@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Ubiquote Homepage{% endblock %}
+
+{% block meta_decription %}{{ quote.text }} - {% endblock %}
+
+{% block body %}
+
+    <h1>"{{ quote.text }}"</h1>
+
+    <h2>Author :
+      {% if quote.author.nickname is not None %}
+        {{ quote.author.nickname|default_if_none:"" }}
+      {% else %}
+        {{ quote.author.first_name|default_if_none:""  }} {{ quote.author.middle_name|default_if_none:"" }} {{ quote.author.last_name|default_if_none:"" }}
+      {% endif %}
+    </h2>
+
+    <h3>Contribor : {{ quote.contributor.email }}</h3>
+
+    <!-- <p><a href="{% url 'texts:get-quotes' %}" ">Home</a></p> -->
+
+    <p>
+      <a href="{% url 'texts:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
+      <a href="{% url 'texts:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
+    </p>
+
+
+    {% endblock %}  

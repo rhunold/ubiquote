@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Add a quote{% endblock %}
+{% block meta_decription %}{{ quote.text }} - {% endblock %}
+
+{% block body %}
+
+    <h1>Add a quote</h1>
+
+
+    <form method="POST" class="form-control"> 
+
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="btn btn-secondary">Post</button>
+
+    </form>
+
+
+
+    {% endblock %}  

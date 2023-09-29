@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete a quote{% endblock %}
+{% block meta_decription %}{{ quote.text }} - {% endblock %}
+
+{% block body %}
+
+    <h1>Delete a quote</h1>
+
+    <p>{{ quote.text }}</p>
+
+    <form method="POST" class="form-control"> 
+
+        {% csrf_token %}
+
+
+        <button class="btn btn-secondary">Delete</button>
+
+    </form>
+
+
+
+    {% endblock %}  

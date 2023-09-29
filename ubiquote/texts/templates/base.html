@@ -1,0 +1,68 @@
+{% load i18n %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %} Ubiquote{% endblock %} </title>
+    <meta name="description" content="{% block meta_decription %}The best quote listing{% endblock %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body>
+
+<!-- 
+    {% block nav %}
+    {% endblock %} -->
+
+    <ul class="nav">
+      <!-- <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="#">Active</a>
+      </li> -->
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'texts:home' %}">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'texts:get-quotes' %}">List Quotes</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'texts:add-quote' %}">Add Quote</a>
+      </li>      
+      <!-- <li class="nav-item">
+        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+      </li> -->
+    </ul>
+
+    <!-- <ul>
+      <li><a href="{% url 'texts:home' %}"  type="button" class="btn btn-info mx-2 ">Home </a></li>      
+      <li><a href="{% url 'texts:get-quotes' %}"  type="button" class="btn btn-info mx-2 ">List Quotes </a></li>
+      <li><a href="{% url 'texts:add-quote' %}"  type="button" class="btn btn-info mx-2 ">Add Quote</a></li>
+      <ul> -->
+
+
+
+
+    {% block body %}
+    {% endblock %}
+
+
+    <ul>
+        <!-- {{ trans }} -->
+    
+        {% get_current_language as LANGUAGE_CODE %}
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+    
+        {% for lang in languages %}
+          <li>
+            <a href="/{{ lang.code }}/">
+              {{ lang.name_local|lower }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    <p>{% translate "hello" %}</p>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  </body>
+</html>
