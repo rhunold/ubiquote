@@ -1,9 +1,15 @@
 from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
-from .forms import UserCreationForm, UserChangeForm
+from .forms import UserCreationForm, UserChangeForm, QuoteForm
 
-from .models import User, Author, Quote
+from .models import User, Author, Quote, Category, QuoteCategory
+
+
+class QuoteCategoryInline(admin.TabularInline):
+    model = QuoteCategory
+
+
 
 class UserAdmin(UserAdmin):
     add_form = UserCreationForm
@@ -30,6 +36,20 @@ class AuthorAdmin(admin.ModelAdmin):
     pass
 
 class QuoteAdmin(admin.ModelAdmin):
+    # form = QuoteForm
+    # model = Quote
+    
+    # fieldsets = (
+    #     (None, {'fields': ('text', 'author', 'contributor', 'lang', )}),
+    # )
+    inlines = [QuoteCategoryInline]   
+    
+    list_display = ('text', 'contributor', 'get_categories',)  
+    ordering = ('-date_updated',)
+    list_filter = ('categories',)
+
+
+class CategoryAdmin(admin.ModelAdmin):
     pass
 
 
@@ -37,3 +57,5 @@ class QuoteAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Quote, QuoteAdmin)
+admin.site.register(Category, CategoryAdmin)
+

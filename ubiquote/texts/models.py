@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 
 import os
 
@@ -25,6 +26,7 @@ class Person(models.Model):
     nationality = models.CharField(choices=NATIONALITIES_CHOICES, null=True, blank=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)    
 
     twitter_url = models.URLField(max_length=200, null=True, blank=True, default='http://www.twitter.com/')
     instagram_url = models.URLField(max_length=200, null=True, blank=True, default='http://www.instagram.com/')
@@ -36,17 +38,19 @@ class Person(models.Model):
 
 class User(AbstractUser, Person):
     username = models.CharField(max_length=30)
-    # username = None
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
-    client = models.BooleanField(default=False, blank=True)
+    # client = models.BooleanField(default=False, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username',]
     objects = UserManager()
     
     def __str__(self):
-        return f'{self.username}'    
-    
+        return f'{self.username}'
+
+
+
+
 class Author(Person):
     nickname = models.CharField(max_length=30, null=True, blank=True)
     biography = models.TextField(max_length=500, blank=True, verbose_name="Biography :")
@@ -59,59 +63,91 @@ class Author(Person):
             
 
 def default_contributor():
-    return lambda: User.objects.get(email=os.environ.get('ADMIN_EMAIL'))
+    admin_email = os.environ.get('ADMIN_EMAIL')
+    return User.objects.get(email=admin_email)
+    
 
 class Text(models.Model):
-    text = models.TextField(max_length=500, verbose_name="Text Content :")
+    text = models.TextField(max_length=500, verbose_name="Text Content :") #, default="Default value"
     lang = models.CharField(max_length=2, choices=LANGUAGES, default="fr")
 
     contributor = models.ForeignKey(
         User,
         related_name="%(app_label)s_%(class)s_related",
         related_query_name="%(app_label)s_%(class)ss",
-        on_delete=models.SET_DEFAULT,
+        # on_delete=models.CASCADE,        
+
         null=True,
-        # default=None,
+        on_delete=models.SET_DEFAULT,
         default=default_contributor
         )
 
     date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
     
+
     class Meta:
         abstract = True
         ordering = ['date_created']
 
 
-def default_author():
-    return lambda: Author.objects.get(id=2)
+class Category(models.Model):
+    title = models.CharField(max_length=100, verbose_name="Category Title :")
+    text = models.TextField(max_length=500, verbose_name=" Text :")
+    # slug = models.SlugField(max_length=100, verbose_name="Category Slug :")
     
+    def __str__(self):
+        return f'{self.title}'
+    
+    class Meta:
+        verbose_name_plural = "Categories"     
+        
+        
+
 class Quote(Text):
-    # user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
-    author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, default = default_author)    # , default=lambda: Author.objects.get(id=1)
-    # category = models.ManyToManyField(Category)
-    # source = models.ForeignKey(Source, null=True, blank=True, on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE) #, default=1)
 
-    # @staticmethod
-    # def get_absolute_url():
-    #     return reverse("create_quote")
+    categories = models.ManyToManyField(
+        Category,
+        # related_query_name="%(app_label)s_%(class)ss",        
+        # related_name="%(app_label)s_%(class)s_related",        
+        # blank=True,
+        # default=None,
+        through='QuoteCategory',
+        # validators=[validate_categories_count]
+        )
+    
+    # def default_author(self):
+    #     return Author.objects.get(id=1)    
 
-    # def display_category(self):
-    #     return ', '.join([cat.title for cat in self.category.all()])
+    def get_categories(self):
+        return "\n".join([cat.title for cat in self.categories.all()])    
 
     def __str__(self):
         return f'"{self.text[:100]}" - Author : {self.author}'
     
     def get_absolute_url(self):
-        # return reverse('texts:get-quote', args=(self.id,))
-        return reverse('texts:get-quotes')    
+        return reverse('texts:get-quotes')
+    
 
-# class Category(models.Model):
-#     title = models.CharField(max_length=100, verbose_name="Category Title :")
-#     # slug = models.SlugField(max_length=100, verbose_name="Category Slug :")
+    # def add_categories(self, category_instance):
+    #     QuoteCategory.objects.create(quote=self, category=category_instance)    
+    
+    
 
-#     @staticmethod
-#     def get_absolute_url():
-#         return reverse("create_category")
-
-#     def __str__(self):
-#         return self.title
+class QuoteCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
+    
+    class Meta:
+        constraints = [
+            # models.CheckConstraint(
+            #     # check=models.Q(quote__count__lte=3,),
+            #     check=models.Q(quote__count__lte=3,),                
+            #     name='check_categorize_per_quote'
+            # ),
+            models.UniqueConstraint(
+                name="%(app_label)s_%(class)s_unique_relationships",
+                fields=["quote", "category"],
+            ),    
+        ]  
