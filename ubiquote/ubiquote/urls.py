@@ -19,18 +19,28 @@ from django.urls import path, include, re_path
 from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
 
+from django.utils.translation import gettext_lazy as _
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path(_('admin/'), admin.site.urls),    
     # path('', include('texts.urls', namespace='texts')),    
 ]
 
 urlpatterns += i18n_patterns (
-    # re_path(r'', include('texts.urls', namespace='texts')),
-    path('', include('texts.urls', namespace='texts')),
+    
+    re_path(r'', include('texts.urls', namespace='texts')),
+    re_path(r'', include('texts.quotes.urls', namespace='quotes')),
+    re_path(r'', include('persons.users.urls', namespace='users')),            
+    
+    # path('', include('texts.urls', namespace='texts')),
+    # path('', include('texts.quotes.urls', namespace='quotes')),
+    # path('', include('persons.users.urls', namespace='users')),    
+
     
 )
 
 if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^rosetta', include('rosetta.urls'))
+        re_path(r'^rosetta/', include('rosetta.urls'))
 ]

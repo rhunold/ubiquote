@@ -1,18 +1,13 @@
 from django.urls import path
 from . import views
-from .views import GetQuotestView, GetQuotetView, AddQuoteView, UpdateQuoteView, DeleteQuoteView, home
-from django.urls import re_path
+from .views import home
+from .views import GetCategoriesView, GetCategoryView
 
 app_name = 'texts'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('quotes/', GetQuotestView.as_view(), name='get-quotes'),
-    path('quote/<int:pk>', GetQuotetView.as_view(), name='get-quote'),
-    path('quote/add/', AddQuoteView.as_view(), name='add-quote'),
-    path('quote/update/<int:pk>', UpdateQuoteView.as_view(), name='update-quote'),
-    path('quote/delete/<int:pk>', DeleteQuoteView.as_view(), name='delete-quote'),    
-    
+    path('categories/', GetCategoriesView.as_view(), name='get-categories'),
+    # path('category/<int:pk>/', GetCategoryView.as_view(), name='get-category'),
+    path('category/<slug:slug>/', GetCategoryView.as_view(), name='get-category'),
 ]
-
-

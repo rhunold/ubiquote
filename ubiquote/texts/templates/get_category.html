@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Category{% endblock %}
+
+{% block meta_decription %}{{ quote.text }} - {% endblock %}
+
+{% block body %}
+
+
+
+    <h1>{{ category.title|safe }}</h1>
+    <h2>{{ category.text|safe }}</h2>
+
+
+    <ul>
+      {% for quote in quotes %}
+      <li>
+        <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}"</a>
+  
+        - 
+        {% if quote.author.nickname is not None %}
+          {{ quote.author.nickname|default_if_none:""|safe }}
+        {% else %}
+          {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
+        {% endif %}
+  
+        <br>
+        -  publié le {{ quote.date_created }} par  {{ quote.contributor.username|safe }}
+
+
+        <p>categories :
+          {% for category in quote.categories.all %}
+          <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
+          {% endfor %}        
+        </p>              
+  
+        {% if user.is_authenticated %}
+          <br>
+          - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
+          - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
+        {% else %}
+        {% endif %}  
+      </li>      
+      {% endfor %}
+      </ul>
+
+    {% endblock %}  

@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'texts',
+    'texts.quotes',    
+    'persons',
+    'persons.users',
+    'persons.authors',
     'rosetta', # managing translations in admin
 ]
 
@@ -66,7 +70,7 @@ ROOT_URLCONF = 'ubiquote.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -151,7 +155,11 @@ LANGUAGES = (
 )
 
 LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale/'),
+    os.path.join(BASE_DIR, 'locale/'),  
 )
 
-AUTH_USER_MODEL = 'texts.User'
+AUTH_USER_MODEL = 'users.User'
+
+LOGIN_REDIRECT_URL = 'texts:home'
+LOGOUT_REDIRECT_URL = 'texts:home'
+

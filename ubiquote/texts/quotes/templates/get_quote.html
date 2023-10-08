@@ -5,7 +5,7 @@
 
 {% block body %}
 
-    <h1>"{{ quote.text }}"</h1>
+    <h1>"{{ quote.text|safe }}"</h1>
 
     <h2>Author :
       {% if quote.author.nickname is not None %}
@@ -17,12 +17,14 @@
 
     <h3>Contribor : {{ quote.contributor.email }}</h3>
 
-    <!-- <p><a href="{% url 'texts:get-quotes' %}" ">Home</a></p> -->
-
+    <!-- <p><a href="{% url 'quotes:get-quotes' %}" ">Home</a></p> -->
+    {% if user.is_authenticated and user.id == quote.contributor.id %}
     <p>
-      <a href="{% url 'texts:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
-      <a href="{% url 'texts:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
+      <a href="{% url 'quotes:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
+      <a href="{% url 'quotes:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
     </p>
+    {% else %}
+    {% endif %}  
 
 
     {% endblock %}  

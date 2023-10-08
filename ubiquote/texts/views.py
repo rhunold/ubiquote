@@ -1,52 +1,50 @@
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from django.utils.translation import gettext as _
 from django.utils.translation import get_language, activate
 
 from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
 
-from .models import User, Author, Quote
-
-from .forms import QuoteForm
-
-# from textblob import TextBlob
-# это компьютерный портал для гиков.    
-# text = "It was a beautiful day ."
-# lang = TextBlob(text)
-# lang_iso639_1 = lang.detect_language()
-# print(lang_iso639_1)
+from .models import Category
+from texts.quotes.models import Quote
+from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
 
-class GetQuotestView(ListView):
+class GetCategoriesView(ListView):
+  model = Category
+  template_name = 'get_categories.html'
+  # ordering =['-date_created']
+
+
+class GetCategoryView(ListView):
+  # category_quotes = QuoteCategory.objects.filter(category=)
   model = Quote
-  template_name = 'get_quotes.html'
-  ordering =['-date_created']
-
-
-class GetQuotetView(DetailView):
-  model = Quote
-  template_name = 'get_quote.html'
+  context_object_name = 'quotes'
+  template_name = 'get_category.html'
   
- 
-class AddQuoteView(CreateView):
-  model = Quote
-  form_class = QuoteForm
-  template_name = 'add_quote.html'
-  # fields = '__all__'
+  def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      # Get the category id from the URL parameter
+      category_slug = self.kwargs['slug']
+      
+      # Get the category object based on the id
+      category = Category.objects.get(slug=category_slug)
+      
+      context['slug'] = category  # Pass the category object to the template
+      # context['title'] = category.title      
+      return context  
   
-class UpdateQuoteView(UpdateView):
-  model = Quote
-  form_class = QuoteForm
-  template_name = 'update_quote.html'
-  # fields = '__all__'  
-  
-class DeleteQuoteView(DeleteView):
-  model = Quote
-  # form_class = QuoteForm
-  template_name = 'delete_quote.html'
-  success_url = reverse_lazy('texts:get-quotes')
-  # fields = '__all__'  
+  # def get_queryset(self):
+  #     # Get the category id from the URL parameter
+  #     category_slug = self.kwargs['slug']
+  #     # category_title = self.kwargs['title']      
+      
+  #     # Filter quotes by the category id
+  #     queryset = Quote.objects.filter(categories__slug=category_slug)
+      
+  #     return queryset
+
 
 
 def home(request):

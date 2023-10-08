@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Add a quote{% endblock %}
+{% block title %}Edit a quote{% endblock %}
 {% block meta_decription %}{{ quote.text }} - {% endblock %}
 
 {% block body %}
 
-    <h1>Add a quote</h1>
+{% if user.is_authenticated %}
+    <h1>Edit a quote</h1>
 
 
     <form method="POST" class="form-control"> 
@@ -13,10 +14,12 @@
         {% csrf_token %}
         {{ form.as_p }}
 
-        <button class="btn btn-secondary">Post</button>
+        <button class="btn btn-secondary">Update</button>
 
     </form>
 
-
+{% else %}
+    <p>You are not allowed here</p>
+{% endif %}  
 
     {% endblock %}  

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Categorys{% endblock %}
+{% block meta_decription %}The best quote listing{% endblock %}
+
+{% block body %}
+    <h1>Categories</h1>
+    <ul>
+    {% for category in object_list %}
+    <li>
+      <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title|slice:":200"|safe }}</a>
+
+    </li>      
+    {% endfor %}
+    </ul>
+
+
+
+    {% endblock %}  

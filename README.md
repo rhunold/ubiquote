@@ -5,7 +5,7 @@
 Ubiquote is a personnal project about short texts like books quotes, movies and series quotes, proverbs...
 
 My intend is to have a database + API and use it as a sandbox to tests several way to present, mix and explore these short texts.
-Also plan to add some AI tools tool generate cools stuff.
+Also plan to add some AI tools to generate cool stuffs.
 
 ## Overview
 
