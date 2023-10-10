@@ -28,10 +28,10 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns (
-    
     re_path(r'', include('texts.urls', namespace='texts')),
     re_path(r'', include('texts.quotes.urls', namespace='quotes')),
     re_path(r'', include('persons.users.urls', namespace='users')),            
+    re_path(r'', include('persons.authors.urls', namespace='authors')),       
     
     # path('', include('texts.urls', namespace='texts')),
     # path('', include('texts.quotes.urls', namespace='quotes')),

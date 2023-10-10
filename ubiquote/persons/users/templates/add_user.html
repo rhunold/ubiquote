@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% translate "Add a user" %}{% endblock %}
+{% block meta_decription %}{% translate "Add a quote" %} - {% endblock %}
+
+{% block body %}
+{% if user.is_authenticated and user.is_superuser %}
+    <h1>{% translate "Add a user" %}</h1>
+
+
+    <form method="POST" class="form-control"> 
+
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="btn btn-secondary">{% translate "Add user" %}</button>
+
+    </form>
+
+    <p></p>
+
+{% else %}
+    <p>You are not allowed here</p>
+{% endif %}  
+
+
+    {% endblock %}  

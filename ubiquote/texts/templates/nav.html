@@ -1,0 +1,48 @@
+
+{% url 'texts:home' as home %}
+{% url 'quotes:get-quotes' as quotes %}
+{% url 'quotes:add-quote' as add_quote %}
+{% url 'authors:get-authors' as authors %}
+{% url 'texts:get-categories' as categories %}
+{% url 'users:get-users' as users %}
+{% url 'users:user-register' as register %}
+{% url 'users:user-login' as login %}
+
+<ul class="nav nav-tabs">
+    <!-- <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.view_name == 'texts:home' %}active{% endif %}" aria-current="page" href="#">Active</a>
+    </li> -->
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:home' %}">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}">Quotes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}">Authors</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}">Categories</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">Users</a>
+    </li>
+    {% if user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">Add Quote</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+      </li>
+    {% else %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}">Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}">Register</a>
+      </li>
+    {% endif %}      
+    <!-- <li class="nav-item">
+      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+    </li> -->
+  </ul>

@@ -11,14 +11,14 @@ from .forms import QuoteForm
 
 
 
-class GetQuotestView(ListView):
+class GetQuotesView(ListView):
   model = Quote
   template_name = 'get_quotes.html'
   context_object_name = 'quotes'
   ordering =['-date_created']
 
 
-class GetQuotetView(DetailView):
+class GetQuoteView(DetailView):
   model = Quote
   template_name = 'get_quote.html'
   

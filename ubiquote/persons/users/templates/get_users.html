@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block meta_decription %}All the users{% endblock %}
+
+{% block body %}
+    <h1>Users</h1>
+    <ul>
+    {% for user in users %}
+    <li>
+
+      <a href="{% url 'users:get-user' user.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+
+        {{ user.username|default_if_none:""|safe }}
+
+        {{ user.first_name|default_if_none:""|safe  }} {{ user.middle_name|default_if_none:""|safe }} {{ user.last_name|default_if_none:""|safe }}
+    </a>
+
+
+
+      <!-- {% if user.is_authenticated and user.id == quote.contributor.id %}
+      <p>
+        - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
+        - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
+      </p>        
+      {% else %}
+      {% endif %}   -->
+    </li>      
+    {% endfor %}
+    </ul>
+
+
+
+    {% endblock %}  

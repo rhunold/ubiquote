@@ -7,15 +7,32 @@
 
     <h1>"{{ quote.text|safe }}"</h1>
 
+
+    {% if quote.author is not None %}
     <h2>Author :
+
+      <a href="{% url 'authors:get-author' quote.author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
       {% if quote.author.nickname is not None %}
         {{ quote.author.nickname|default_if_none:"" }}
       {% else %}
         {{ quote.author.first_name|default_if_none:""  }} {{ quote.author.middle_name|default_if_none:"" }} {{ quote.author.last_name|default_if_none:"" }}
       {% endif %}
+      </a>
     </h2>
+    {% else %}
+    <!-- <h2>Anonyme</h2> -->
 
-    <h3>Contribor : {{ quote.contributor.email }}</h3>
+    {% endif %}
+
+    <h3>Contribor : {{ quote.contributor.username }}</h3>
+
+    {% if quote.categories is not None %}
+    <p>categories :
+      {% for category in quote.categories.all %}
+      <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
+      {% endfor %}        
+    </p>
+    {% endif %}      
 
     <!-- <p><a href="{% url 'quotes:get-quotes' %}" ">Home</a></p> -->
     {% if user.is_authenticated and user.id == quote.contributor.id %}

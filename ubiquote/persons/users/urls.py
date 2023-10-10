@@ -1,13 +1,15 @@
 from django.urls import path, include
-from .views import UserRegisterView, LoginView #, LogoutView
-
+from .views import UserRegisterView, LoginView, GetUsersView, GetUserView  #, LogoutView
 
 app_name = 'users'
 
 urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='user-register'),
     # path('login/', LoginView.as_view(), name='login'),
-    path('', include('django.contrib.auth.urls')),     
+    path('', include('django.contrib.auth.urls')),
+    
+    path('users/', GetUsersView.as_view(), name='get-users'),
+    path('user/<str:slug>/', GetUserView.as_view(), name='get-user'),    
     
     # path('logout/', LogoutView.as_view(), name='logout'),    
     # path('users/', GetUserView.as_view(), name='get-users'),

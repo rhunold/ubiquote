@@ -6,6 +6,6 @@ app_name = 'persons'
 
 urlpatterns = [
     # path('', views.home, name='home'),
-    path('', include('quotes.urls', namespace='quotes')),    
+    # path('', include('quotes.urls', namespace='quotes')),    
     
 ]

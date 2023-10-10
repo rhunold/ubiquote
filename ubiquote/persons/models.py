@@ -2,7 +2,7 @@ from django.db import models
 
 from django.core.exceptions import ValidationError
 
-import os
+# import os
 
 from .constants import SEX_CHOICES, NATIONALITIES_CHOICES
 

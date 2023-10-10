@@ -18,7 +18,6 @@ class GetCategoriesView(ListView):
 
 
 class GetCategoryView(ListView):
-  # category_quotes = QuoteCategory.objects.filter(category=)
   model = Quote
   context_object_name = 'quotes'
   template_name = 'get_category.html'
@@ -31,19 +30,18 @@ class GetCategoryView(ListView):
       # Get the category object based on the id
       category = Category.objects.get(slug=category_slug)
       
-      context['slug'] = category  # Pass the category object to the template
-      # context['title'] = category.title      
+      context['category'] = category  # Pass the category object to the template
+    
       return context  
   
-  # def get_queryset(self):
-  #     # Get the category id from the URL parameter
-  #     category_slug = self.kwargs['slug']
-  #     # category_title = self.kwargs['title']      
+  def get_queryset(self):
+      # Get the category id from the URL parameter
+      category_slug = self.kwargs['slug']    
       
-  #     # Filter quotes by the category id
-  #     queryset = Quote.objects.filter(categories__slug=category_slug)
+      # Filter quotes by the category id
+      queryset = Quote.objects.filter(categories__slug=category_slug)
       
-  #     return queryset
+      return queryset
 
 
 

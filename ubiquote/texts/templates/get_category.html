@@ -14,32 +14,45 @@
     <ul>
       {% for quote in quotes %}
       <li>
-        <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}"</a>
-  
-        - 
-        {% if quote.author.nickname is not None %}
-          {{ quote.author.nickname|default_if_none:""|safe }}
-        {% else %}
-          {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
-        {% endif %}
-  
-        <br>
-        -  publié le {{ quote.date_created }} par  {{ quote.contributor.username|safe }}
+        <p>
+            <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}</a>
 
 
-        <p>categories :
-          {% for category in quote.categories.all %}
-          <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
-          {% endfor %}        
-        </p>              
+            {% if quote.author is not None %}
+            <a href="{% url 'authors:get-author' quote.author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+              {% if quote.author.nickname is not None %}
+                {{ quote.author.nickname|default_if_none:""|safe }}
+              {% else %}
+                {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
+              {% endif %}
+            </a>
+            {% endif %}          
+          </p>
+
+          <p>
+            publié le {{ quote.date_created }} par 
+            <a href="{% url 'users:get-user' quote.contributor.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+            {{ quote.contributor.username|safe }}
+            </a>
+          </p>
+
+
+          {% if quote.categories is not None %}
+          <p>categories :
+            {% for category in quote.categories.all %}
+            <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
+            {% endfor %}        
+          </p>
+          {% endif %}        
   
-        {% if user.is_authenticated %}
-          <br>
-          - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
-          - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
-        {% else %}
-        {% endif %}  
-      </li>      
+          {% if user.is_authenticated %}
+           <p>
+            - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
+            - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
+          {% else %}
+          {% endif %}
+          </p>
+      </li>
       {% endfor %}
       </ul>
 
