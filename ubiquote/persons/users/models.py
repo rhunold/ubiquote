@@ -15,7 +15,10 @@ class User(AbstractUser, Person):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username',]
 
-    slug = AutoSlugField(populate_from='username', unique=True, null=True, default=None)    
+    slug = AutoSlugField(populate_from='username', unique=True, null=True, default=None)
+    
+    
+    avatar = models.ImageField(upload_to='avatars/users/', null=True, blank=True, default='avatars/default.png')    
         
     # objects = UserManager()
     

@@ -1,22 +1,30 @@
 {% extends 'base.html' %}
+
+
 {% block title %}Ubiquote Homepage{% endblock %}
 
 {% block meta_decription %}{{ quote.text }} - {% endblock %}
 
 {% block body %}
 
+
+    {% include "quote_card.html" %}
+
+    {% comment %}
+
     <h1>"{{ quote.text|safe }}"</h1>
 
 
     {% if quote.author is not None %}
-    <h2>Author :
+    <h2>
 
       <a href="{% url 'authors:get-author' quote.author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
-      {% if quote.author.nickname is not None %}
+      <!-- {% if quote.author.nickname is not None %}
         {{ quote.author.nickname|default_if_none:"" }}
       {% else %}
         {{ quote.author.first_name|default_if_none:""  }} {{ quote.author.middle_name|default_if_none:"" }} {{ quote.author.last_name|default_if_none:"" }}
-      {% endif %}
+      {% endif %} -->
+      {{ quote.author }}
       </a>
     </h2>
     {% else %}
@@ -32,16 +40,40 @@
       <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
       {% endfor %}        
     </p>
-    {% endif %}      
+    {% endif %}
 
-    <!-- <p><a href="{% url 'quotes:get-quotes' %}" ">Home</a></p> -->
+    {% if user.is_authenticated %}
+      {% if fav %}
+        <p><a href="{% url 'quotes:like-quote' quote.id  %}" class="btn btn-outline-primary">UnLike</a></p>
+      {% else %}
+        <p><a href="{% url 'quotes:like-quote' quote.id  %}" class="btn btn-outline-primary">Like</a></p>      
+      {% endif %} 
+    {% else %}
+      <p><a href="{% url 'users:user-register' %}" class="btn btn-outline-primary">Like</a></p>    
+    {% endif %}  
+
+
+
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+
+
+
     {% if user.is_authenticated and user.id == quote.contributor.id %}
     <p>
-      <a href="{% url 'quotes:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
-      <a href="{% url 'quotes:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
+      <a href="{% url 'quotes:update-quote' quote.slug  %}" type="button" class="btn btn-info mx-2">update</a>
+      <a href="{% url 'quotes:delete-quote' quote.slug  %}" type="button" class="btn btn-info mx-2">delete</a>
     </p>
     {% else %}
     {% endif %}  
 
+    {% endcomment %}    
 
-    {% endblock %}  
+
+{% endblock %}  

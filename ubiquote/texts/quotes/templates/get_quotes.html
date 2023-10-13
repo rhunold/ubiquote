@@ -1,49 +1,21 @@
 {% extends 'base.html' %}
+{% load likes_tag %}
+
 {% block title %}Quotes{% endblock %}
 {% block meta_decription %}All the quotes{% endblock %}
-<!-- {% block nav_quotes_class %}active{% endblock %} -->
+
+
 
 {% block body %}
+
+
+
     <h1>Quotes</h1>
-    <ul>
-    {% for quote in quotes %}
-    <li>
-      <p>
-        <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}</a>
 
-        
-        {% if quote.author is not None %}
-        <a href="{% url 'authors:get-author' quote.author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
-        {% if quote.author.nickname is not None %}
-          - {{ quote.author.nickname|default_if_none:""|safe }}
-        {% else %}
-          - {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
-        {% endif %}
-        </a>
-        {% endif %}
-        
-      </p>
-      <p>publié le {{ quote.date_created }} par {{ quote.contributor.username|safe }}</p>
-
-      {% if quote.categories is not None %}
-      <p>categories :
-        {% for category in quote.categories.all %}
-        <a href="{% url 'texts:get-category' category.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
-        {% endfor %}        
-      </p>
-      {% endif %}      
+    <p>{{ quotes_count }} quotes in the page</p>
 
 
-      {% if user.is_authenticated and user.id == quote.contributor.id %}
-      <p>
-        <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
-        - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
-      </p>        
-      {% else %}
-      {% endif %}  
-    </li>      
-    {% endfor %}
-    </ul>
+    {% include "quotes_cards.html" %}
 
 
 

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}My Likes{% endblock %}
+{% block meta_decription %}List of my likes{% endblock %}
+
+{% block body %}
+{% if user.is_authenticated %}
+    <h1>{% translate "My Likes" %}</h1>
+
+    {% include "quotes_cards.html" %}    
+
+
+{% else %}
+    <p>You are not allowed here</p>
+{% endif %}  
+
+
+    {% endblock %}  

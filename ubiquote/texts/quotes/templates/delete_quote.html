@@ -5,7 +5,7 @@
 
 {% block body %}
 
-{% if user.is_authenticated  and user.id == quote.contributor.id %}
+{% if user.is_authenticated  and user.id == quote.contributor.id  or user.is_superuser %}
 
     <h1>Delete a quote</h1>
 

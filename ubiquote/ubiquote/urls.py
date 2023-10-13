@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf.urls.i18n import i18n_patterns
 from django.conf import settings
+from django.conf.urls.static import static
 
 from django.utils.translation import gettext_lazy as _
 
@@ -31,7 +32,9 @@ urlpatterns += i18n_patterns (
     re_path(r'', include('texts.urls', namespace='texts')),
     re_path(r'', include('texts.quotes.urls', namespace='quotes')),
     re_path(r'', include('persons.users.urls', namespace='users')),            
-    re_path(r'', include('persons.authors.urls', namespace='authors')),       
+    re_path(r'', include('persons.authors.urls', namespace='authors')),
+    
+    # re_path(r'', include('interactions.likes.urls', namespace='likes')),      
     
     # path('', include('texts.urls', namespace='texts')),
     # path('', include('texts.quotes.urls', namespace='quotes')),
@@ -44,3 +47,6 @@ if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [
         re_path(r'^rosetta/', include('rosetta.urls'))
 ]
+    
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

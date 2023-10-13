@@ -7,11 +7,12 @@
 {% url 'users:get-users' as users %}
 {% url 'users:user-register' as register %}
 {% url 'users:user-login' as login %}
+{% url 'users:get-user-likes' as get_likes %}
+
+{% url 'users:get-user' as user_connected %}
 
 <ul class="nav nav-tabs">
-    <!-- <li class="nav-item">
-      <a class="nav-link {% if request.resolver_match.view_name == 'texts:home' %}active{% endif %}" aria-current="page" href="#">Active</a>
-    </li> -->
+
     <li class="nav-item">
       <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:home' %}">Home</a>
     </li>
@@ -28,8 +29,16 @@
       <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">Users</a>
     </li>
     {% if user.is_authenticated %}
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">Add Quote</a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}">Likes</a>
+    </li>
+
       <li class="nav-item">
-        <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">Add Quote</a>
+        <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"> {{ user }}</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>

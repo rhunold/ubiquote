@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'persons',
     'persons.users',
     'persons.authors',
+    # 'interactions.likes',  
+    # 'interactions.follows',        
     'rosetta', # managing translations in admin
 ]
 
@@ -148,7 +150,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
 LANGUAGES = (
     ('en', _('English')),
     ('fr', _('French')),    
@@ -163,3 +164,5 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = 'texts:home'
 LOGOUT_REDIRECT_URL = 'texts:home'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

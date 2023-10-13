@@ -1,10 +1,16 @@
 from django.db import models
 
 from persons.authors.models import Author
+from persons.users.models import User
 from ..models import Category, Text
 
 from django.urls import reverse
-  
+
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+
+
+
 
 class Quote(Text):
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE) #, default=1)
@@ -15,9 +21,18 @@ class Quote(Text):
         # related_name="%(app_label)s_%(class)s_related",        
         # blank=True,
         # default=None,
-        through='QuoteCategory',
+        through='QuotesCategories',
         # validators=[validate_categories_count]
         )
+    
+    likes = models.ManyToManyField(
+        User,
+        # related_name="%(app_label)s_%(class)s_likes",
+        # default=None,
+        # blank=True,
+        # through='%(app_label)ss%(class)ssLikes',
+        through='QuotesLikes',
+        )     
     
     # def default_author(self):
     #     return Author.objects.get(id=1)    
@@ -28,16 +43,16 @@ class Quote(Text):
     def __str__(self):
         return f'"{self.text[:100]}" - Author : {self.author}'
     
-    def get_absolute_url(self):
-        return reverse('quotes:get-quotes')
+    # def get_absolute_url(self):
+    #     return reverse('quotes:get-quote') #, args=[self.slug]
     
 
     # def add_categories(self, category_instance):
     #     QuoteCategory.objects.create(quote=self, category=category_instance)   
 
-    
 
-class QuoteCategory(models.Model):
+
+class QuotesCategories(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     
@@ -53,3 +68,21 @@ class QuoteCategory(models.Model):
                 fields=["quote", "category"],
             ),    
         ]      
+
+
+
+     
+
+class QuotesLikes(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="%(app_label)s_%(class)s_unique_relationships",
+                fields=["quote", "user"],
+            ),    
+        ]      
+    

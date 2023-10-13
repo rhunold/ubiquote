@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit an author{% endblock %}
+{% block title %}Edit user {{ user }}{% endblock %}
 {% block meta_decription %}{{ quote }} - {% endblock %}
 
 {% block body %}
 
 {% if user.is_authenticated %}
-    <h1>Edit a author</h1>
+    <h1>Edit user {{ user }}</h1>
 
 
     <form method="POST" class="form-control"> 

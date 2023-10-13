@@ -12,7 +12,7 @@ class QuoteForm(forms.ModelForm):
     
     class Meta:
         model = Quote
-        fields = ('text', 'author', 'lang', 'categories') # 'contributor'
+        fields = ('text', 'author', 'lang', 'categories', 'status') # 'contributor'
         widgets = {
             'text': forms.Textarea(attrs={'class' : 'form-control', 'placeholder' : "Put your quote here"}),
             'author': forms.Select(attrs={'class' : 'form-control'}),

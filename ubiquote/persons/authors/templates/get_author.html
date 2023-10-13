@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+
+
 {% block title %}Auteur{% endblock %}
 
 {% block meta_decription %}{{ author.lastname }} - {% endblock %}
@@ -8,12 +10,19 @@
 
 
     <h1>
-      {% if author.nickname is not None %}
+      <!-- {% if author.nickname is not None %}
         {{ author.nickname|default_if_none:"" }}
       {% else %}
         {{ author.first_name|default_if_none:""  }} {{ author.middle_name|default_if_none:"" }} {{ author.last_name|default_if_none:"" }}
-      {% endif %}
+      {% endif %} -->
+      
+      {{ author }}
     </h1>
+
+    {% if author.avatar.url is not None %}
+      <img src="{{ author.avatar.url }}" class="rounded-circle">
+    {% endif %}      
+
 
     <h2>{{ author.biography|safe }}</h2>
 
@@ -44,46 +53,14 @@
 
 
 
-
-    <ul>
-      {% for quote in quotes %}
-      <li>
-        <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}</a>
-  
-        <!-- - 
-        {% if quote.author.nickname is not None %}
-          {{ quote.author.nickname|default_if_none:""|safe }}
-        {% else %}
-          {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
-        {% endif %}
-   -->
-        <br>
-        -  publié le {{ quote.date_created }} par  {{ quote.contributor.username|safe }}
+    {% include "quotes_cards.html" %}
 
 
-        <p>categories :
-          {% for category in quote.categories.all %}
-          <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
-          {% endfor %}        
-        </p>              
-  
-        {% if user.is_authenticated %}
-          <br>
-          - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
-          - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
-        {% else %}
-        {% endif %}  
-      </li>
-      {% endfor %}
-      </ul>      
 
-    <!-- {% if user.is_authenticated and user.id == quote.contributor.id %}
-    <p>
-      <a href="{% url 'quotes:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
-      <a href="{% url 'quotes:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
-    </p>
-    {% else %}
-    {% endif %}   -->
+    {% if user.is_authenticated and user.is_superuser %}
+      <a href="{% url 'authors:update-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update author</a>
+      <a href="{% url 'authors:delete-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete author</a>      
+    {% endif %}    
 
 
-    {% endblock %}  
+{% endblock %}  

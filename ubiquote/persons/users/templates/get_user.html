@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Auteur{% endblock %}
+{% block title %}{{ user }}{% endblock %}
 
 {% block meta_decription %}{{ author.lastname }} - {% endblock %}
 
@@ -11,12 +11,13 @@
 
         {{ user.username|default_if_none:"" }}
 
-
-
-
     </h1>
 
     <h2>{{ user.first_name|default_if_none:""  }} {{ user.middle_name|default_if_none:"" }} {{ user.last_name|default_if_none:"" }}</h2>
+
+    {% if user.avatar.url is not None %}
+      <img src="{{ user.avatar.url }}" class="rounded-circle">
+    {% endif %}       
 
     {% if user.date_birth is not None %}
       <p>date_birth : {{ user.date_birth|date:"d M Y"|safe }} </p>
@@ -43,48 +44,15 @@
       </a>
     </p>
 
+    
+    {% include "quotes_cards.html" %}
 
+    
 
-
-    <ul>
-      {% for quote in quotes %}
-      <li>
-        <a href="{% url 'quotes:get-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote.text|slice:":200"|safe }}</a>
-  
-        <!-- - 
-        {% if quote.author.nickname is not None %}
-          {{ quote.author.nickname|default_if_none:""|safe }}
-        {% else %}
-          {{ quote.author.first_name|default_if_none:""|safe  }} {{ quote.author.middle_name|default_if_none:""|safe }} {{ quote.author.last_name|default_if_none:""|safe }}
-        {% endif %}
-   -->
-        <br>
-        -  publié le {{ quote.date_created }} 
-
-
-        <p>categories :
-          {% for category in quote.categories.all %}
-          <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
-          {% endfor %}        
-        </p>              
-  
-        {% if user.is_authenticated %}
-          <br>
-          - <a href="{% url 'quotes:update-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">update</a>
-          - <a href="{% url 'quotes:delete-quote' quote.id  %}" class="link-offset-2 link-underline link-underline-opacity-10">delete</a>
-        {% else %}
-        {% endif %}  
-      </li>
-      {% endfor %}
-      </ul>      
-
-    <!-- {% if user.is_authenticated and user.id == quote.contributor.id %}
-    <p>
-      <a href="{% url 'quotes:update-quote' quote.id  %}" type="button" class="btn btn-info mx-2">update</a>
-      <a href="{% url 'quotes:delete-quote' quote.id  %}" type="button" class="btn btn-info mx-2">delete</a>
-    </p>
-    {% else %}
-    {% endif %}   -->
+    {% if user.is_authenticated and user.is_superuser %}
+      <a href="{% url 'users:update-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update user</a>
+      <a href="{% url 'users:delete-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete user</a>      
+    {% endif %}    
 
 
     {% endblock %}  

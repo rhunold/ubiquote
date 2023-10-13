@@ -5,7 +5,7 @@
 {% block body %}
     <h1>Categories</h1>
     <ul>
-    {% for category in object_list %}
+    {% for category in categories %}
     <li>
       <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title|slice:":200"|safe }}</a>
 

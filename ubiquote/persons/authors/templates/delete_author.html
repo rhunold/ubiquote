@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 
-{% block title %}Delete an author{% endblock %}
+{% block title %}Delete {{ author }} {% endblock %}
 {% block meta_decription %}{{ author }} - {% endblock %}
 
 {% block body %}
 
 {% if user.is_authenticated and user.is_superuser %}
 
-    <h1>Delete an author</h1>
+    <h1>Delete {{ author }}</h1>
 
     <!-- <p>{{ quote.text|safe }}</p> -->
 

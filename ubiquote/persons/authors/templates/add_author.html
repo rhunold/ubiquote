@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% translate "Add a quote" %}{% endblock %}
-{% block meta_decription %}{% translate "Add a quote" %} - {% endblock %}
+{% block title %}{% translate "Add an author" %}{% endblock %}
+{% block meta_decription %}{% translate "Add an author" %} - {% endblock %}
 
 {% block body %}
 {% if user.is_authenticated %}
-    <h1>{% translate "Add a quote" %}</h1>
+    <h1>{% translate "Add an author" %}</h1>
 
 
-    <form method="POST" class="form-control"> 
+    <form method="POST" class="form-control" enctype="multipart/form-data"> 
 
         {% csrf_token %}
         {{ form.as_p }}

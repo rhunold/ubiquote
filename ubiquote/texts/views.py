@@ -8,22 +8,29 @@ from django.shortcuts import get_object_or_404
 
 from .models import Category
 from texts.quotes.models import Quote
+from texts.quotes.views import get_user_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
 
 class GetCategoriesView(ListView):
   model = Category
   template_name = 'get_categories.html'
+  context_object_name = 'categories'  
   # ordering =['-date_created']
 
 
 class GetCategoryView(ListView):
   model = Quote
+  queryset = Quote.published.all()  
   context_object_name = 'quotes'
   template_name = 'get_category.html'
   
   def get_context_data(self, **kwargs):
       context = super().get_context_data(**kwargs)
+      
+      # Get user likes for buton status      
+      get_user_likes(self, context)       
+      
       # Get the category id from the URL parameter
       category_slug = self.kwargs['slug']
       
@@ -39,7 +46,7 @@ class GetCategoryView(ListView):
       category_slug = self.kwargs['slug']    
       
       # Filter quotes by the category id
-      queryset = Quote.objects.filter(categories__slug=category_slug)
+      queryset = Quote.published.filter(categories__slug=category_slug)
       
       return queryset
 

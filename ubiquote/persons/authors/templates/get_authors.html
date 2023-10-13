@@ -29,6 +29,10 @@
     {% endfor %}
     </ul>
 
+    {% if user.is_authenticated and user.is_superuser %}
+      <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">Add author</a>
+    {% endif %}
+
 
 
     {% endblock %}  

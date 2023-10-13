@@ -9,7 +9,7 @@
     <h1>{% translate "Add a user" %}</h1>
 
 
-    <form method="POST" class="form-control"> 
+    <form method="POST" class="form-control" enctype="multipart/form-data"> 
 
         {% csrf_token %}
         {{ form.as_p }}
