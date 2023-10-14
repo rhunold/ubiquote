@@ -28,11 +28,11 @@
     <li class="nav-item">
       <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">Users</a>
     </li>
+    
     {% if user.is_authenticated %}
     <li class="nav-item">
       <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">Add Quote</a>
     </li>
-
     <li class="nav-item">
       <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}">Likes</a>
     </li>

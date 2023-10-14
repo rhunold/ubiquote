@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from .models import Category
 from texts.quotes.models import Quote
-from texts.quotes.views import get_user_likes
+from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
 
@@ -29,7 +29,7 @@ class GetCategoryView(ListView):
       context = super().get_context_data(**kwargs)
       
       # Get user likes for buton status      
-      get_user_likes(self, context)       
+      get_user_quotes_likes(self, context)       
       
       # Get the category id from the URL parameter
       category_slug = self.kwargs['slug']

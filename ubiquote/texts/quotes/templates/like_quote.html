@@ -5,9 +5,8 @@
 
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
 
-        {% if user.is_authenticated %}
 
-        <form method="post" action="{% url 'quotes:like-quote' quote.id %}" >
+        <form method="post" action="{% url 'quotes:like-quote' quote.id %}">
         {% csrf_token %}
 
             {% if liked_quotes|has_user_liked:quote.id %}
@@ -15,11 +14,12 @@
             {% else %}
             <button type="submit" class="btn btn-primary m-1" type="button">Like</button>
             {% endif %}
-        
+            
+            {{ quote.count_likes }}
         
         </form>
        
-    {% endif %}  
+
 
 
 

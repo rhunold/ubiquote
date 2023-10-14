@@ -4,6 +4,7 @@
 
 {% block body %}
     <h1>Categories</h1>
+    <p>{{ categories.count|default:"Default Value" }} categories available in the database</p>
     <ul>
     {% for category in categories %}
     <li>

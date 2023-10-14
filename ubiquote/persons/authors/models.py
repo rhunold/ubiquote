@@ -30,4 +30,9 @@ class Author(Person):
         else:
             return f'{self.first_name or ""} {self.middle_name or ""} {self.last_name or ""}'
         
+
+    def count_authors():
+        count = Author.objects.count()
+        return count        
+        
     

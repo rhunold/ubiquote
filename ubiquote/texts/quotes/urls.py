@@ -10,7 +10,12 @@ urlpatterns = [
     path('add/quote/', AddQuoteView.as_view(), name='add-quote'),
     path('update/quote/<str:slug>', UpdateQuoteView.as_view(), name='update-quote'),
     path('delete/quote/<str:slug>', DeleteQuoteView.as_view(), name='delete-quote'),
-    path('like/<int:id>/', like_quote, name='like-quote'),    
+    
+    # function to add / remove a like on a quote
+    path('quote/like/<int:id>/', like_quote, name='like-quote'),
+    
+    
+    
     # path('like-unlike-quote/<int:quote_id>/', like_unlike_quote, name='like-unlike-quote'),
 
 ]

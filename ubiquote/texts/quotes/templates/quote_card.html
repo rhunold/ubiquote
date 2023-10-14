@@ -9,7 +9,11 @@
       </blockquote>
     </div>
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Publié le {{ quote.date_created }} par  {{ quote.contributor.username|safe }}</li>
+      <li class="list-group-item">Publié le {{ quote.date_created }} par 
+        <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+          {{ quote.contributor.username|safe }}
+        </a>
+      </li>
       <li class="list-group-item">
         categories :
             {% for category in quote.categories.all %}
@@ -23,7 +27,7 @@
   
       <a href="{% url 'quotes:get-quote' quote.slug  %}" class="btn btn-primary m-1">Permalink</a>
 
-      {% if user.is_authenticated and request.user == user %}
+       {% if user.is_authenticated and user == quote.contributor %}
       <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary m-1">update</a>
       <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary m-1">delete</a>
       {% else %}

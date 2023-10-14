@@ -9,7 +9,7 @@ from .forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from texts.quotes.models import Quote
-from texts.quotes.views import get_user_likes
+from texts.quotes.views import get_user_quotes_likes
 
 from .models import User
 from .forms import  UserForm
@@ -20,20 +20,12 @@ from django.urls import reverse_lazy
 
 @login_required
 def user_likes(request):
-
-  
-  # # Get user likes for buton status
-  # context = get_user_likes(self, context) 
-  
+  # Get user likes for buton status
   quotes = Quote.published.filter(likes=request.user)
-  
-  # return render(request, 'users:get_user_likes', {'context': context})  
-  
   return render(request, 'users:get_user_likes', {'quotes': quotes})
 
 
 class GetUserLikesView(ListView):
-  # model = Author
   model = Quote
   queryset = Quote.published.all()
   
@@ -44,29 +36,27 @@ class GetUserLikesView(ListView):
       context = super().get_context_data(**kwargs)
       
       # Get user likes for buton status
-      context = get_user_likes(self, context)       
+      get_user_quotes_likes(self, context)       
       
-      # Get the author slug from the URL parameter
-      user_slug = self.kwargs['slug']
+      # Get the profil slug from the URL parameter
+      profil_slug = self.kwargs['slug']
       
-      # Get the author object based on the slug
-      user = User.objects.get(slug=user_slug)
+      # Get the profil object based on the slug
+      profil = User.objects.get(slug=profil_slug)
       
-
-      
-      quotes = Quote.published.filter(likes=user.id)
+      quotes = Quote.published.filter(likes=profil.id)
       context['quotes'] = quotes           
       
-      context['user'] = user  # Pass the category object to the template
+      context['profil'] = profil
       return context
 
   def get_queryset(self):
-      # Get the category id from the URL parameter
-      user_slug = self.kwargs['slug']   
-      user = User.objects.get(slug=user_slug)
+      # Get the profil id from the URL parameter
+      profil_slug = self.kwargs['slug']   
+      profil = User.objects.get(slug=profil_slug)
       
-      # Filter quotes by the category id
-      queryset = Quote.published.filter(likes=user.id) 
+      # Filter quotes by the profil id
+      queryset = Quote.published.filter(likes=profil.id) 
       
       return queryset
   
@@ -85,9 +75,9 @@ class LoginView(auth_views.LoginView):
     #     # Redirect to the detail page of the newly created author
     #     return reverse_lazy('users:get-user', kwargs={'slug': self.object.slug})    
     
-class LogoutView(auth_views.LoginView):
+class LogoutView(auth_views.LogoutView):
     form_class = AuthenticationForm
-    template_name = 'registration/login.html'
+    template_name = 'registration/logout.html'
     success_url = reverse_lazy('texts:home')
 
 
@@ -109,15 +99,12 @@ class GetUserView(ListView):
       context = super().get_context_data(**kwargs)
       
       # Get user likes for buton status
-      get_user_likes(self, context)         
-      
-      # Get the author slug from the URL parameter
-      user_slug = self.kwargs['slug']
+      get_user_quotes_likes(self, context)
       
       # Get the author object based on the slug
-      user = User.objects.get(slug=user_slug)
+      profil = User.objects.get(slug=self.kwargs['slug'])
       
-      context['user'] = user  # Pass the category object to the template
+      context['profil'] = profil  # Pass the category object to the template
       # context['title'] = category.title      
       return context
 

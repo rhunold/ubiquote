@@ -1,45 +1,41 @@
 {% extends 'base.html' %}
-{% block title %}{{ user }}{% endblock %}
+{% block title %}{{ profil }} profil page {% endblock %}
 
-{% block meta_decription %}{{ author.lastname }} - {% endblock %}
+{% block meta_decription %}{{ profil}} - {% endblock %}
 
 {% block body %}
 
 
 
-    <h1>
+    <h1>{{ profil.username|default_if_none:"" }}</h1>
 
-        {{ user.username|default_if_none:"" }}
+    <h2>{{ profil.first_name|default_if_none:""  }} {{ profil.middle_name|default_if_none:"" }} {{ profil.last_name|default_if_none:"" }}</h2>
 
-    </h1>
-
-    <h2>{{ user.first_name|default_if_none:""  }} {{ user.middle_name|default_if_none:"" }} {{ user.last_name|default_if_none:"" }}</h2>
-
-    {% if user.avatar.url is not None %}
+    {% if profil.avatar.url is not None %}
       <img src="{{ user.avatar.url }}" class="rounded-circle">
     {% endif %}       
 
-    {% if user.date_birth is not None %}
-      <p>date_birth : {{ user.date_birth|date:"d M Y"|safe }} </p>
+    {% if profil.date_birth is not None %}
+      <p>date_birth : {{ profil.date_birth|date:"d M Y"|safe }} </p>
     {% endif %}      
 
-    {% if user.date_death is not None %}
-      <p>date_death : {{ user.date_death|date:"d M Y"|safe }}</p>
+    {% if profil.date_death is not None %}
+      <p>date_death : {{ profil.date_death|date:"d M Y"|safe }}</p>
     {% endif %}         
     
-    {% if user.sex is not None %}    
-      <p>sex : {{ user.sex|safe }}</p>
+    {% if profil.sex is not None %}    
+      <p>sex : {{ profil.sex|safe }}</p>
     {% endif %}
 
-    {% if user.nationality is not None %}   
-      <p>nationality :  {{ user.nationality|safe }}</p>
+    {% if profil.nationality is not None %}   
+      <p>nationality :  {{ profil.nationality|safe }}</p>
     {% endif %}
 
-    <p>date_created : {{ user.date_created|date:"d M Y à G:i"|safe }}</p>
-    <p>date_updated : {{ user.date_updated|date:"d M Y à G:i"|safe }}</p>
+    <p>date_created : {{ profil.date_created|date:"d M Y à G:i"|safe }}</p>
+    <p>date_updated : {{ profil.date_updated|date:"d M Y à G:i"|safe }}</p>
 
     <p>
-      <a href="{{ user.twitter_url|safe }}" class="link-offset-2 link-underline link-underline-opacity-10">
+      <a href="{{ profil.twitter_url|safe }}" class="link-offset-2 link-underline link-underline-opacity-10">
       twitter
       </a>
     </p>
@@ -47,12 +43,12 @@
     
     {% include "quotes_cards.html" %}
 
-    
 
-    {% if user.is_authenticated and user.is_superuser %}
+    {% if user.is_authenticated and user.slug == profil.slug or user.is_superuser  %}
       <a href="{% url 'users:update-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update user</a>
       <a href="{% url 'users:delete-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete user</a>      
-    {% endif %}    
+    {% endif %}
 
 
-    {% endblock %}  
+
+{% endblock %}  

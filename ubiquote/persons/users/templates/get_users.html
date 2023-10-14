@@ -10,18 +10,11 @@
 
       <a href="{% url 'users:get-user' user.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
 
-        {{ user.username|default_if_none:""|safe }}
-
-        {{ user.first_name|default_if_none:""|safe  }} {{ user.middle_name|default_if_none:""|safe }} {{ user.last_name|default_if_none:""|safe }}
+        {{ user.username|safe }}
     </a>
-
-
-
 
     </li>      
     {% endfor %}
     </ul>
-
-
 
     {% endblock %}  

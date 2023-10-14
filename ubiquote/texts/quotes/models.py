@@ -27,15 +27,14 @@ class Quote(Text):
     
     likes = models.ManyToManyField(
         User,
-        # related_name="%(app_label)s_%(class)s_likes",
-        # default=None,
-        # blank=True,
-        # through='%(app_label)ss%(class)ssLikes',
         through='QuotesLikes',
         )     
     
     # def default_author(self):
-    #     return Author.objects.get(id=1)    
+    #     return Author.objects.get(id=1)
+    
+    def count_likes(self):
+        return self.likes.all().count()
 
     def get_categories(self):
         return "\n".join([cat.title for cat in self.categories.all()])    
@@ -70,13 +69,16 @@ class QuotesCategories(models.Model):
         ]      
 
 
-
-     
-
 class QuotesLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # def count_quote_likes(self):
+    #     """
+    #     Count the number of likes for the current quote.
+    #     """
+    #     return QuotesLikes.objects.filter(quote=self.quote).count()    
     
     class Meta:
         constraints = [

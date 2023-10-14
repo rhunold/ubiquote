@@ -64,18 +64,6 @@ class Text(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     
-    
-    # likes = models.ManyToManyField(
-    #     User,
-    #     # related_name="%(app_label)s_%(class)s_likes",
-    #     default=None,
-    #     blank=True,
-    #     through='%(app_label)ss%(class)ssLikes'
-    #     )
-    
-    
-
-
     # def get_absolute_url(self):
     #     return reverse('%(app_label)s:get-%(class)s', args=[self.slug])
     
@@ -85,15 +73,7 @@ class Text(models.Model):
     #     self.snippet = Substr(self.text, 1, 100)
     #     super().save(*args, **kwargs)
 
-    
-    # likes = GenericRelation(Like) # , related_query_names="quote"    
-    # likes = models.ManyToManyField(User, related_name="%(app_label)s_%(class)s_likes")
-    
-    # def user_has_liked(self, user):
-    #     return self.likes.filter(user=user).exists()    
-    
-    # def total_likes(self):
-    #     return self.likes.count()
+
 
     class Meta:
         abstract = True
@@ -111,3 +91,7 @@ class Category(models.Model):
     
     class Meta:
         verbose_name_plural = "Categories"     
+        
+    def count_categories():
+        count = Category.objects.count()
+        return count            

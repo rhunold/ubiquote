@@ -6,34 +6,8 @@ from django.urls import reverse_lazy
 from .models import Author
 from .forms import AuthorForm
 from texts.quotes.models import Quote
-from texts.quotes.views import get_user_likes
+from texts.quotes.views import get_user_quotes_likes
 
-# from .forms import QuoteForm
-
-
-# def get_user_likes(self, context):
-
-#   # EN FAIRE UNE FONCTION CAR DRY / QUOTES ET AUTRES MODELES
-#   quotes = Quote.published.all()
-#   quotes_count = Quote.published.count()          
-  
-#   # Create a dictionary to store the likes status for each quote
-#   liked_quotes = {}
-  
-#   for quote in self.queryset:
-#     liked_quotes[quote.id] = False  # Initialize to False by default
-
-#     if quote.likes.filter(id=self.request.user.id).exists():
-#       liked_quotes[quote.id] = True
-
-#       print(liked_quotes)
-
-#   context['quotes'] = quotes
-#   context['quotes_count'] = quotes_count
-#   context['liked_quotes'] = liked_quotes  
-  
-  
-#   return context
 
 
 class GetAuthorsView(ListView):
@@ -46,7 +20,7 @@ class GetAuthorsView(ListView):
 class GetAuthorView(ListView):
   # model = Author
   model = Quote
-  queryset = Quote.published.all()
+  queryset = Quote.published.all().order_by('slug')
   context_object_name = 'quotes'  
   template_name = 'get_author.html'
   
@@ -54,7 +28,7 @@ class GetAuthorView(ListView):
       context = super().get_context_data(**kwargs)
       
       # Get user likes for buton status
-      get_user_likes(self, context)      
+      get_user_quotes_likes(self, context)      
       
       # Get the author slug from the URL parameter to Get the author object 
       author_slug = self.kwargs['slug']
