@@ -73,8 +73,6 @@ class Text(models.Model):
     #     self.snippet = Substr(self.text, 1, 100)
     #     super().save(*args, **kwargs)
 
-
-
     class Meta:
         abstract = True
         ordering = ['date_created']

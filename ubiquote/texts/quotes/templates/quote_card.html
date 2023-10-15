@@ -3,36 +3,46 @@
       Quote
     </div>
     <div class="card-body">
+      
       <blockquote class="blockquote mb-0">
-        <p>{{ quote.text|safe }}</p>
-        <footer class="blockquote-footer"> {{ quote.author|default_if_none:""|safe }} in <cite title="Source Title">Source Title</cite></footer>
+        <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|safe }}</a></p>
+
+        <footer class="blockquote-footer">
+          <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">{{ quote.author|default_if_none:""|safe }}</a>
+          in <cite title="Source Title">Source Title</cite>
+        </footer>
       </blockquote>
     </div>
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Publié le {{ quote.date_created }} par 
-        <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
-          {{ quote.contributor.username|safe }}
-        </a>
-      </li>
+
       <li class="list-group-item">
         categories :
             {% for category in quote.categories.all %}
             <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a> &nbsp;
             {% endfor %}   
       </li>
+      <li class="list-group-item">
+        {% if user.is_authenticated and user == quote.contributor %}
+        <div class="float-end">                  
+          <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary x-1">update</a>
+          <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary x-1">delete</a>
+        </div>
+        {% else %}
+
+        {% endif %}         
+        
+        Publié le {{ quote.date_created }} par 
+        <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+          {{ quote.contributor.username|safe }}
+        </a>
+         
+      </li>
+      <li class="list-group-item">
+        <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
+          {% include "like_quote.html" %}          
+        </div>  
+      </li>
+
     </ul>  
-    <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
 
-      {% include "like_quote.html" %}          
-  
-      <a href="{% url 'quotes:get-quote' quote.slug  %}" class="btn btn-primary m-1">Permalink</a>
-
-       {% if user.is_authenticated and user == quote.contributor %}
-      <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary m-1">update</a>
-      <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary m-1">delete</a>
-      {% else %}
-      {% endif %}           
-      
-
-    </div>  
   </div>      

@@ -10,8 +10,6 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 
-
-
 class Quote(Text):
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE) #, default=1)
 
@@ -73,12 +71,6 @@ class QuotesLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    
-    # def count_quote_likes(self):
-    #     """
-    #     Count the number of likes for the current quote.
-    #     """
-    #     return QuotesLikes.objects.filter(quote=self.quote).count()    
     
     class Meta:
         constraints = [

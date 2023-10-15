@@ -13,7 +13,10 @@
 
     {% if profil.avatar.url is not None %}
       <img src="{{ user.avatar.url }}" class="rounded-circle">
-    {% endif %}       
+    {% endif %}
+
+
+    <p>{{ quotes.count }} quotes published.</p>    
 
     {% if profil.date_birth is not None %}
       <p>date_birth : {{ profil.date_birth|date:"d M Y"|safe }} </p>
