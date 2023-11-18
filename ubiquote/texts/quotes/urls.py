@@ -13,9 +13,5 @@ urlpatterns = [
     
     # function to add / remove a like on a quote
     path('quote/like/<int:id>/', like_quote, name='like-quote'),
-    
-    
-    
-    # path('like-unlike-quote/<int:quote_id>/', like_unlike_quote, name='like-unlike-quote'),
 
 ]

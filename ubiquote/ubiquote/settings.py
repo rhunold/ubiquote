@@ -40,19 +40,26 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'dal', # override the jquery.init.js script provided by the admin
+    'dal_select2',
+    
+    # 'autocomplete_light',    
+    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'texts',
     'texts.quotes',    
     'persons',
     'persons.users',
     'persons.authors',
     # 'interactions.likes',  
-    # 'interactions.follows',        
+    # 'interactions.follows',
+    'django_htmx',    
     'rosetta', # managing translations in admin
 ]
 
@@ -65,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_htmx.middleware.HtmxMiddleware'
 ]
 
 ROOT_URLCONF = 'ubiquote.urls'
@@ -142,7 +150,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+# Absolute filesystem path to the directory that will hold collected static files.
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -161,6 +172,7 @@ LOCALE_PATHS = (
 
 AUTH_USER_MODEL = 'users.User'
 
+LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = 'texts:home'
 LOGOUT_REDIRECT_URL = 'texts:home'
 

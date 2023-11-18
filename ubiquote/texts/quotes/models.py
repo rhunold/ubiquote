@@ -5,13 +5,14 @@ from persons.users.models import User
 from ..models import Category, Text
 
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 
 class Quote(Text):
-    author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE) #, default=1)
+    author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, related_name='author') #, default=1)
 
     categories = models.ManyToManyField(
         Category,

@@ -4,19 +4,14 @@
 {% block title %}Quotes{% endblock %}
 {% block meta_decription %}All the quotes{% endblock %}
 
-
+{% load i18n %}
 
 {% block body %}
 
+    <h1>{% translate "Quotes" %}</h1>
 
-
-    <h1>Quotes</h1>
-
-    <p>{{ quotes.count }} quotes available in the database</p>
-
+    <p>{{ quotes.count }} {% translate "quotes available in the database" %} </p>
 
     {% include "quotes_cards.html" %}
 
-
-
-    {% endblock %}  
+{% endblock %}  

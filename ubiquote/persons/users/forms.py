@@ -5,6 +5,7 @@ from .models import User
 
 
 
+
 # Admin Forms
 class UserCreationForm(UserCreationForm):
 # If you want to give superuser privileges to the staff users, override the save method 

@@ -1,28 +1,76 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% translate "Add a quote" %}{% endblock %}
 {% block meta_decription %}{% translate "Add a quote" %} - {% endblock %}
 
 {% block body %}
-{% if user.is_authenticated %}
-    <h1>{% translate "Add a quote" %}</h1>
+    {% if user.is_authenticated %}
+        <h1>{% translate "Add a quote" %}</h1>
 
 
-    <form method="POST" class="form-control"> 
 
-        {% csrf_token %}
-        {{ form.as_p }}
-
-        <button class="btn btn-secondary">{% translate "Post" %}</button>
-
-    </form>
-
-    <p></p>
-
-{% else %}
-    <p>You are not allowed here</p>
-{% endif %}  
+    {% comment %}
+        <input type="text" list="authors" placeholder="Authors" class="form-control">
+        <datalist id="authors">
+        {% for author in authors %}
+        <option value="{{ author }}"></option>
+        {% endfor %}
+        </datalist>
+    {% endcomment %}        
 
 
-    {% endblock %}  
+        <form action="" method="POST" class="form-control"> <!--  hx-post="." --> 
+
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <table style="display: none">
+                {{ view.formset.empty_form }}
+            </table>
+    
+            <table>
+                {{ view.formset }}
+            </table>            
+
+        
+
+            <button class="btn btn-secondary">{% translate "Post" %}</button>
+
+        </form>
+
+    {% else %}
+        <p>You are not allowed here</p>
+    {% endif %}
+
+
+    {{ form.media }}
+    
+    <script>
+    (function($) {
+        $('#add-form').click(function() {
+            var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+            var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+            newTable.find(':input').each(function() {
+                for (attr of ['last_name', 'id'])
+                    $(this).attr(
+                        attr,
+                        $(this).attr(attr).replace('__prefix__', index)
+                    )
+            })
+            newTable.insertBefore($(this))
+            $('#id_inline_test_models-TOTAL_FORMS').val(
+                parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
+            )
+            newTable.slideDown()
+        })
+    })($)
+    </script>    
+
+
+{% endblock %}  
+
+
+
+

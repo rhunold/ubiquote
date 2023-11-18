@@ -1,6 +1,8 @@
+{% load i18n %}
+
 <div class="card m-md-5">
     <div class="card-header">
-      Quote
+      {% translate "Quote" %}
     </div>
     <div class="card-body">
       
@@ -16,7 +18,7 @@
     <ul class="list-group list-group-flush">
 
       <li class="list-group-item">
-        categories :
+        {% translate "categories" %} :
             {% for category in quote.categories.all %}
             <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a> &nbsp;
             {% endfor %}   
@@ -24,14 +26,14 @@
       <li class="list-group-item">
         {% if user.is_authenticated and user == quote.contributor %}
         <div class="float-end">                  
-          <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary x-1">update</a>
-          <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary x-1">delete</a>
+          <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "update" %}</a>
+          <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "delete" %}</a>
         </div>
         {% else %}
 
         {% endif %}         
         
-        Publié le {{ quote.date_created }} par 
+        {% translate "published" %} {{ quote.date_created }}  {% translate "by" %} 
         <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
           {{ quote.contributor.username|safe }}
         </a>

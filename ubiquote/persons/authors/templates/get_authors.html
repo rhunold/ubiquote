@@ -7,19 +7,13 @@
 
     <p>{{ authors.count }} author available in the database</p>
 
+
     <ul>
     {% for author in authors %}
     <li>
-
       <a href="{% url 'authors:get-author' author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
-      {% if author.nickname is not None %}
-        {{ author.nickname|default_if_none:""|safe }}
-      {% else %}
-        {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
-      {% endif %}
-    </a>
-
-
+      {{ author.nickname|default_if_none:""|safe }} {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
+      </a>
     </li>      
     {% endfor %}
     </ul>

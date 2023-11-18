@@ -77,8 +77,6 @@ class GetQuoteView(DetailView):
     
     get_user_quotes_likes(self, context)
     
-
-  
  
     return context
 

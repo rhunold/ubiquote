@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block title %}Register{% endblock %}
 {% block meta_decription %}{{ quote.text }} - {% endblock %}
 
 {% block body %}
 
-    <h1>Register</h1>
+    <h1>{% translate "Register" %}</h1>
 
 
     <form method="POST" class="form-control"> 
@@ -13,7 +14,7 @@
         {% csrf_token %}
         {{ form.as_p }}
 
-        <button class="btn btn-secondary">Register</button>
+        <button class="btn btn-secondary">{% translate "Register" %}</button>
 
     </form>
 

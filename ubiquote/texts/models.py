@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from persons.users.models import User
 
@@ -7,6 +8,8 @@ import os
 
 from django.conf import settings
 LANGUAGES = settings.LANGUAGES
+
+
 
 from django.db.models.functions import Substr
 
@@ -32,12 +35,12 @@ class Text(models.Model):
             return super().get_queryset() .filter(status='published')
         
     status_options = (
-        ('draft', 'Draft'),
-        ('published', 'Published')
+        ('draft', _('draft')),
+        ('published', _('published'))
     )
     
-    text = models.TextField(max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
-    lang = models.CharField(max_length=2, choices=LANGUAGES, default="fr")
+    text = models.TextField(_('Text'), max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
+    lang = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="fr")
         
     # snippet = models.CharField(max_length=100, editable=False)
     
@@ -47,7 +50,7 @@ class Text(models.Model):
         # Customize this method to generate the slug from the desired field(s)
         return self.text[:100]
     
-    status = models.CharField(max_length=10, choices=status_options, default='published')
+    status = models.CharField(_('status'),max_length=10, choices=status_options, default='published')
     # objects = models.Manager() # Defaut Manager
     published = PublishedManager() # to make query preformated : Post.published.all() vs Post.objects.all()
 
@@ -81,15 +84,17 @@ class Text(models.Model):
 class Category(models.Model):
     title = models.CharField(max_length=100, verbose_name="Category Title :")
     # add snippet ?
-    text = models.TextField(max_length=500, verbose_name=" Text :")
+    text = models.TextField(verbose_name=" Text :")
     slug = AutoSlugField(populate_from='title', unique=True, null=True, default=None)
     
     def __str__(self):
         return f'{self.title}'
+
+    def count_categories():
+        count = Category.objects.count()
+        return count           
     
     class Meta:
         verbose_name_plural = "Categories"     
         
-    def count_categories():
-        count = Category.objects.count()
-        return count            
+     

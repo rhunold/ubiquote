@@ -1,3 +1,5 @@
+{% load i18n %}
+
 
 {% url 'texts:home' as home %}
 {% url 'quotes:get-quotes' as quotes %}
@@ -7,51 +9,92 @@
 {% url 'users:get-users' as users %}
 {% url 'users:user-register' as register %}
 {% url 'users:user-login' as login %}
-{% url 'users:get-user-likes' as get_likes %}
+{% url 'users:get-user-likes' user.slug as get_likes %}
 
-{% url 'users:get-user' as user_connected %}
+{% url 'users:get-user' user.slug as user_connected %}
 
 <ul class="nav nav-tabs">
 
     <li class="nav-item">
-      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:home' %}">Home</a>
+      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:home' %}">{% translate "Home" %}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}">Quotes</a>
+      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}">{% translate "Quotes" %}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}">Authors</a>
+      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}">{% translate "Authors" %}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}">Categories</a>
+      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}">{% translate "Categories" %}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">Users</a>
+      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">{% translate "Users" %}</a>
     </li>
     
     {% if user.is_authenticated %}
     <li class="nav-item">
-      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">Add Quote</a>
+      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">{% translate "Add Quote" %}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}">Likes</a>
+      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}">{% translate "Likes" %}</a>
     </li>
 
       <li class="nav-item">
         <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"> {{ user }}</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+        <a class="nav-link" href="{% url 'users:logout' %}">{% translate "Logout" %}</a>
       </li>
     {% else %}
       <li class="nav-item">
-        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}">Login</a>
+        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}">{% translate "Login" %}</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}">Register</a>
+        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"></a>
       </li>
     {% endif %}      
     <!-- <li class="nav-item">
       <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
     </li> -->
+
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {% translate "Languages" %}
+      </a>
+
+
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      {% get_language_info_list for LANGUAGES as languages %}
+
+      <ul class="dropdown-menu">
+        {% for lang in languages %}
+        <li><a class="dropdown-item" href="/{{ lang.code }}/">{{ lang.name_local|lower }}</a></li>
+        {% endfor %}
+        <!-- <li><a class="dropdown-item" href="#">Another action</a></li>
+        <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+      </ul>
+    </li>
+
   </ul>
+
+  <button hx-post="/clicked" hx-swap="outerHTML">
+    Click Me
+  </button>
+
+  <!-- <ul>
+    {{ trans }}
+
+
+
+    {% for lang in languages %}
+      <li>
+        <a href="/{{ lang.code }}/">
+          {{ lang.name_local|lower }}
+        </a>
+    </li>
+    {% endfor %}
+</ul> -->
+
+
+<!-- <p>{% translate "hello" %}</p> -->

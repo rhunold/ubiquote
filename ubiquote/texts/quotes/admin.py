@@ -1,4 +1,6 @@
 from django.contrib import admin
+
+
 from django.contrib.auth.admin import UserAdmin
 from .forms import QuoteForm
 from .models import Quote, QuotesCategories
@@ -9,7 +11,7 @@ class QuotesCategoriesInline(admin.TabularInline):
 
 
 class QuoteAdmin(admin.ModelAdmin):
-    # form = QuoteForm
+    form = QuoteForm
     # model = Quote
     
     # fieldsets = (
@@ -20,6 +22,8 @@ class QuoteAdmin(admin.ModelAdmin):
     list_display = ('text', 'contributor', 'get_categories',)  
     ordering = ('-date_updated',)
     list_filter = ('categories',)
+    
+
 
 
 admin.site.register(Quote, QuoteAdmin)

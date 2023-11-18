@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-08 10:03+0000\n"
-"PO-Revision-Date: 2023-10-08 10:15+0000\n"
+"PO-Revision-Date: 2023-11-09 13:01+0000\n"
 "Last-Translator:   <raphael.hunold@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -21,15 +21,15 @@ msgstr ""
 
 #: persons/constants.py:5
 msgid "Female"
-msgstr ""
+msgstr "Femme"
 
 #: persons/constants.py:6
 msgid "Male"
-msgstr ""
+msgstr "Homme"
 
 #: persons/constants.py:7
 msgid "Unsure"
-msgstr ""
+msgstr "Incertain"
 
 #: persons/constants.py:12
 msgid "Afghan"
@@ -821,7 +821,7 @@ msgstr ""
 
 #: texts/templates/_nav.html:19 texts/templates/base.html:74 texts/views.py:18
 msgid "hello"
-msgstr ""
+msgstr "bonjour"
 
 #: texts/templates/add_quote.html:21
 msgid "Add a quote"
