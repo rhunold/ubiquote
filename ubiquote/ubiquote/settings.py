@@ -152,8 +152,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Absolute filesystem path to the directory that will hold collected static files.
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# Absolute filesystem path to the directory that will hold collectstatic files.
+STATIC_ROOT = BASE_DIR / "static"
+
+STATICFILES_DIRS = [BASE_DIR / "static/custom/"]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

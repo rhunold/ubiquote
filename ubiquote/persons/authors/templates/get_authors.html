@@ -1,22 +1,44 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
 {% block title %}Authors{% endblock %}
 {% block meta_decription %}All the authors{% endblock %}
 
 {% block body %}
     <h1>Authors</h1>
 
-    <p>{{ authors.count }} author available in the database</p>
+    <p>{{ page_obj.paginator.count }} author available in the database</p>
 
 
-    <ul>
-    {% for author in authors %}
-    <li>
-      <a href="{% url 'authors:get-author' author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
-      {{ author.nickname|default_if_none:""|safe }} {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
-      </a>
-    </li>      
-    {% endfor %}
-    </ul>
+    <!-- Autocomplete input -->
+    <input type="text" name="q" hx-get="{% url 'authors:search_authors' %}" hx-trigger="keyup changed delay:500ms"  hx-target="#author-list" hx-swap="innerHTML" placeholder="Search authors...">
+
+    <!-- Author list -->
+    <div id="author-list" hx-preserve="true" >  
+      <!-- This will be replaced with the updated author list -->
+    
+      {% include "author_list.html" %}
+
+
+    {% if is_paginated %}
+    <div class="pagination">
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="/authors/?page={{ page_obj.previous_page_number }}"> {% translate "previous" %}</a>
+            {% endif %}
+            <span class="page-current">
+                {{ page_obj.number }}  {% translate "of" %} {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="/authors?page={{ page_obj.next_page_number }}"> {% translate "next" %}</a>
+            {% endif %}
+        </span>
+    </div>
+  {% endif %}
+
+  </div>
+
 
     {% if user.is_superuser %} 
       <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">Add author</a>
@@ -24,4 +46,4 @@
 
 
 
-    {% endblock %}  
+{% endblock %}  

@@ -40,7 +40,7 @@ def get_user_quotes_likes(self, context):
 
 class GetQuotesView(ListView):
   model = Quote
-  queryset = Quote.published.all()
+  # queryset = Quote.published.all()
   template_name = 'get_quotes.html'
   context_object_name = 'quotes'
   ordering =['-date_created']

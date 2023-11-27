@@ -9,18 +9,12 @@ import os
 from django.conf import settings
 LANGUAGES = settings.LANGUAGES
 
-
-
 from django.db.models.functions import Substr
 
 
 from django.urls import reverse
 from autoslug import AutoSlugField
 
-
-
-# from interactions.likes.models import Like
-# from django.contrib.contenttypes.fields import GenericRelation
      
 
 def default_contributor():

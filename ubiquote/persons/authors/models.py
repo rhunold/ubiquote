@@ -32,15 +32,18 @@ class Author(Person):
     #     return f'avatars/authors/{instance.generate_slug()}_{filename}'    
     
     def __str__(self):
-        return f'{self.nickname or ""} {self.first_name or ""} {self.middle_name or ""} {self.last_name or ""}'
+        if self.nickname:
+            return self.nickname
+        else:
+            return f'{self.first_name or ""} {self.middle_name or ""} {self.last_name or ""}'        
+        
+        # return f'{self.nickname or ""} {self.first_name or ""} {self.middle_name or ""} {self.last_name or ""}'
         
 
     def count_authors():
         count = Author.objects.count()
-        return count        
-        
-        
-        
+        return count
+ 
  
 
 class AuthorAutocomplete(autocomplete.Select2QuerySetView):
@@ -49,14 +52,18 @@ class AuthorAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Author.objects.none()
 
-        qs = Author.objects.all()
+        qs = Author.objects.all().order_by('last_name')
+
+        # if self.q:
+            # qs = qs.filter(last_name__istartswith=self.q)
 
         if self.q:
-            # qs = qs.filter(last_name__istartswith=self.q)
-            
-            qs = qs.filter(Q(last_name__istartswith=self.q) | Q(nickname__istartswith=self.q))
-            
-
+            qs = qs.filter(
+                Q(last_name__istartswith=self.q) |
+                Q(first_name__istartswith=self.q) |
+                Q(middle_name__istartswith=self.q) |
+                Q(nickname__istartswith=self.q)
+                )
         return qs
     
     def get_result_label(self, result):

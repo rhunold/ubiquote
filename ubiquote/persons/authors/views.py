@@ -1,13 +1,23 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from django.http import JsonResponse
+
 from django.urls import reverse_lazy
 
 from .models import Author
 from .forms import AuthorForm
+from .forms import AuthorAutoCompleteForm
+
+# from persons.authors.models import AuthorAutocomplete
+
 from texts.quotes.models import Quote
+from texts.quotes.forms import QuoteForm
+
 from texts.quotes.views import get_user_quotes_likes
 
+from django.db.models import Q
+# from django.core.paginator import Paginator
 
 
 class GetAuthorsView(ListView):
@@ -15,6 +25,26 @@ class GetAuthorsView(ListView):
   template_name = 'get_authors.html'
   context_object_name = 'authors'
   ordering =['last_name']
+  paginate_by = 20
+  
+  # def get_context_data(self, **kwargs):
+  #     context = super().get_context_data(**kwargs)
+  #     context['autocomplete_url'] = 'author-autocomplete'
+  #     return context
+  
+  # queryset = Author.objects.all()
+  
+  
+  # form_class = AuthorAutoCompleteForm  
+  
+  # def get_queryset(self):
+  #   query = self.request.GET.get('q')
+  #   if query:
+  #       return Author.objects.filter(
+  #           Q(first_name__icontains=query) | Q(last_name__icontains=query)| Q(nickname__icontains=query)
+  #       )
+  #   else:
+  #       return Author.objects.all()
 
 
 class GetAuthorView(ListView):
@@ -98,3 +128,31 @@ class DeleteAuthorView(DeleteView):
   template_name = 'delete_author.html'
   success_url = reverse_lazy('author:get-authors')
   # fields = '__all__'  
+
+
+def search_authors(request):
+    query = request.GET.get('q', '')
+
+    # Check if the query has a minimum length of 2 characters
+    if len(query) >= 2:
+        # print(f"Received query: {query}")
+
+        # Use Q objects to construct a complex OR query
+        authors = Author.objects.filter(
+            Q(last_name__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(middle_name__icontains=query) |
+            Q(nickname__icontains=query)
+        )
+
+        # print(authors.query)  # Check the generated SQL query
+        return render(request, 'author_list.html', {'authors': authors})
+    else:
+        # If the query is too short, return an empty result
+        return render(request, 'author_list.html', {'authors': []})
+  
+  
+def author_list(request):
+    authors = Author.objects.all()
+    return render(request, 'author_list.html', {'authors': authors})  
+  

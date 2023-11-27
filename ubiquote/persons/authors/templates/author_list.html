@@ -1,0 +1,14 @@
+<ul id="search-results">
+{% for author in authors %}
+<li>
+  <a href="{% url 'authors:get-author' author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+
+  {% if author.nickname %}
+    {{ author.nickname|default_if_none:""|safe }}
+  {% endif %}
+  
+  {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
+  </a>
+</li>  
+{% endfor %}
+</ul>

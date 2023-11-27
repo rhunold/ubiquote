@@ -22,23 +22,14 @@ app_name = 'ubiquote'
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path(_('admin/'), admin.site.urls),    
-    # path('', include('texts.urls', namespace='texts')),
-    # path(r'^author-autocomplete/$/', AuthorAutocomplete.as_view(), name='author-autocomplete'),
-    
-    
+
     path(
         r'author-autocomplete/',
         AuthorAutocomplete.as_view(),
-        # autocomplete.Select2QuerySetView.as_view(model=Author),
         name='author-autocomplete',
     ),
     
-    
-    # path(
-    #     'author-autocomplete',
-    #     autocomplete.Select2QuerySetView.as_view(model=Quote),
-    #     name='author-autocomplete',
-    # ),    
+
     
 ]
 

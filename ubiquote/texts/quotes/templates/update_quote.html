@@ -1,25 +1,40 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Edit a quote{% endblock %}
 {% block meta_decription %}{{ quote.text }} - {% endblock %}
 
 {% block body %}
 
-{% if user.is_authenticated %}
-    <h1>Edit a quote</h1>
+    {% if user.is_authenticated %}
+        <h1>Edit a quote</h1>
 
 
-    <form method="POST" class="form-control"> 
+        <form action="" method="POST" class="form-control"> 
 
-        {% csrf_token %}
-        {{ form.as_p }}
+            {% csrf_token %}
+            {{ form.as_p }}
 
-        <button class="btn btn-secondary">Update</button>
 
-    </form>
+            <table style="display: none">
+                {{ view.formset.empty_form }}
+            </table>
 
-{% else %}
-    <p>You are not allowed here</p>
-{% endif %}  
+            <table>
+                {{ view.formset }}
+            </table>            
 
-    {% endblock %}  
+
+            <button class="btn btn-secondary">Update</button>
+
+        </form>
+
+    {% else %}
+        <p>You are not allowed here</p>
+    {% endif %}  
+
+    {{ form.media }}
+    {% include 'author_select_form_script.html' %}  
+
+{% endblock %}  
