@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+      - .env.docker
+
+    command: >
+      sh -c "python ubiquote/manage.py collectstatic --noinput &&
+             python ubiquote/manage.py migrate &&      
+             python ubiquote/manage.py makemigrations &&
+             python ubiquote/manage.py runserver 0.0.0.0:8000"    
+
+    volumes:
+      - .:/code
+   
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      - db 
+      # db:
+      #   condition: service_completed_successfully  
+  
+  db:
+    image: postgres:15
+    restart: always
+
+    env_file:
+      - .env.docker
+          
+    volumes:
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Add this line to lauchh a script before lauching       
+      - ./data/db:/var/lib/postgresql/data
+
+      # - pgdata:/var/lib/postgresql/data
+      # - pgconf:/etc/postgresql
+      # - pglog:/var/log/postgresql
+
+      # - postgres_data: /var/lib/postgresql/data/
+ 
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "exit 0"
+
+
+# volumes:
+#   pgdata:
+#     driver: local
+#   pgconf:
+#     driver: local
+#   pglog: 
+#     driver: local   
+
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    # container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: raphael.hunold@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: Pos1977sop
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+    # depends_on:
+    #   # - db
+    #   db:
+    #     condition: service_completed_successfully        
+
+volumes:
+  local_pgdata:
+  pgadmin-data:

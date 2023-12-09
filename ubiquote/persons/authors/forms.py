@@ -29,9 +29,9 @@ class AuthorAutoCompleteForm(forms.ModelForm):
         model = Author
         fields = ('first_name', 'middle_name', 'last_name', 'nickname', ) # 'contributor'
         queryset = Author.objects.all()
-        initial= Author.objects.order_by("last_name").first(),
+        # initial= Author.objects.order_by("last_name").first(),
         
-        author = Author.objects.all()        
+        # author = Author.objects.all()        
         
         widgets = {
             # 'nickname': forms.Select(attrs={'class' : 'form-control'}),            

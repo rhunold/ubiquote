@@ -42,3 +42,23 @@ You must install a binary file on your system. Choose the appropriate one [here]
 More informations on translation on the [Django Documentation](https://docs.djangoproject.com/fr/4.2/topics/i18n/translation/)
 
 Highly recommand this [Yourube video](https://www.youtube.com/watch?v=z_p8WxFGV5A)
+
+### pg_trgm to enhence search teach
+
+You must add 'django.contrib.postgres'  in INSTALLED_APPS of your settings.py
+
+In PGadmin, you can add extentions for your database that enable some capality such as trigram or unaccent query sets.
+Click on "Extentions" in your database, then click and choose "Create / Extentions..."
+You must select "pg_trgm" to add this capacity.
+You also have to add the extention "unaccent"
+
+Or you can do it by commande line :
+
+1) Log into postgres
+psql -U <DB_USERNAME>
+
+2) After you are connected, switch to the DB you want to install the extension for:
+\c <DB_NAME>
+
+3) Then install the extension as answered previously:
+CREATE EXTENSION pg_trgm;

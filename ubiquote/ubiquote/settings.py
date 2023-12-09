@@ -34,8 +34,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', default=get_random_secret_key()
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 # Application definition
 
@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     # 'interactions.follows',
     'django_htmx',    
     'rosetta', # managing translations in admin
+    'django.contrib.postgres'    
 ]
 
 MIDDLEWARE = [

@@ -13,7 +13,7 @@ from django.db.models import Q
 class Author(Person):
     nickname = models.CharField(_('nickname'), max_length=30, null=True, blank=True)
     # biography = models.TextField(max_length=500, blank=True, verbose_name="Biography :")
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
+    # user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     
     avatar = models.ImageField(_('avatar'),upload_to='avatars/authors/', null=True, blank=True, default='avatars/default.png')
     
@@ -43,6 +43,9 @@ class Author(Person):
     def count_authors():
         count = Author.objects.count()
         return count
+    
+    class Meta:
+       ordering = ['last_name', 'nickname']    
  
  
 

@@ -1,0 +1,13 @@
+*.pyc
+*.pyo
+*.pyd
+*DS_Store
+/specs
+/env
+# .git
+# .env
+migrations/
+docker-compose.yml
+# oc_site.sh
+# pytest.ini
+.vscode

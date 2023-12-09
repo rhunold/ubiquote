@@ -17,9 +17,9 @@ from autoslug import AutoSlugField
 
      
 
-def default_contributor():
-    admin_email = os.environ.get('ADMIN_EMAIL')
-    return User.objects.get(email=admin_email)
+# def default_contributor():
+#     admin_email = os.environ.get('ADMIN_EMAIL')
+#     return User.objects.get(email=admin_email)
     
 
 class Text(models.Model):

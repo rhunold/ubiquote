@@ -12,13 +12,21 @@
 
 
     <!-- Autocomplete input -->
-    <input type="text" name="q" hx-get="{% url 'authors:search_authors' %}" hx-trigger="keyup changed delay:500ms"  hx-target="#author-list" hx-swap="innerHTML" placeholder="Search authors...">
+    <input type="text" name="q"
+    hx-get="{% url 'authors:search_authors' %}"
+    hx-trigger="keyup changed delay:500ms"
+    hx-target="#author-list"
+    hx-swap="innerHTML"
+    placeholder="{% translate 'Search authors...' %}">
 
     <!-- Author list -->
     <div id="author-list" hx-preserve="true" >  
       <!-- This will be replaced with the updated author list -->
     
       {% include "author_list.html" %}
+
+    </div>
+
 
 
     {% if is_paginated %}
@@ -35,13 +43,11 @@
             {% endif %}
         </span>
     </div>
-  {% endif %}
-
-  </div>
+    {% endif %}    
 
 
     {% if user.is_superuser %} 
-      <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">Add author</a>
+      <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">{% translate "Add author" %}</a>
     {% endif %}
 
 
