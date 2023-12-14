@@ -21,9 +21,6 @@ class AuthorForm(forms.ModelForm):
         }
 
 
-
-
-
 class AuthorAutoCompleteForm(forms.ModelForm):
     class Meta:
         model = Author

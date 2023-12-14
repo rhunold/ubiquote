@@ -10,13 +10,24 @@
 
 
     <h1>
-      <!-- {% if author.nickname is not None %}
+
+
+      {{ author.first_name|default_if_none:""  }}
+      {{ author.middle_name|default_if_none:" " }}
+      {{ author.particul|default_if_none:"" }}
+      {{ author.last_name|default_if_none:"" }}
+
+
+
+      {% if author.nickname and author.last_name %}
+        also known as
         {{ author.nickname|default_if_none:"" }}
       {% else %}
-        {{ author.first_name|default_if_none:""  }} {{ author.middle_name|default_if_none:"" }} {{ author.last_name|default_if_none:"" }}
-      {% endif %} -->
+      {{ author.nickname|default_if_none:"" }}
+      {% endif %}
       
-      {{ author }}
+
+
     </h1>
 
     {% if author.avatar.url is not None %}

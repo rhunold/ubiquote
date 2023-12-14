@@ -23,6 +23,9 @@ services:
       - db 
       # db:
       #   condition: service_completed_successfully  
+
+    links: # for network
+      - db
   
   db:
     image: postgres:15
@@ -32,14 +35,14 @@ services:
       - .env.docker
           
     volumes:
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Add this line to lauchh a script before lauching       
-      - ./data/db:/var/lib/postgresql/data
+      -  db_data:/var/lib/postgresql/data    
+    
+      # - ./data/db:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Add this line to lauchh a script before lauching / after volumes info if empty
 
       # - pgdata:/var/lib/postgresql/data
       # - pgconf:/etc/postgresql
       # - pglog:/var/log/postgresql
-
-      # - postgres_data: /var/lib/postgresql/data/
  
     ports:
       - "5432:5432"
@@ -47,13 +50,6 @@ services:
       test: "exit 0"
 
 
-# volumes:
-#   pgdata:
-#     driver: local
-#   pgconf:
-#     driver: local
-#   pglog: 
-#     driver: local   
 
 
   pgadmin4:
@@ -66,7 +62,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: raphael.hunold@gmail.com
       PGADMIN_DEFAULT_PASSWORD: Pos1977sop
     volumes:
-      - pgadmin-data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
 
     # depends_on:
     #   # - db
@@ -74,5 +70,18 @@ services:
     #     condition: service_completed_successfully        
 
 volumes:
-  local_pgdata:
-  pgadmin-data:
+  db_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  # local_pgdata
+
+
+
+# volumes:
+#   pgdata:
+#     driver: local
+#   pgconf:
+#     driver: local
+#   pglog: 
+#     driver: local   

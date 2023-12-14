@@ -11,15 +11,13 @@ from django.conf import settings
 LANGUAGES = settings.LANGUAGES
 
 
-
-# from django.urls import reverse
-
-
 class Person(models.Model):
     first_name = models.CharField(_('first name'), max_length=30, null=True, blank=True)
     middle_name = models.CharField(_('middle name'), max_length=30, null=True, blank=True)
     last_name = models.CharField(_('last name'), max_length=50, null=True, blank=True)
-
+    particul = models.CharField(_('particul'), max_length=5, null=True, blank=True)
+    title = models.CharField(_('title'), max_length=15, null=True, blank=True)
+    
     date_birth = models.DateField(_('birthday'), null=True, blank=True)
     date_death = models.DateField(_('death'), null=True, blank=True)
     
@@ -33,7 +31,6 @@ class Person(models.Model):
     biography = models.TextField(_('biography'), max_length=500, blank=True)    
 
     twitter_url = models.URLField(max_length=200, null=True, blank=True, default='http://www.twitter.com/')
-
 
     class Meta:
         abstract = True
