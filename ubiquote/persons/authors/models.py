@@ -8,11 +8,15 @@ from dal import autocomplete
 from django.utils.html import format_html
 from django.db.models import Q
 
+# from flexidate import FlexiDate
+
 # import autocomplete_light
 
 class Author(Person):
     nickname = models.CharField(_('nickname'), max_length=30, null=True, blank=True)
-    fullname = models.CharField(max_length=255, blank=True, null=True)
+    fullname = models.CharField(_('fullname'), max_length=255, blank=True, null=True)
+    
+
     # ordering = models.CharField(max_length=255, blank=True, null=True)  # New field for manual ordering
 
     # biography = models.TextField(max_length=500, blank=True, verbose_name="Biography :")

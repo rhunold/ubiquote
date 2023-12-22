@@ -5,8 +5,8 @@ from django.urls import path, reverse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
-
-
+# from rosetta.admin import TranslationAdmin
+from .forms import AuthorForm
 from django import forms
 
 from .models import Author
@@ -23,11 +23,19 @@ class CsvImportForm(forms.Form):
     csv_upload = forms.FileField()
 
 class AuthorAdmin(admin.ModelAdmin):
+    form = AuthorForm    
     
-    list_display = ('first_name', 'middle_name',  'particul', 'last_name', 'nickname', 'date_created')
+    list_display = ('first_name', 'middle_name',  'particul', 'last_name', 'nickname', 'date_created', 'date_birth', ) # 'test_date'
     ordering = ('fullname',)
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname', 'title', 'particul']
     # autocomplete_fields = ['last_name']
+
+    # widgets = {
+    #     'date_birth': forms.DateInput(format='%Y-%m-%d'),   
+    # }    
+
+    
+
     
     def get_urls(self):
         urls = super().get_urls()

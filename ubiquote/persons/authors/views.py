@@ -21,6 +21,8 @@ from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, TrigramSimilarity
 from django.contrib.postgres.lookups import Unaccent
 
+from flexidate import parse
+
 
 
 class GetAuthorsView(ListView):
@@ -47,6 +49,17 @@ class GetAuthorView(ListView):
       author_slug = self.kwargs['slug']
       author = Author.objects.get(slug=author_slug)
       context['author'] = author
+      
+      
+      from datetime import datetime, timedelta
+      if author.date_birth_datefield  is not None:
+        author.date_birth_datefield = author.date_birth_datefield +timedelta(days=10)
+        print(author.date_birth_datefield)
+      else:
+        print("operation impossible")
+
+      
+      # context['date_birth'] = date_birth      
  
       return context
 
@@ -89,6 +102,8 @@ class AddAuthorView(CreateView):
   model = Author
   form_class = AuthorForm
   template_name = 'add_author.html'
+ 
+  
   def get_success_url(self):
       # Redirect to the detail page of the newly created author
       return reverse_lazy('authors:get-author', kwargs={'slug': self.object.slug})

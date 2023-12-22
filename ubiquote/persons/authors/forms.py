@@ -7,16 +7,33 @@ from texts.quotes.models import Quote
 from dal import autocomplete
 from django.utils.translation import gettext_lazy as _
 
+# class CustomDateWidget(forms.DateInput):
+#     input_type = 'text'
+
+#     def __init__(self, attrs=None, format='%Y/%m/%d'):
+#         super().__init__(attrs={'autocomplete': 'off', 'placeholder': format}, format=format)
+
 
 class AuthorForm(forms.ModelForm):
+    
+    # date_birth = forms.DateField(widget=CustomDateWidget)    
+            
     class Meta:
         model = Author
-        fields = ('first_name', 'middle_name', 'last_name', 'nickname', 'avatar', 'biography', 'sex') # 'contributor'
+        # fields = ('first_name', 'middle_name', 'last_name', 'nickname', 'avatar', 'biography', 'sex', 'date_birth') # 'contributor' 
+        fields = '__all__'
      
+        # date_birth = forms.DateInput(
+        #      input_formats=['%Y-%m-%d'], attrs={'class': 'form-control'})     
+        
         widgets = {
             'biography': forms.Textarea(attrs={'class' : 'form-control', 'placeholder' : _("Put your bio here")}),
                     
-            
+            # 'date_birth': forms.DateInput(format='%Y-%m-%d'),  
+                      
+            # 'date_birth': forms.DateInput(
+            #     format=('%Y-%m-%d'), localize=True, attrs={'class': 'form-control'}),
+         
             'lang': forms.Select(attrs={'class' : 'form-control'}),
         }
 

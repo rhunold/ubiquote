@@ -38,12 +38,23 @@
     <h2>{{ author.biography|safe }}</h2>
 
     {% if author.date_birth is not None %}
-      <p>date_birth : {{ author.date_birth|date:"d M Y"|safe }} </p>
+
+      {% if author.date_birth_datefield  is  None %}
+      <p>date_birth : {{ author.date_birth  }}  </p>
+      {% else %} 
+      <p>date_birth : {{ author.date_birth_datefield|date:"d M Y"|safe}} </p>      
+      {% endif %} 
+
     {% endif %}      
 
     {% if author.date_death is not None %}
-      <p>date_death : {{ author.date_death|date:"d M Y"|safe }}</p>
-    {% endif %}         
+      {% if author.date_death_datefield  is  None %}
+      <p>date_death : {{ author.date_death  }}  </p>
+      {% else %} 
+      <p>date_death : {{ author.date_death_datefield|date:"d M Y"|safe}} </p>      
+      {% endif %} 
+
+    {% endif %}           
     
     {% if author.sex is not None %}    
       <p>sex : {{ author.sex|safe }}</p>
