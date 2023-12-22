@@ -33,6 +33,9 @@ class Text(models.Model):
         ('published', _('published'))
     )
     
+    # Define the default manager
+    objects = models.Manager()    
+    
     text = models.TextField(_('Text'), max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
     lang = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="fr")
         
