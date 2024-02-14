@@ -13,6 +13,7 @@ from .forms import QuoteForm
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch
 from django.core.cache import cache
+from django.contrib.auth import get_user_model
 
 
 @login_required
@@ -25,6 +26,14 @@ def like_quote(request, id):
   return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
 
+
+
+UserModel = get_user_model()
+
+def get_user(request):
+    if not hasattr(request, '_cached_user'):
+        request._cached_user = auth.get_user(request)
+    return request._cached_user
   
 def get_user_quotes_likes(self, context):
   
@@ -33,12 +42,15 @@ def get_user_quotes_likes(self, context):
   if cached_data is not None:
       context['liked_quotes'] = cached_data
       return context
+    
+  # Get the user object and cache it
+  user = get_user_model().objects.get(pk=self.request.user.pk)    
   
   # Prefetch related likes for all quotes
   quotes_with_likes = Quote.objects.annotate(
       total_likes=Count('likes')
   ).prefetch_related(
-      Prefetch('likes', queryset=QuotesLikes.objects.filter(user=self.request.user), to_attr='user_likes')
+      Prefetch('likes', queryset=QuotesLikes.objects.filter(user=user), to_attr='user_likes')
   )
 
   # Determine which quotes are liked by the user
