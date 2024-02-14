@@ -61,7 +61,9 @@ INSTALLED_APPS = [
     # 'interactions.follows',
     'django_htmx',    
     'rosetta', # managing translations in admin
-    'django.contrib.postgres'    
+    'django.contrib.postgres',
+    
+    'debug_toolbar'
 ]
 
 MIDDLEWARE = [
@@ -73,6 +75,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    'debug_toolbar.middleware.DebugToolbarMiddleware',    
     'django_htmx.middleware.HtmxMiddleware'
 ]
 
@@ -147,11 +151,17 @@ USE_I18N = True
 
 USE_TZ = True
 
+# DATETIME_INPUT_FORMATS = ['%Y-%m-%d']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# For debut tool
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 # Absolute filesystem path to the directory that will hold collectstatic files.
 STATIC_ROOT = BASE_DIR / "static"
@@ -163,6 +173,8 @@ STATICFILES_DIRS = [BASE_DIR / "static/custom/"]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
 
 
 LANGUAGES = (
@@ -183,5 +195,5 @@ LOGOUT_REDIRECT_URL = 'texts:home'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# to disable the security when you want to proceed more than 1000 operations at once (delete all authors)
+# to disable the security when you want to proceed more than 1000 operations at once (delete all authors...)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500

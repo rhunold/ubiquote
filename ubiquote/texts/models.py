@@ -17,9 +17,13 @@ from autoslug import AutoSlugField
 
      
 
-# def default_contributor():
-#     admin_email = os.environ.get('ADMIN_EMAIL')
-#     return User.objects.get(email=admin_email)
+def default_contributor():
+    admin_email = os.environ.get('ADMIN_EMAIL')
+    try:
+        return User.objects.get(email=admin_email).id
+    except User.DoesNotExist:
+        # Gérer le cas où l'utilisateur n'existe pas
+        return None
     
 
 class Text(models.Model):
@@ -55,10 +59,12 @@ class Text(models.Model):
         User,
         related_name="%(app_label)s_%(class)s_related",
         related_query_name="%(app_label)s_%(class)ss",
-        null=True,
+
         on_delete=models.SET_DEFAULT,
-        default=None
-        # default=default_contributor
+        # default=None
+        default=default_contributor,
+        null=True
+        
         )
 
     date_created = models.DateTimeField(auto_now_add=True)

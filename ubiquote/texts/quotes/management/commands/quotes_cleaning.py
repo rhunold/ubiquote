@@ -37,7 +37,7 @@ class Command(BaseCommand):
             # English rules
             text = self.apply_english_rules(text)
 
-        # Common rules here if needed  for both languages
+        # Common rules here if needed  for all languages
         
         # Remove 2 or more consecutive whitespace 
         text = re.sub(r'\s\s+', ' ', text)

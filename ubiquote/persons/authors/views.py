@@ -35,7 +35,8 @@ class GetAuthorsView(ListView):
 class GetAuthorView(ListView):
   # model = Author
   model = Quote
-  queryset = Quote.published.all().order_by('slug')
+  # queryset = Quote.published.all().order_by('slug')
+  # queryset = Quote.objects.all().select_related('author')  
   context_object_name = 'quotes'  
   template_name = 'get_author.html'
   
@@ -66,11 +67,31 @@ class GetAuthorView(ListView):
   def get_queryset(self):
       # Get the category id from the URL parameter
       author_slug = self.kwargs['slug']
+      author = Author.objects.get(slug=author_slug)
       
       # Filter quotes by the manager and same author slug
-      queryset = Quote.published.filter(author__slug=author_slug) 
+      queryset = Quote.published.filter(author=author).select_related('author')
+      
+      # queryset = Quote.objects.select_related('author__hometown').get(id=4)
+
+      
+      # queryset = Quote.objects.all().select_related('author')
+      # queryset = Quote.published.filter(author__slug=author_slug).select_related('author')
+      # queryset = Quote.objects.select_related('author').get(author__slug=author_slug)
+      # p = b.author         # Doesn't hit the database.
+      # c = p.hometown       # Doesn't hit the database.   
+       
+      # return queryset      
+      
+      # Fetch the author object based on the URL parameter (assuming author_id is passed in URL)
+      # author_id = self.kwargs['author_id']  # Adjust this based on your URL configuration
+      
+      # queryset = Quote.objects.filter(author__slug=author_slug).prefetch_related('author')
+      
+      # queryset = Quote.objects.select_related('author')
       
       return queryset
+
     
     
 

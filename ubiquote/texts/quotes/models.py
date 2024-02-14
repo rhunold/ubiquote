@@ -46,7 +46,23 @@ class Quote(Text):
     
 
     # def add_categories(self, category_instance):
-    #     QuoteCategory.objects.create(quote=self, category=category_instance)   
+    #     QuoteCategory.objects.create(quote=self, category=category_instance)  
+    
+    class Meta:
+       indexes = [
+            # models.Index(fields=['text',]),           
+            models.Index(fields=['author',]),
+            # models.Index(fields=['lang',]),             
+            # models.Index(fields=['categories',]),
+            models.Index(fields=['-date_created', ]),
+            # models.Index(fields=['slug',]),               
+            # contributor
+            # status
+            # published
+            # slug
+            # date_created
+            # date_updated
+        ]             
 
 
 
@@ -79,5 +95,9 @@ class QuotesLikes(models.Model):
                 name="%(app_label)s_%(class)s_unique_relationships",
                 fields=["quote", "user"],
             ),    
-        ]      
+        ]
+        indexes = [
+                # models.Index(fields=['user',]),           
+                models.Index(fields=['quote',]),
+            ]           
     

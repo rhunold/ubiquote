@@ -8,9 +8,9 @@
             {{ quote.count_likes }}   
 
             {% if liked_quotes|has_user_liked:quote.id %}
-            <button type="submit" class="btn btn-light m-1" type="button">Unilke</button>
+                <button type="submit" class="btn btn-light m-1" type="button">Unilke</button>
             {% else %}
-            <button type="submit" class="btn btn-primary m-1" type="button">Like</button>
+                <button type="submit" class="btn btn-primary m-1" type="button">Like</button>
             {% endif %}
 
         

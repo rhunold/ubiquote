@@ -25,7 +25,7 @@ class CsvImportForm(forms.Form):
 class AuthorAdmin(admin.ModelAdmin):
     form = AuthorForm    
     
-    list_display = ('first_name', 'middle_name',  'particul', 'last_name', 'nickname', 'date_created', 'date_birth', ) # 'test_date'
+    list_display = ('first_name', 'middle_name',  'particul', 'last_name', 'nickname', 'date_created', 'date_birth', 'slug' ) # 'test_date'
     ordering = ('fullname',)
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname', 'title', 'particul']
     # autocomplete_fields = ['last_name']
@@ -33,8 +33,6 @@ class AuthorAdmin(admin.ModelAdmin):
     # widgets = {
     #     'date_birth': forms.DateInput(format='%Y-%m-%d'),   
     # }    
-
-    
 
     
     def get_urls(self):
@@ -78,7 +76,7 @@ class AuthorAdmin(admin.ModelAdmin):
                 )                
 
 
-                # Temporarily disable auto_now_add
+                # Temporarily disable auto_now_add if random_datetime for date_created
                 author = Author()
                 author._meta.get_field('date_created').auto_now_add = False
                 
@@ -87,7 +85,7 @@ class AuthorAdmin(admin.ModelAdmin):
                     # print(fields[0])
 
                     created_author = Author.objects.update_or_create(
-                        # id = fields[0],
+                        id = fields[0],
                         first_name = fields[1],
                         middle_name = fields[2],
                         particul = fields[3],

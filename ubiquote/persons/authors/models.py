@@ -34,9 +34,9 @@ class Author(Person):
         if self.nickname:
             return self.nickname
         elif self.title:
-            return f'{self.title}  {self.last_name}'       
+            return f'{self.title} {self.last_name}'       
         else:
-            return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""}  {self.last_name or ""}'
+            return f'{self.first_name or ""}{self.middle_name or ""}{self.particul or ""}{self.last_name or ""}'
         
     
     

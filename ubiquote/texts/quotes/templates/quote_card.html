@@ -1,5 +1,6 @@
 {% load i18n %}
 
+
 <div class="card m-md-5">
     <div class="card-header">
       {% translate "Quote" %}
@@ -8,11 +9,14 @@
       
       <blockquote class="blockquote mb-0">
         <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|safe }}</a></p>
+        
+        {% if quote.author %}
+          <footer class="blockquote-footer">
+            <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">{{ quote.author|default_if_none:""|safe }}</a>
+            in <cite title="Source Title">Source Title</cite>
+          </footer>
 
-        <footer class="blockquote-footer">
-          <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">{{ quote.author|default_if_none:""|safe }}</a>
-          in <cite title="Source Title">Source Title</cite>
-        </footer>
+        {% endif %}            
       </blockquote>
     </div>
     <ul class="list-group list-group-flush">

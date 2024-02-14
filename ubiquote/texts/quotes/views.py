@@ -10,6 +10,10 @@ from django.urls import reverse_lazy, reverse
 from .models import Quote, QuotesLikes
 from .forms import QuoteForm
 
+from django.core.paginator import Paginator
+from django.db.models import Count, Prefetch
+from django.core.cache import cache
+
 
 @login_required
 def like_quote(request, id):
@@ -23,39 +27,56 @@ def like_quote(request, id):
 
   
 def get_user_quotes_likes(self, context):
-  quotes = Quote.published.all()
   
-  # Create a dictionary to store the likes status for each quote
-  liked_quotes = {}
+  # Check if the cached data exists
+  cached_data = cache.get('user_likes_{}'.format(self.request.user.id))
+  if cached_data is not None:
+      context['liked_quotes'] = cached_data
+      return context
   
-  for quote in quotes:
-    liked_quotes[quote.id] = False  # Initialize to False by default
+  # Prefetch related likes for all quotes
+  quotes_with_likes = Quote.objects.annotate(
+      total_likes=Count('likes')
+  ).prefetch_related(
+      Prefetch('likes', queryset=QuotesLikes.objects.filter(user=self.request.user), to_attr='user_likes')
+  )
 
-    if quote.likes.filter(id=self.request.user.id).exists(): # Check if user has liked the quote previously
-      liked_quotes[quote.id] = True
+  # Determine which quotes are liked by the user
+  liked_quotes = {quote.id: bool(quote.user_likes) for quote in quotes_with_likes}
+  
+  # Cache the data
+  cache.set('user_likes_{}'.format(self.request.user.id), liked_quotes)  
 
-  context['liked_quotes'] = liked_quotes  
+  context['liked_quotes'] = liked_quotes
+  
+  # print(context)
   
   return context
 
 class GetQuotesView(ListView):
   model = Quote
-  # queryset = Quote.published.all()
   template_name = 'get_quotes.html'
   context_object_name = 'quotes'
-  ordering =['-date_created']
-  status = 'published'
+  # ordering =['-date_created']
+  # status = 'published'
+  # queryset = Quote.published.all()
+  paginate_by = 10  # Number of items per page
+  
+  def get_queryset(self):
+      # queryset = super().get_queryset().select_related('author',)
+      queryset = Quote.objects.all().select_related('author').order_by('date_created')
+      return queryset
   
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     
-    # Get user likes for every like buton on the page
+    # Get user likes for every like button on the page
     get_user_quotes_likes(self, context)
-
-    context['user'] = self.request.user 
-
-    return context 
     
+    context['user'] = self.request.user
+      
+    return context
+  
 
 
 class GetQuoteView(DetailView):
@@ -63,23 +84,26 @@ class GetQuoteView(DetailView):
   template_name = 'get_quote.html'
   context_object_name = 'quote'
   status = 'published'
+  ordering =['-date_created']  
   
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
-    
-    # # Get the author slug from the URL parameter
-    # quote_slug = self.kwargs['slug']
-    
-    # # Get the author object based on the slug
-    # quote = Quote.published.get(slug=quote_slug)
-    
-    # Get user likes for buton status      
-    
-    get_user_quotes_likes(self, context)
-    
- 
-    return context
 
+    quote = self.object
+
+    # Prefetch related likes for the provided quote
+    liked_quotes = Quote.objects.filter(id=quote.id).annotate(
+        total_likes=Count('likes')
+    ).prefetch_related(
+        Prefetch('likes', queryset=QuotesLikes.objects.filter(user=self.request.user), to_attr='user_likes')
+    ).first()
+
+    # Determine if the user has liked the provided quote
+    context['liked_quotes'] = liked_quotes.user_likes[0]
+    context['count_likes'] = liked_quotes.total_likes if liked_quotes else 0  # Count likes or default to 0
+
+
+    return context
   
   
  

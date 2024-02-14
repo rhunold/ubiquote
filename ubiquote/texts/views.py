@@ -28,8 +28,7 @@ class GetCategoryView(ListView):
   def get_context_data(self, **kwargs):
       context = super().get_context_data(**kwargs)
       
-      # Get user likes for buton status      
-      get_user_quotes_likes(self, context)       
+      # Get user likes for buton status           
       
       # Get the category id from the URL parameter
       category_slug = self.kwargs['slug']
