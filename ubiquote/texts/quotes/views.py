@@ -99,7 +99,7 @@ class GetQuoteView(DetailView):
     ).first()
 
     # Determine if the user has liked the provided quote
-    context['liked_quotes'] = liked_quotes.user_likes[0]
+    context['liked_quotes'] = liked_quotes.user_likes
     context['count_likes'] = liked_quotes.total_likes if liked_quotes else 0  # Count likes or default to 0
 
 
