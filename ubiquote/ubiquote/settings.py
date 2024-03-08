@@ -174,7 +174,7 @@ STATICFILES_DIRS = [BASE_DIR / "static/custom/"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+DEFAULT_PAGINATION = 10  # Define your default pagination value here
 
 
 LANGUAGES = (

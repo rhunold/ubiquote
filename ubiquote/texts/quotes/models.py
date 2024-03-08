@@ -27,13 +27,21 @@ class Quote(Text):
     likes = models.ManyToManyField(
         User,
         through='QuotesLikes',
+        # related_name="quoteslikes"
         )     
     
     # def default_author(self):
     #     return Author.objects.get(id=1)
     
-    def count_likes(self):
-        return self.likes.all().count()
+    # def count_likes(self):
+    #     return self.likes.all().count()
+    
+    # def get_total_likes(self):
+    #     return self.likes.count()
+
+    # def has_user_liked(self, user):
+    #     return self.likes.filter(user=user).exists()
+    
 
     def get_categories(self):
         return "\n".join([cat.title for cat in self.categories.all()])    
@@ -49,20 +57,24 @@ class Quote(Text):
     #     QuoteCategory.objects.create(quote=self, category=category_instance)  
     
     class Meta:
-       indexes = [
-            # models.Index(fields=['text',]),           
-            models.Index(fields=['author',]),
-            # models.Index(fields=['lang',]),             
-            # models.Index(fields=['categories',]),
-            models.Index(fields=['-date_created', ]),
-            # models.Index(fields=['slug',]),               
-            # contributor
-            # status
-            # published
-            # slug
-            # date_created
-            # date_updated
-        ]             
+        # ordering =['-date_created'],
+        indexes = [
+                models.Index(fields=['-date_created','text','author'], name='quotes_idx',)
+            
+            
+                # models.Index(fields=['text',]),           
+                # models.Index(fields=['author',]),
+                # models.Index(fields=['lang',]),             
+                # models.Index(fields=['categories',]),
+                # models.Index(fields=['-date_created', ]),
+                # models.Index(fields=['slug',]),               
+                # contributor
+                # status
+                # published
+                # slug
+                # date_created
+                # date_updated
+            ]             
 
 
 
@@ -89,6 +101,14 @@ class QuotesLikes(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     
+    @classmethod
+    def has_user_liked(cls, user, quote):
+        return cls.objects.filter(user=user, quote=quote).exists()
+    
+    # @classmethod
+    # def total_likes_by_user(cls, user):
+    #     return cls.objects.filter(user=user).count()    
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -98,6 +118,6 @@ class QuotesLikes(models.Model):
         ]
         indexes = [
                 # models.Index(fields=['user',]),           
-                models.Index(fields=['quote',]),
+                models.Index(fields=['user', 'quote']),
             ]           
     

@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 from .models import Category
 from texts.quotes.models import Quote
-from texts.quotes.views import get_user_quotes_likes
+# from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
 

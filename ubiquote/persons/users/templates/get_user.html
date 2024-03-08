@@ -16,7 +16,7 @@
     {% endif %}
 
 
-    <p>{{ quotes.count }} quotes published.</p>    
+    <!-- <p>{{ quotes.count }} quotes published.</p>     -->
 
     {% if profil.date_birth is not None %}
       <p>date_birth : {{ profil.date_birth|date:"d M Y"|safe }} </p>
@@ -43,7 +43,7 @@
       </a>
     </p>
 
-    
+    Total contribution : {{ total_quotes }}
     {% include "quotes_cards.html" %}
 
 

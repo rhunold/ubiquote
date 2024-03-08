@@ -11,10 +11,11 @@ from .forms import AuthorAutoCompleteForm
 
 # from persons.authors.models import AuthorAutocomplete
 
-from texts.quotes.models import Quote
+from texts.quotes.models import Quote, QuotesLikes
 from texts.quotes.forms import QuoteForm
+from texts.quotes.views import LanguageFilterMixin
 
-from texts.quotes.views import get_user_quotes_likes
+# from texts.quotes.views import get_user_quotes_likes
 
 from django.db.models import Q
 
@@ -22,8 +23,7 @@ from django.contrib.postgres.search import SearchVector, TrigramSimilarity
 from django.contrib.postgres.lookups import Unaccent
 
 from flexidate import parse
-
-
+from django.conf import settings
 
 class GetAuthorsView(ListView):
   model = Author
@@ -32,19 +32,21 @@ class GetAuthorsView(ListView):
   paginate_by = 20
   
 
-class GetAuthorView(ListView):
-  # model = Author
+class GetAuthorView(LanguageFilterMixin, ListView):
   model = Quote
-  # queryset = Quote.published.all().order_by('slug')
-  # queryset = Quote.objects.all().select_related('author')  
+  queryset =  Quote.published.all()
   context_object_name = 'quotes'  
   template_name = 'get_author.html'
+  paginate_by = settings.DEFAULT_PAGINATION  
   
   def get_context_data(self, **kwargs):
       context = super().get_context_data(**kwargs)
       
-      # Get user likes for buton status
-      get_user_quotes_likes(self, context)      
+      user = self.request.user
+      quotes = context['quotes']  # Get the queryset of quotes
+      quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
+      liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
+      context['liked_quotes'] = liked_quotes
       
       # Get the author slug from the URL parameter to Get the author object 
       author_slug = self.kwargs['slug']
@@ -55,68 +57,14 @@ class GetAuthorView(ListView):
       from datetime import datetime, timedelta
       if author.date_birth_datefield  is not None:
         author.date_birth_datefield = author.date_birth_datefield +timedelta(days=10)
-        print(author.date_birth_datefield)
+        # print(author.date_birth_datefield)
       else:
         print("operation impossible")
 
-      
-      # context['date_birth'] = date_birth      
  
       return context
-
-  def get_queryset(self):
-      # Get the category id from the URL parameter
-      author_slug = self.kwargs['slug']
-      author = Author.objects.get(slug=author_slug)
-      
-      # Filter quotes by the manager and same author slug
-      queryset = Quote.published.filter(author=author).select_related('author')
-      
-      # queryset = Quote.objects.select_related('author__hometown').get(id=4)
-
-      
-      # queryset = Quote.objects.all().select_related('author')
-      # queryset = Quote.published.filter(author__slug=author_slug).select_related('author')
-      # queryset = Quote.objects.select_related('author').get(author__slug=author_slug)
-      # p = b.author         # Doesn't hit the database.
-      # c = p.hometown       # Doesn't hit the database.   
-       
-      # return queryset      
-      
-      # Fetch the author object based on the URL parameter (assuming author_id is passed in URL)
-      # author_id = self.kwargs['author_id']  # Adjust this based on your URL configuration
-      
-      # queryset = Quote.objects.filter(author__slug=author_slug).prefetch_related('author')
-      
-      # queryset = Quote.objects.select_related('author')
-      
-      return queryset
-
-    
-    
-
-  # def get_context_data(self, **kwargs):
-  #   context = super().get_context_data(**kwargs)
-  #   quotes = Quote.published.all()
-  #   quotes_count = Quote.published.count()    
-
-  #   # Create a dictionary to store the likes status for each quote
-  #   liked_quotes = {}
-    
-  #   for quote in self.queryset:
-  #     liked_quotes[quote.id] = False  # Initialize to False by default
-
-
-  #     if quote.likes.filter(id=self.request.user.id).exists():
-  #       liked_quotes[quote.id] = True
-
-  #       print(liked_quotes)
-
-  #   context['quotes'] = quotes
-  #   context['quotes_count'] = quotes_count
-  #   context['liked_quotes'] = liked_quotes  # Pass the like status dictionary to the template
-    
-    
+  
+  
   
  
 class AddAuthorView(CreateView):
