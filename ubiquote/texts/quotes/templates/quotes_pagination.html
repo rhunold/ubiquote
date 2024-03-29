@@ -1,0 +1,43 @@
+
+
+{% if is_paginated %}
+<div class="pagination m-md-5 align-items-center justify-content-center">
+    <span class="page-links">
+        {% if page_obj.has_previous %}
+            <a href="?q={% if search_query %}q={{ search_query }}&{% endif %}page=1">&laquo; first</a>                
+            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+        <span class="page-current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+        {% if page_obj.has_next %}
+            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}">next</a>
+            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}">last &raquo;</a>                    
+        {% endif %}
+    </span>
+</div>
+{% endif %} 
+
+
+
+
+
+
+<!-- 
+{% if is_paginated %}
+<div class="pagination m-md-5 align-items-center justify-content-center">
+    <span class="page-links">
+        {% if page_obj.has_previous %}
+            <a href="?q={{ search_query }}&page=1">&laquo; first</a>                
+            <a href="?q={{ search_query }}&page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+        <span class="page-current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+        {% if page_obj.has_next %}
+            <a href="?q={{ search_query }}&page={{ page_obj.next_page_number }}">next</a>
+            <a href="?q={{ search_query }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>                    
+        {% endif %}
+    </span>
+</div>
+{% endif %}  -->

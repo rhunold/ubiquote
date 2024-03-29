@@ -1,12 +1,12 @@
 from django.contrib import admin, messages
-from .models import Author
+from .models import Author, AuthorTranslation
 
 from django.urls import path, reverse
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
 # from rosetta.admin import TranslationAdmin
-from .forms import AuthorForm
+from .forms import AuthorForm, AuthorTranslationForm
 from django import forms
 
 from .models import Author
@@ -14,6 +14,8 @@ from .models import Author
 
 from datetime import datetime, timedelta
 import random
+
+from dal import autocomplete
 
 start_date = datetime(2020, 10, 1)
 end_date = datetime(2023, 10, 10)
@@ -104,5 +106,38 @@ class AuthorAdmin(admin.ModelAdmin):
         return render(request, "admin/csv_authors_upload.html", data)
 
 
+class AuthorTranslationAdmin(admin.ModelAdmin):
+    form = AuthorTranslationForm   
+    
+    # class Meta:
+    #     model = AuthorTranslation
+    #     fields = ('author', 'language_code', 'translated_name') # 'contributor'
+    #     widgets = {
+    #         # 'text': forms.Textarea(attrs={'class' : 'form-control', 'placeholder' : _("Put your quote here") }),
+                     
+            
+    #         'author': autocomplete.ModelSelect2(
+    #             url='author-autocomplete',
+    #             attrs={
+    #                 # 'data-width': '100%',
+    #                 'data-html': True,
+    #                 # Set some placeholder
+    #                 # 'data-placeholder': 'Autocomplete ...',
+    #                 # Only trigger autocompletion after 2 characters have been typed
+    #                 'data-minimum-input-length': 2,                    
+    #                 'class' : 'form-control',
+    #                 },
+    #             # attrs={'class' : 'form-control'},
+    #             ),
+                                
+
+            
+    #         # 'contributor': forms.Select(attrs={'class' : 'form-control'}),
+    #         'language_code': forms.Select(attrs={'class' : 'form-control'}),
+    #         'translated_name': forms.CharField(attrs={'class' : 'form-control'}),
+    #     }
+    
+
 admin.site.register(Author, AuthorAdmin)
 
+admin.site.register(AuthorTranslation, AuthorTranslationAdmin)

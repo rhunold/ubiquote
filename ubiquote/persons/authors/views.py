@@ -5,7 +5,7 @@ from django.http import JsonResponse
 
 from django.urls import reverse_lazy
 
-from .models import Author
+from .models import Author, AuthorTranslation
 from .forms import AuthorForm
 from .forms import AuthorAutoCompleteForm
 
@@ -24,12 +24,60 @@ from django.contrib.postgres.lookups import Unaccent
 
 from flexidate import parse
 from django.conf import settings
+LANGUAGES = settings.LANGUAGES
 
 class GetAuthorsView(ListView):
   model = Author
   template_name = 'get_authors.html'
   context_object_name = 'authors'
-  paginate_by = 20
+  # queryset =  Author.objects.all()  
+  paginate_by = settings.DEFAULT_PAGINATION 
+  
+
+  def get_queryset(self):
+      queryset = super().get_queryset()
+      return queryset
+
+  def get_context_data(self, **kwargs):
+      context = super().get_context_data(**kwargs)
+      
+      # Check if the URL path contains "/en/"
+      if '/en/' in self.request.path:
+          # Get language code
+          language_code = 'en'  # Default language code
+          
+          # Get translated names for authors
+          translated_names = {}
+          for author in context['authors']:
+              author_translation = AuthorTranslation.objects.filter(author=author, language_code=language_code).first()
+              if author_translation:
+                  translated_names[author.id] = author_translation.translated_name
+              # else:
+              #     translated_names[author.id] = None
+
+
+          context["translated_names"] = translated_names
+          
+          print(context["translated_names"] )
+
+      return context  
+  
+  
+
+  # def get_context_data(self, **kwargs):
+  #     context = super().get_context_data(**kwargs)
+  #     authors =  Author.objects.all()        
+      
+  #     # Retrieve translated author names
+  #     translated_names = {}
+  #     for author in authors:
+  #         translated_names[author.id] = author.get_translation(language_code='en')  # Replace 'en' with the desired language code
+          
+  #     # print(translated_names)
+  #     context["translated_names"] = translated_names
+
+ 
+  #     return context  
   
 
 class GetAuthorView(LanguageFilterMixin, ListView):
@@ -52,6 +100,25 @@ class GetAuthorView(LanguageFilterMixin, ListView):
       author_slug = self.kwargs['slug']
       author = Author.objects.get(slug=author_slug)
       context['author'] = author
+      
+      # Get translated names for authors
+      if hasattr(self, 'request'):
+          language_code = self.request.LANGUAGE_CODE
+      else:
+          language_code = 'en'  # Default language if language code is not available
+      
+      translated_names = {}
+      for quote in quotes:
+          author = quote.author
+          if author:
+              translated_names[quote.id] = author.get_translation(language_code)
+          else:
+              translated_names[quote.id] = 'Unknown'
+      
+      context['translated_names'] = translated_names
+      
+      first_result = next(iter(translated_names.values()), None)
+      context['translated_name'] = first_result
       
       
       from datetime import datetime, timedelta
@@ -112,11 +179,20 @@ def search_authors(request):
             # Q(first_name__unaccent__icontains=query) |
             # Q(middle_name__unaccent__icontains=query) 
 
-            Q(fullname__unaccent__icontains=query)             
+            Q(fullname__unaccent__icontains=query)
         )
+        
+        print(authors)
 
+        # Retrieve translated author names
+        translated_names = {}
+        for author in authors:
+            translated_names[author.id] = author.get_translation(language_code='en')  # Replace 'en' with the desired language code
+            
+        print(authors)
+        
 
-        return render(request, 'author_list.html', {'authors': authors})        
+        return render(request, 'author_list.html', {'authors': authors, 'translated_names': translated_names})        
         
         # authors = Author.objects.annotate(similarity=TrigramSimilarity(Unaccent('last_name'), query),).filter(similarity__gt=0.3).order_by('-similarity')        
         
@@ -126,11 +202,20 @@ def search_authors(request):
     else:
         # If the query is too short, return an empty result
 
+
         
         authors = Author.objects.all()[:20]        
         # authors = Author.objects.all().order_by( 'nickname', 'last_name')[:20]
+        
+        
+        # Retrieve translated author names
+        translated_names = {}
+        for author in authors:
+            translated_names[author.id] = author.get_translation(language_code='en')  # Replace 'en' with the desired language code 
+            
+        print("test X")       
     
-        return render(request, 'author_list.html', {'authors': authors})
+        return render(request, 'author_list.html', {'authors': authors, 'translated_names': translated_names})
   
   
 def author_list(request):

@@ -6,8 +6,6 @@ from .models import Quote
 from django.utils.translation import gettext_lazy as _
 
 
-
-
 class QuoteForm(forms.ModelForm):
     
     def clean_categories(self):
@@ -44,4 +42,33 @@ class QuoteForm(forms.ModelForm):
             'lang': forms.Select(attrs={'class' : 'form-control'}),
             'categories': forms.SelectMultiple(attrs={'class' : 'form-control'}),
         }
+
+
+
+# class QuoteAutoCompleteForm(forms.ModelForm):
+#     class Meta:
+#         model = Quote
+#         fields = ('text', 'author',) # 'contributor'
+#         queryset = Quote.objects.all()
+#         # initial= Author.objects.order_by("last_name").first(),
+        
+#         # author = Author.objects.all()        
+        
+#         widgets = {
+#             # 'nickname': forms.Select(attrs={'class' : 'form-control'}),            
+#             'text': autocomplete.ModelSelect2(
+#                 url='quote-autocomplete',
+#                 attrs={
+#                     # 'data-width': '100%',
+#                     'data-html': True,
+#                     # Set some placeholder
+#                     # 'data-placeholder': 'Autocomplete ...',
+#                     # Only trigger autocompletion after 2 characters have been typed
+#                     'data-minimum-input-length': 2,                    
+#                     'class' : 'form-control',
+#                     },
+#                 # attrs={'class' : 'form-control'},
+#                 ),
+#         }
+
 

@@ -5,14 +5,52 @@
 
 {% load i18n %}
 
+
 {% block body %}
 
-<div class="m-md-5">
-    <h1>{% translate "Quotes" %}</h1>
+  
 
-    <p>{{ total_quotes }} {% translate "quotes available in the database" %} </p>
-</div>    
+
+    {% include "quote_search.html" %}
+
+    {% include "quotes_pagination.html" %}        
 
     {% include "quotes_cards.html" %}
 
+    {% include "quotes_pagination.html" %}    
+
+
+
+{% comment %}  
+
+<div class="m-md-5">
+    <!-- <h1>{% translate "Quotes" %}</h1> -->
+</div>  
+
+<!-- Autocomplete input -->
+
+<input type="text" name="q"
+hx-get="{% url 'quotes:search-quotes' %}"
+hx-trigger="keyup changed delay:500ms"
+hx-target="#quote-results"
+hx-swap="innerHTML"
+placeholder="{% translate 'Search quotes...' %}"    
+value="{{ request.GET.q }}"
+>
+<!-- hx-vals="{'q': this.value}"     -->
+
+
+<!-- Quotes list -->
+<!-- hx-swap="outerHTML" -->
+<div id="quote-results" hx-preserve="true" > 
+    <!-- This will be replaced with the updated author list -->    
+    
+      {% include "quotes_cards.html" %}
+      <!-- {% include "quote_results.html" %}       -->
+    
+</div>
+{% endcomment %}     
+
+
 {% endblock %}  
+

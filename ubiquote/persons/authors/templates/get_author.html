@@ -12,23 +12,34 @@
     <h1>
 
 
-      {{ author.first_name|default_if_none:""  }}
-      {{ author.middle_name|default_if_none:" " }}
-      {{ author.particul|default_if_none:"" }}
-      {{ author.last_name|default_if_none:"" }}
 
+      {% if '/en/' in request.path %}
+        {{ translated_name }} 
 
-
-      {% if author.nickname and author.last_name %}
-        also known as
-        {{ author.nickname|default_if_none:"" }}
       {% else %}
-      {{ author.nickname|default_if_none:"" }}
-      {% endif %}
-      
 
+
+
+        {{ author.first_name|default_if_none:""  }}
+        {{ author.middle_name|default_if_none:" " }}
+        {{ author.particul|default_if_none:"" }}
+        {{ author.last_name|default_if_none:"" }}
+
+
+
+        {% if author.nickname and author.last_name %}
+          also known as
+          {{ author.nickname|default_if_none:"" }}
+        {% else %}
+        {{ author.nickname|default_if_none:"" }}
+        {% endif %}      
+
+
+      {% endif %}      
 
     </h1>
+
+
 
     {% if author.avatar.url is not None %}
       <img src="{{ author.avatar.url }}" class="rounded-circle">

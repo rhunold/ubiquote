@@ -1,7 +1,7 @@
 from django import forms
 # from dal import autocomplete
 
-from .models import Author
+from .models import Author, AuthorTranslation
 from texts.quotes.models import Quote
 
 from dal import autocomplete
@@ -67,3 +67,28 @@ class AuthorAutoCompleteForm(forms.ModelForm):
 
 
 
+class AuthorTranslationForm(forms.ModelForm):
+
+    class Meta:
+        model = AuthorTranslation
+        fields = ('author', 'language_code', 'translated_name')
+        widgets = {
+            'author': autocomplete.ModelSelect2(
+                url='author-autocomplete',
+                attrs={
+                    # 'data-width': '100%',
+                    'data-html': True,
+                    # Set some placeholder
+                    # 'data-placeholder': 'Autocomplete ...',
+                    # Only trigger autocompletion after 2 characters have been typed
+                    'data-minimum-input-length': 2,                    
+                    'class' : 'form-control',
+                    },
+                # attrs={'class' : 'form-control'},
+                ),
+                        
+            'language_code': forms.Select(attrs={'class': 'form-control'}),
+            'translated_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        
+            

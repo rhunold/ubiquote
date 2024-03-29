@@ -40,6 +40,10 @@ class Text(models.Model):
     # Define the default manager
     objects = models.Manager()    
     
+    
+    # text_input = models.TextField(_('Text'), max_length=1000)
+    # text_cleaned = models.TextField(_('Text cleaned'), max_length=1000)    # vide au debut=> ajouter methode pour le generer (detetection de lang puis formatage...)
+    
     text = models.TextField(_('Text'), max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
     lang = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="fr")
         

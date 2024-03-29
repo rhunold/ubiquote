@@ -1,0 +1,26 @@
+{% load i18n %}
+
+
+
+<form class="row g-3 m-md-5 bg-transparent" method="GET" action="{% url 'quotes:get-quotes' %}">
+    
+
+    <div class="col-md">
+        <input class="form-control me-2" type="text" placeholder=" {% translate 'Search here' %} " arial-label="Search"name="q" value="{% if search_query %}{{ search_query }}{% endif %}">
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary x-1" type="submit">Search</button>
+    </div>
+
+
+    {% if search_query %}
+        <p>{{ paginator.count }} results for "{{ search_query }}" </p>
+    {% else %}
+        <p>{{ total_quotes }}  {% translate "quotes available in the database" %} </p>
+
+    {% endif %}
+    
+
+</form>
+
+

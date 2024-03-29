@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # 'django_elasticsearch_dsl',
+    'django.contrib.postgres',    
+    
     'texts',
     'texts.quotes',    
     'persons',
@@ -61,7 +64,7 @@ INSTALLED_APPS = [
     # 'interactions.follows',
     'django_htmx',    
     'rosetta', # managing translations in admin
-    'django.contrib.postgres',
+
     
     'debug_toolbar'
 ]
@@ -176,10 +179,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DEFAULT_PAGINATION = 10  # Define your default pagination value here
 
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'https://localhost:9200',
+        'verify_certs': False,
+        'http_auth': (os.environ.get('ELASTICSEARCH_USERNAME'), os.environ.get('ELASTICSEARCH_PASSWORD')),          
+    },
+}
+
+
 
 LANGUAGES = (
     ('en', _('English')),
-    ('fr', _('French')),    
+    ('fr', _('French')),
 )
 
 LOCALE_PATHS = (

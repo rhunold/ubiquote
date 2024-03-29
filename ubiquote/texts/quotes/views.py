@@ -4,13 +4,16 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
+
 from django.contrib import messages
 
 from django.urls import reverse_lazy, reverse
 
 from .models import Quote, QuotesLikes
 from .forms import QuoteForm
+
+from django.db.models import Q
 
 from persons.authors.models import Author
 
@@ -19,8 +22,20 @@ from django.db.models import Count, Prefetch
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.http import JsonResponse
 
+from django.http import JsonResponse
+from django.contrib.postgres.search import SearchVector
+
+from django.shortcuts import render
+# from elasticsearch import Elasticsearch
+
+from django.conf import settings
+LANGUAGES = settings.LANGUAGES
+from django.utils.translation import get_language
+
+
+from django.template.loader import render_to_string
+from django.http import HttpResponse
 
 @login_required
 def like_quote(request, id):
@@ -34,6 +49,7 @@ def like_quote(request, id):
     likes_count = quote.likes.count()
 
     return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
+
 
 
 class LanguageFilterMixin:
@@ -68,25 +84,80 @@ class GetQuotesView(LanguageFilterMixin, ListView):
     context_object_name = 'quotes'
     ordering =['-date_created']
     # status = 'published'
-    queryset = Quote.published.all().select_related('author')
+    # queryset = Quote.published.all().select_related('author')
     paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        user = self.request.user
+        user = self.request.user # ATTENTION => si pas logué, page d'errreur => mettre en place redirection pour cas où on doit loguer l'utilisateur (avec un mixin, method_decoarator ou d'autre facon de faire... )
+        
+        
         quotes = context['quotes']  # Get the queryset of quotes
         quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
         liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
-        context['liked_quotes'] = liked_quotes      
+        context['liked_quotes'] = liked_quotes
+        
+        # Get translated names for authors
+        if hasattr(self, 'request'):
+            language_code = self.request.LANGUAGE_CODE
+            # print(language_code)
+        else:
+            language_code = 'en'  # Default language if language code is not available
+        
+        translated_names = {}
+        for quote in quotes:
+            author = quote.author
+            if author:
+                translated_names[quote.id] = author.get_translation(language_code)
+            else:
+                translated_names[quote.id] = 'Unknown'
+        
+        print(translated_names)
+        context['translated_names'] = translated_names
+           
                     
         # Get total number of quotes in the database
         total_quotes = Quote.objects.count()
         context['total_quotes'] = total_quotes
         
+        # GET the search query / create pagination
+        search_query = self.request.GET.get('q')
+        context['search_query'] = search_query
+        if search_query:
+            paginator = Paginator(self.get_queryset(), self.paginate_by)
+            page_number = self.request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+            context['page_obj'] = page_obj
+            context['paginator'] = paginator
+        
         return context
-    
+        
+    def get_queryset(self):
+        queryset = super().get_queryset()  # Get the default queryset
+        search_query = self.request.GET.get('q')
+        if search_query:
+            queryset = queryset.annotate(
+                search=SearchVector('text')
+            ).filter(search=search_query)
+        return queryset
+        
+    # REdirect if page number requested is empty
+    def get(self, request, *args, **kwargs):
+        # print(dir(request))
+        try:
+            return super().get(request, *args, **kwargs)
 
+        except Http404:
+            page = self.request.GET.get('page', None)
+            paginator = Paginator(self.get_queryset(), self.paginate_by)
+            last_page = paginator.num_pages or 1
+            search_query = self.request.GET.get('q') or ''
+            if page:
+                return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
+            else:
+                raise        
+        
 
 class GetQuoteView(DetailView):
     model = Quote
@@ -97,6 +168,27 @@ class GetQuoteView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['has_user_liked'] = QuotesLikes.has_user_liked(self.request.user, self.object) 
+        
+        quote = self.object
+        
+        # Get translated names for authors
+        if hasattr(self, 'request'):
+            language_code = self.request.LANGUAGE_CODE
+            # print(language_code)
+        else:
+            language_code = 'en'  # Default language if language code is not available        
+        
+        # Assuming the Quote model has a foreign key field named 'author'
+        author = quote.author  # Retrieve the author associated with the quote
+        
+        # Assuming LANGUAGES is defined elsewhere
+        if author:
+            translated_names = {}
+            translated_names[quote.id] = author.get_translation(language_code)
+            context['translated_names'] = translated_names
+        else:
+            pass
+        
         return context
   
 

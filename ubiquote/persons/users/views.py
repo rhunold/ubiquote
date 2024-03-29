@@ -16,6 +16,8 @@ from .forms import  UserForm
 from django.conf import settings
 
 from django.contrib.auth import views as auth_views
+from django.utils.translation import get_language
+
 
 from django.urls import reverse_lazy
 
@@ -45,6 +47,21 @@ class GetUserLikesView(ListView):
       # Get total number of quotes in the database
       total_quotes = Quote.published.filter(likes=profil).count()
       context['total_quotes'] = total_quotes   
+      
+      
+      user_language = get_language()   
+    
+      translated_names = {}
+      for quote in quotes:
+          author = quote.author
+          if author:
+              translated_names[quote.id] = author.get_translation(user_language)
+              print("1")
+          else:
+              translated_names[quote.id] = 'Unknown'
+              print('2')
+      
+      context['translated_names'] = translated_names         
       
       return context
     
@@ -105,7 +122,21 @@ class GetUserView(ListView):
                   
       # Get total number of quotes in the database
       total_quotes = Quote.published.filter(contributor__slug=profil) .count()
-      context['total_quotes'] = total_quotes      
+      context['total_quotes'] = total_quotes
+      
+      user_language = get_language()   
+    
+      translated_names = {}
+      for quote in quotes:
+          author = quote.author
+          if author:
+              translated_names[quote.id] = author.get_translation(user_language)
+              print("1")
+          else:
+              translated_names[quote.id] = 'Unknown'
+              print('2')
+      
+      context['translated_names'] = translated_names       
          
       return context
 

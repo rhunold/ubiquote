@@ -1,12 +1,16 @@
 from django.db import models
 from ..models import Person
-from persons.users.models import User
+# from persons.users.models import User
 from autoslug import AutoSlugField
 from django.utils.translation import gettext_lazy as _
 
 from dal import autocomplete
 from django.utils.html import format_html
 from django.db.models import Q
+
+
+from django.conf import settings
+LANGUAGES = settings.LANGUAGES
 
 # from flexidate import FlexiDate
 
@@ -21,7 +25,8 @@ class Author(Person):
 
     # biography = models.TextField(max_length=500, blank=True, verbose_name="Biography :")
     # user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    # signature = models.ImageField(_('signature'),upload_to='signature/authors/', null=True, blank=True, default='signature/default.png')       
+    # signature = models.ImageField(_('signature'),upload_to='signature/authors/', null=True, blank=True, default='signature/default.png')  
+
     
     avatar = models.ImageField(_('avatar'),upload_to='avatars/authors/', null=True, blank=True, default='avatars/default.png')
  
@@ -44,11 +49,14 @@ class Author(Person):
     #     return f'avatars/authors/{instance.generate_slug()}_{filename}'    
     
     def __str__(self):
+
         # if self.nickname:
         #     return self.nickname
+        # elif self.title:
+        #     return f'{self.title} {self.last_name}'       
         # else:
-        #     return f' {self.title or ""} {self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
-        
+        #     return f'{self.first_name or ""}{self.middle_name or ""}{self.particul or ""}{self.last_name or ""}'
+                
         return f'{self.fullname or ""}'
     
     def generate_fullname(self):
@@ -77,9 +85,25 @@ class Author(Person):
         super().save(*args, **kwargs)       
         
 
-    def count_authors():
-        count = Author.objects.count()
-        return count
+    # def count_authors():
+    #     count = Author.objects.count()
+    #     return count
+    
+    def get_translation(self, language_code):
+        try:
+            translation = self.authortranslation_set.get(language_code="en")
+            return translation.translated_name
+        except AuthorTranslation.DoesNotExist:
+            
+            if self.nickname:
+                return self.nickname
+            elif self.title:
+                return f'{self.title} {self.last_name}'       
+            else:
+                return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'
+                                
+            
+            # return self.fullname    
     
     class Meta:
        ordering = ['fullname']
@@ -88,7 +112,26 @@ class Author(Person):
 # for author in Author.objects.all():
 #     author.save()
  
- 
+
+
+class AuthorTranslation(models.Model):
+    author = models.ForeignKey('Author', on_delete=models.CASCADE)
+    language_code = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="en") # first lang to be translated : en . Because I'm fr
+    translated_name = models.CharField(max_length=255)
+    
+    def __str__(self):
+        # if self.nickname:
+        #     return self.nickname
+        # else:
+        #     return f' {self.title or ""} {self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
+        
+        return f'{self.translated_name or ""}'    
+
+    class Meta:
+        unique_together = ('author', 'language_code')
+        
+        
+        
 
 class AuthorAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

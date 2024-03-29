@@ -1,5 +1,6 @@
 {% load static %}
 {% load i18n %}
+{% load get_item %} 
 
 
 <ul id="search-results">
@@ -7,17 +8,42 @@
 <li>
   <a href="{% url 'authors:get-author' author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
 
+    {% if '/en/' in request.path %}
+      {% if translated_names|get_item:author.id %}
+          {{ translated_names|get_item:author.id }}
 
-  {% if author.nickname %}
-    {{ author.nickname|default_if_none:""|safe }}
-  {% endif %}
-  
-  {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} 
-  {{ author.particul|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
+      {% else %}
 
-  {% comment %}
-    {{ author.fullname|default_if_none:""|safe  }}  
-  {% endcomment %}
+        {% if author.nickname %}
+          {{ author.nickname|default_if_none:""|safe }}
+        {% endif %}
+        
+        {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} 
+
+
+        
+        {{ author.particul|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
+
+      {% endif %}
+      
+    {% else %}
+
+      {% if author.nickname %}
+        {{ author.nickname|default_if_none:""|safe }}
+      {% endif %}
+      
+      {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} 
+      {{ author.particul|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
+
+      {% comment %}
+        {{ author.fullname|default_if_none:""|safe  }}  
+      {% endcomment %}      
+
+    {% endif %}
+
+
+
+
   </a>
 </li>  
 {% endfor %}

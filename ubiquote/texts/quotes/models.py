@@ -2,13 +2,17 @@ from django.db import models
 
 from persons.authors.models import Author
 from persons.users.models import User
-from ..models import Category, Text
+from texts.models import Text, Category
 
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+
+# from django_elasticsearch_dsl import Document
+# from django_elasticsearch_dsl.registries import registry
+
 
 
 class Quote(Text):
@@ -24,11 +28,15 @@ class Quote(Text):
         # validators=[validate_categories_count]
         )
     
+    
+    # A mettre dans le model User (donc mettre Quote dans le champs M2M) et à renommer en quote_likes => copy past ou avant de vider bdd et recommancer import csv
     likes = models.ManyToManyField(
         User,
         through='QuotesLikes',
         # related_name="quoteslikes"
-        )     
+        )   
+
+    # for_you_algo_feature => generate a value to match with user.for_you value => give the user the content that is the most accurate to his preference/consomation/interests...    
     
     # def default_author(self):
     #     return Author.objects.get(id=1)
@@ -96,6 +104,8 @@ class QuotesCategories(models.Model):
         ]      
 
 
+
+    
 class QuotesLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
@@ -120,4 +130,5 @@ class QuotesLikes(models.Model):
                 # models.Index(fields=['user',]),           
                 models.Index(fields=['user', 'quote']),
             ]           
-    
+          
+

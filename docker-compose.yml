@@ -85,3 +85,7 @@ volumes:
 #     driver: local
 #   pglog: 
 #     driver: local   
+
+
+## Moyen de recuperer variable dans le fichier .env => A tester 
+# ${DATABASES_NAME}

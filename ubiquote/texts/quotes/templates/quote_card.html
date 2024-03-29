@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load get_item %} 
 
 
 <div class="card m-md-5">
@@ -12,7 +13,31 @@
         
         {% if quote.author %}
           <footer class="blockquote-footer">
-            <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">{{ quote.author|default_if_none:""|safe }}</a>
+            <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">
+
+
+
+
+              {% if '/en/' in request.path %}
+
+              
+                {% if translated_names|get_item:quote.id %}
+                  {{ translated_names|default_if_none:''|get_item:quote.id }}
+                {% else %}
+                  {{ quote.author|default_if_none:""|safe }}
+                {% endif %}
+                
+
+              {% else %}                              
+                {{ quote.author|default_if_none:""|safe }}
+              {% endif %}
+
+
+
+
+              
+            
+            </a>
             in <cite title="Source Title">Source Title</cite>
           </footer>
 
