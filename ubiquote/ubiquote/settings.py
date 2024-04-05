@@ -179,13 +179,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DEFAULT_PAGINATION = 10  # Define your default pagination value here
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'https://localhost:9200',
-        'verify_certs': False,
-        'http_auth': (os.environ.get('ELASTICSEARCH_USERNAME'), os.environ.get('ELASTICSEARCH_PASSWORD')),          
-    },
-}
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': 'https://localhost:9200',
+#         'verify_certs': False,
+#         'http_auth': (os.environ.get('ELASTICSEARCH_USERNAME'), os.environ.get('ELASTICSEARCH_PASSWORD')),          
+#     },
+# }
 
 
 

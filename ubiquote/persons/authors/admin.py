@@ -27,9 +27,9 @@ class CsvImportForm(forms.Form):
 class AuthorAdmin(admin.ModelAdmin):
     form = AuthorForm    
     
-    list_display = ('first_name', 'middle_name',  'particul', 'last_name', 'nickname', 'date_created', 'date_birth', 'slug' ) # 'test_date'
+    list_display = ('first_name', 'middle_name', 'last_name', 'nickname', 'date_created', 'date_birth', 'slug' ) # 'test_date'
     ordering = ('fullname',)
-    search_fields = ['first_name', 'middle_name', 'last_name', 'nickname', 'title', 'particul']
+    search_fields = ['first_name', 'middle_name', 'last_name', 'nickname', 'title']
     # autocomplete_fields = ['last_name']
 
     # widgets = {
