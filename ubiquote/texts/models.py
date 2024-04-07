@@ -53,6 +53,7 @@ class Text(models.Model):
     
     def generate_slug(self):
         # Customize this method to generate the slug from the desired field(s)
+        # return f"{self.text}-{self.author}".replace(" ", "-").lower()
         return self.text[:100]
     
     status = models.CharField(_('status'),max_length=10, choices=status_options, default='published')
