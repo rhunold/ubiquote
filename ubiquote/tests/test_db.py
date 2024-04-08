@@ -90,14 +90,16 @@ def test_database_performance():
     assert end_time - start_time < 1  # Example: Less than 1 second
     
     
-def test_database_migrations(db):
+def test_database_migrations(db, capsys):
     from django.core.management import call_command
     # Run database migrations
     call_command('migrate')
-    # Assert no errors occurred during migrations
-    assert True
+    
+    # Capture the standard output to check for errors
+    captured = capsys.readouterr()
 
-
+    # Check if any errors occurred during migrations
+    assert 'Error' not in captured.err
     
     
     

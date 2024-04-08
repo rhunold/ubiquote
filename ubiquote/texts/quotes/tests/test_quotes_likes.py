@@ -1,4 +1,5 @@
 import pytest
+import random
 
 from persons.users.models import User
 from persons.authors.models import Author
@@ -36,8 +37,28 @@ def test_user_create_quote(db, user):
     assert Quote.objects.count() == 11771 + 1
 
 
-def test_view_home(db, client):
-    response = client.get('/en/')  # Make a GET request to the specified URL
+def test_view_home(db, client, user):
+    # Authenticate the user using force_login
+    client.force_login(user)
+    
+    # Generate a random number of quotes to like
+    num_quotes_to_like = random.randint(1, 5)  # Adjust the range as needed
+    
+    # Retrieve a list of all quotes from the database
+    all_quotes = Quote.objects.all()
+    
+    # Randomly select a subset of quotes to like
+    quotes_to_like = random.sample(list(all_quotes), num_quotes_to_like)
+    
+    # Create quotelikes instances for the selected quotes and associate them with the user
+    for quote in quotes_to_like:
+        QuotesLikes.objects.create(user=user, quote=quote)
+    
+    # Construct the URL with the actual user ID
+    url = f'/recommendations/{user.id}/'
+    
+    response = client.get(url, follow=True)  # Make a GET request to the specified URL and follow redirects
+    
     assert response.status_code == 200  # Assert that the response status code is 200 OK
     assert 'Welcome in Extraquote' in response.content.decode()  # Assert that the response contains expected content
 
