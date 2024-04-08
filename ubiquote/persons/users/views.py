@@ -1,8 +1,11 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 
 from django.views import generic
 # from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 
 from .forms import UserCreationForm, UserChangeForm, AuthenticationForm
 
@@ -21,55 +24,70 @@ from django.utils.translation import get_language
 
 from django.urls import reverse_lazy
 
-
-class GetUserLikesView(ListView):
-  model = Quote
-  context_object_name = 'quotes'  
-  template_name = 'get_user_likes.html'
-  paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
+# @login_required
+class GetUserLikesView(ListView, LoginRequiredMixin):
+    model = Quote
+    context_object_name = 'quotes'  
+    template_name = 'get_user_likes.html'
+    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
+    login_url = reverse_lazy('login')  # URL name of your login page    
+    
+    # def get(self, request, *args, **kwargs):
+    #     return super().get(request, *args, **kwargs)    
   
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      
-      # # Get the profil slug from the URL parameter
-      profil_slug = self.kwargs['slug']
-      
-      # # Get the profil object based on the slug
-      profil = User.objects.get(slug=profil_slug)       
-      
-      context['profil'] = profil
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get the profil slug from the URL parameter
+        profil_slug = self.kwargs['slug']
+        # Get the profil object based on the slug
+        profil = User.objects.get(slug=profil_slug)       
+        context['profil'] = profil
+        
+        # user = self.request.user      
 
-      quotes = context['quotes']  # Get the queryset of quotes
-      quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(profil, quote) for quote in quotes}
-      liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
-      context['liked_quotes'] = liked_quotes      
-                  
-      # Get total number of quotes in the database
-      total_quotes = Quote.published.filter(likes=profil).count()
-      context['total_quotes'] = total_quotes   
-      
-      
-      user_language = get_language()   
-    
-      translated_names = {}
-      for quote in quotes:
-          author = quote.author
-          if author:
-              translated_names[quote.id] = author.get_translation(user_language)
-              print("1")
-          else:
-              translated_names[quote.id] = 'Unknown'
-              print('2')
-      
-      context['translated_names'] = translated_names         
-      
-      return context
+        quotes = context['quotes']  # Get the queryset of quotes
+        
+        # Have a track of liked quote to display like button
+        quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(profil, quote) for quote in quotes}
+        liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
+        context['liked_quotes'] = liked_quotes
+        
+        # get the timestamp of when the quoteslikes had been created
+        liked_quotes_timestamps = QuotesLikes.objects.filter(user=profil).values('quote_id', 'timestamp')
+        context['liked_quotes_timestamps'] = liked_quotes_timestamps
+
+
+        # Get total number of quotes in the database
+        total_quotes = Quote.published.filter(likes=profil).count()
+        context['total_quotes'] = total_quotes   
+        
+        user_language = get_language()   
+        
+        translated_names = {}
+        for quote in quotes:
+            author = quote.author
+            if author:
+                translated_names[quote.id] = author.get_translation(user_language)
+                #   print("1")
+            #   else:
+            #       translated_names[quote.id] = 'Unknown'
+            #     #   print('2')
+        
+        context['translated_names'] = translated_names         
+        
+        return context
     
 
-  def get_queryset(self):
-      user = self.request.user
-      liked_quote_ids = QuotesLikes.objects.filter(user=user).values_list('quote_id', flat=True)
-      return Quote.objects.filter(id__in=liked_quote_ids).select_related('author').order_by('-date_created')
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            liked_quote = QuotesLikes.objects.filter(user=user).values_list('quote_id', flat=True)
+            return Quote.objects.filter(id__in=liked_quote).select_related('author').order_by('-date_created')
+        else:
+            # Redirect anonymous users to the login page
+            # return redirect('users:login')
+            raise PermissionDenied
 
   
 

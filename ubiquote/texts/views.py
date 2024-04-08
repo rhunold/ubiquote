@@ -1,7 +1,9 @@
+import random
 from django.shortcuts import render
 
 from django.utils.translation import gettext as _
 from django.utils.translation import get_language, activate
+from django.contrib.auth.decorators import login_required
 
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -12,8 +14,12 @@ from texts.quotes.views import LanguageFilterMixin
 # from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from django.conf import settings
 LANGUAGES = settings.LANGUAGES
+
+from texts.quotes.services import RecommendationService
 
 
 class GetCategoriesView(ListView):
@@ -77,10 +83,58 @@ class GetCategoryView(LanguageFilterMixin, ListView):
 
 
 
+@login_required
 def home(request):
-    trans = translate(language='fr')
-    return render(request, 'home.html', {'trans' : trans})
+  
+    recommended_quotes = RecommendationService.recommend_quotes(request.user)
+    
+    # # Order the recommended quotes by their primary key (id) to provide a consistent order
+    quotes = list(recommended_quotes.order_by('date_created'))
+    
+    
+    if hasattr(request, 'LANGUAGE_CODE'):
+        language_code = request.LANGUAGE_CODE
+    else:
+        language_code = 'en'  # Default language if language code is not available
+    
+        
+    translated_names = {}
+    for quote in quotes:
+        author = quote.author
+        if author:
+            translated_names[quote.id] = author.get_translation(language_code)
+        else:
+            translated_names[quote.id] = 'Unknown'    
+    
+    # context['translated_names'] = translated_names
+    
+    # Shuffle the list of recommended quotes
+    # random.shuffle(quotes)    
 
+    # Paginate the recommended quotes
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(quotes, 10)  # Change 10 to the desired number of quotes per page
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Pass pagination variables to the template
+    context = {
+        'translated_names': translated_names,
+        'quotes': page_obj,
+        # 'quotes': recommended_quotes,
+        'page_obj' : page_obj,
+        'paginator': paginator,
+        'is_paginated': page_obj.has_other_pages(),
+    }
+
+    return render(request, 'recommended_quotes.html', context)
+  
+  
 def translate(language):
   cur_language = get_language()
   try:

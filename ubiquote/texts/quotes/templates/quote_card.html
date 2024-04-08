@@ -74,6 +74,21 @@
         </div>  
       </li>
 
+      <!-- Display when the quote was liked on the Favorite page -->
+      {% if '/likes/' in request.path %}
+      <li class="list-group-item">
+        <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
+
+            {% for liked_quote in liked_quotes_timestamps %}
+              {% if liked_quote.quote_id == quote.id %}
+                  <p>You liked this quote on: {{ liked_quote.timestamp }}</p>
+              {% endif %}
+            {% endfor %}
+      
+        </div>  
+      </li>
+      {% endif %}
+
     </ul>  
 
   </div>      

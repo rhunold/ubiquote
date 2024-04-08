@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 
 from django.contrib.auth.admin import UserAdmin
 from .forms import QuoteForm
-from .models import Quote, QuotesCategories
+from .models import Quote, QuotesCategories, QuotesLikes
 from persons.authors.models import Author
 
 from django import forms
@@ -140,6 +140,11 @@ class QuoteAdmin(admin.ModelAdmin):
         return render(request, "admin/csv_quotes_upload.html", data)    
     
 
-
+class QuotesLikesAdmin(admin.ModelAdmin):
+    model = QuotesLikes
+    list_display = ('user', 'quote', 'timestamp',)  
+    ordering = ('-timestamp',)
+    list_filter = ('user',)    
 
 admin.site.register(Quote, QuoteAdmin)
+admin.site.register(QuotesLikes, QuotesLikesAdmin)

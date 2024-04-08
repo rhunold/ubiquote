@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -37,6 +38,10 @@ from django.utils.translation import get_language
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
+
+# from django.http import JsonResponse
+from .services import RecommendationService
+
 @login_required
 def like_quote(request, id):
     quote = get_object_or_404(Quote, id=id)
@@ -50,6 +55,11 @@ def like_quote(request, id):
 
     return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
 
+
+# @login_required
+def recommend_quotes(request, user_id):
+    recommended_quotes = RecommendationService.recommend_quotes(user_id)
+    return render(request, 'recommended_quotes.html', {'recommended_quotes': recommended_quotes})
 
 
 class LanguageFilterMixin:
@@ -78,7 +88,8 @@ class LanguageFilterMixin:
                     
         return queryset
 
-class GetQuotesView(LanguageFilterMixin, ListView):
+# @login_required
+class GetQuotesView(LoginRequiredMixin,ListView, LanguageFilterMixin):
     model = Quote
     template_name = 'get_quotes.html'
     context_object_name = 'quotes'
@@ -113,7 +124,7 @@ class GetQuotesView(LanguageFilterMixin, ListView):
             else:
                 translated_names[quote.id] = 'Unknown'
         
-        print(translated_names)
+        # print(translated_names)
         context['translated_names'] = translated_names
            
                     
@@ -157,8 +168,9 @@ class GetQuotesView(LanguageFilterMixin, ListView):
                 return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
             else:
                 raise        
-        
 
+
+@login_required
 class GetQuoteView(DetailView):
     model = Quote
     template_name = 'get_quote.html'
@@ -191,7 +203,7 @@ class GetQuoteView(DetailView):
         
         return context
   
-
+@login_required
 class AddQuoteView(CreateView):
     model = Quote
     form_class = QuoteForm
@@ -208,7 +220,8 @@ class AddQuoteView(CreateView):
     def form_valid(self, form):
         form.instance.contributor = self.request.user
         return super().form_valid(form) 
-    
+ 
+@login_required   
 class UpdateQuoteView(UpdateView):
     model = Quote
     form_class = QuoteForm
@@ -222,7 +235,8 @@ class UpdateQuoteView(UpdateView):
     def get_success_url(self):
         # Redirect to the detail page of the newly created author
         return reverse_lazy('quotes:get-quote', kwargs={'slug': self.object.slug})
-    
+
+@login_required
 class DeleteQuoteView(DeleteView):
     model = Quote
     # form_class = QuoteForm
