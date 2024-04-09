@@ -88,9 +88,11 @@ def home(request):
   
     recommended_quotes = RecommendationService.recommend_quotes(request.user)
     
-    # # Order the recommended quotes by their primary key (id) to provide a consistent order
-    quotes = list(recommended_quotes.order_by('date_created'))
     
+    # Order the recommended quotes by their primary key (id) to provide a consistent order
+    # quotes = recommended_quotes.order_by('date_created')
+    
+    quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)    
     
     if hasattr(request, 'LANGUAGE_CODE'):
         language_code = request.LANGUAGE_CODE

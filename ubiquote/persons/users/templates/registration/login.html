@@ -12,6 +12,9 @@
 
         {% csrf_token %}
         {{ form.as_p }}
+        <!-- Include the quote_id as a hidden field if needed (when like before logged) -->
+        <input type="hidden" name="quote_id" value="{{ quote_id }}">
+        
 
         <button class="btn btn-secondary">Login</button>
 

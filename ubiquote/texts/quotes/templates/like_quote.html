@@ -2,22 +2,43 @@
 
 {# block body #}
 
+        <span class="likes-count">{{ quote.likes.count }} likes</span>
 
+        {% if user.is_authenticated %}
+        <form id="likesarea-{{quote.id}}">
+            {% csrf_token %}
+            <button hx-post="{% url 'quotes:like-quote' quote.id %}" id="like-button" 
+            hx-target="#likesarea-{{quote.id}}" hx-swap="outerHTML" class="btn m-1 {% if liked or has_user_liked or quote.id in liked_quotes %}btn-light{% else %}btn-primary{% endif %}" >
 
-    <form id="likesarea-{{quote.id}}">
+                {% if liked or has_user_liked or quote.id in liked_quotes %}
+                    Unlike
+                {% else %}
+                    Like
+                {% endif %}
+            </button>
+        </form>
+        {% else %}  
+        
+        <!-- <a class="btn btn-primary" href="{% url 'quotes:like-quote' quote.id %}?next={{ request.path }}" role="button">Like</a> -->
+        
+        <!-- <a class="btn btn-primary" href="{% url 'quotes:like-quote' quote.id %}?next={% url 'users:get-user-likes' request.user %}" role="button">Like</a> -->
+        
+        <!-- <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.path }}" role="button">Like</a> -->
 
-        <span class="likes-count">{{ quote.likes.count }}</span>
+        <!-- If user is not authenticated, display a message and the login form with quote_id -->
+        
+        <!-- <form action="{% url 'quotes:like-quote' quote.id  %}?next={{ request.path }}" method="post"> -->
 
-        <button hx-post="{% url 'quotes:like-quote' quote.id %}" id="like-button" 
-        hx-target="#likesarea-{{quote.id}}" hx-swap="outerHTML" class="btn m-1 {% if liked or has_user_liked or quote.id in liked_quotes %}btn-light{% else %}btn-primary{% endif %}" >
+        <form action="{% url 'quotes:like-quote' quote.id  %}?next={{ request.path }}" method="post">            
+            {% csrf_token %}
 
-            {% if liked or has_user_liked or quote.id in liked_quotes %}
-                Unlike
-            {% else %}
-                Like
-            {% endif %}
-        </button>
-    </form>
+            {{ quote.id }}
+            <input type="hidden" name="quote_id" value="{{ quote.id }}">
+            <button type="submit" class="btn btn-primary">Like</button>
+        </form>
+        
+        {% endif %} 
+
 
 
 

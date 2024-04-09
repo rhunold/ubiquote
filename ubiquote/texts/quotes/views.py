@@ -42,21 +42,40 @@ from django.http import HttpResponse
 # from django.http import JsonResponse
 from .services import RecommendationService
 
-@login_required
+# @login_required
 def like_quote(request, id):
     quote = get_object_or_404(Quote, id=id)
-    if quote.likes.filter(id=request.user.id).exists():
-        quote.likes.remove(request.user)
-        liked = False
+    
+    
+    if request.user.is_authenticated:
+        if quote.likes.filter(id=request.user.id).exists():
+            quote.likes.remove(request.user)
+            liked = False
+        else:
+            quote.likes.add(request.user)
+            liked = True
+        likes_count = quote.likes.count()
+
+        return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
     else:
-        quote.likes.add(request.user)
-        liked = True
-    likes_count = quote.likes.count()
 
-    return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
+        # quote_id = request.session['quote_id'] = quote.id
+        # return redirect(reverse('users:login') + '?quote_id=' + str(quote_id) )
+
+        # Store the quote ID in the session
+        request.session['quote_id'] = id
+        
+        # Redirect the user to the login page with the quote ID included in the query string
+        return redirect(reverse('users:login') + '?quote_id=' + str(id))        
+        
+    
+    
+     
 
 
-# @login_required
+
+
+
 def recommend_quotes(request, user_id):
     recommended_quotes = RecommendationService.recommend_quotes(user_id)
     return render(request, 'recommended_quotes.html', {'recommended_quotes': recommended_quotes})
@@ -88,8 +107,8 @@ class LanguageFilterMixin:
                     
         return queryset
 
-# @login_required
-class GetQuotesView(LoginRequiredMixin,ListView, LanguageFilterMixin):
+
+class GetQuotesView(ListView, LanguageFilterMixin): # LoginRequiredMixin
     model = Quote
     template_name = 'get_quotes.html'
     context_object_name = 'quotes'
@@ -170,8 +189,7 @@ class GetQuotesView(LoginRequiredMixin,ListView, LanguageFilterMixin):
                 raise        
 
 
-@login_required
-class GetQuoteView(DetailView):
+class GetQuoteView(DetailView): # LoginRequiredMixin
     model = Quote
     template_name = 'get_quote.html'
     context_object_name = 'quote'
@@ -203,8 +221,8 @@ class GetQuoteView(DetailView):
         
         return context
   
-@login_required
-class AddQuoteView(CreateView):
+
+class AddQuoteView(LoginRequiredMixin, CreateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'add_quote.html'
@@ -221,15 +239,15 @@ class AddQuoteView(CreateView):
         form.instance.contributor = self.request.user
         return super().form_valid(form) 
  
-@login_required   
-class UpdateQuoteView(UpdateView):
+# @login_required   
+class UpdateQuoteView(LoginRequiredMixin, UpdateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'update_quote.html'
     
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    # @method_decorator(login_required)
+    # def dispatch(self, *args, **kwargs):
+    #     return super().dispatch(*args, **kwargs)
     
     # fields = '__all__'  
     def get_success_url(self):

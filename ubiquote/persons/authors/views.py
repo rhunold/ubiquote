@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from django.urls import reverse_lazy
 
@@ -80,7 +81,7 @@ class GetAuthorsView(ListView):
   #     return context  
   
 
-class GetAuthorView(LanguageFilterMixin, ListView):
+class GetAuthorView(LoginRequiredMixin, LanguageFilterMixin, ListView):
   model = Quote
   queryset =  Quote.published.all()
   context_object_name = 'quotes'  

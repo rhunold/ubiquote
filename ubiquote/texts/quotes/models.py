@@ -1,6 +1,7 @@
 from django.db import models
 
 from persons.authors.models import Author
+from django.contrib.auth.models import AnonymousUser
 from persons.users.models import User
 from texts.models import Text, Category
 
@@ -111,9 +112,15 @@ class QuotesLikes(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     
+    # @classmethod
+    # def has_user_liked(cls, user, quote):
+    #     return cls.objects.filter(user=user, quote=quote).exists()
+    
     @classmethod
     def has_user_liked(cls, user, quote):
-        return cls.objects.filter(user=user, quote=quote).exists()
+        if not isinstance(user, User) or isinstance(user, AnonymousUser):
+            return False  # Return False if user is not authenticated or is anonymous
+        return cls.objects.filter(user=user, quote=quote).exists()    
     
     # @classmethod
     # def total_likes_by_user(cls, user):

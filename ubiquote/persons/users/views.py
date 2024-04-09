@@ -1,5 +1,9 @@
-from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import render, redirect
+
+from django.urls import reverse, reverse_lazy
+from django.db.models import Max
+
+from django.contrib import messages
 
 from django.views import generic
 # from django.contrib.auth.forms import UserCreationForm
@@ -18,19 +22,21 @@ from .models import User
 from .forms import  UserForm
 from django.conf import settings
 
+from texts.quotes.views import like_quote
+
 from django.contrib.auth import views as auth_views
 from django.utils.translation import get_language
 
 
-from django.urls import reverse_lazy
+
 
 # @login_required
-class GetUserLikesView(ListView, LoginRequiredMixin):
+class GetUserLikesView(LoginRequiredMixin, ListView):
     model = Quote
     context_object_name = 'quotes'  
     template_name = 'get_user_likes.html'
     paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
-    login_url = reverse_lazy('login')  # URL name of your login page    
+    # login_url = reverse_lazy('login')  # URL name of your login page    
     
     # def get(self, request, *args, **kwargs):
     #     return super().get(request, *args, **kwargs)    
@@ -82,8 +88,15 @@ class GetUserLikesView(ListView, LoginRequiredMixin):
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            liked_quote = QuotesLikes.objects.filter(user=user).values_list('quote_id', flat=True)
-            return Quote.objects.filter(id__in=liked_quote).select_related('author').order_by('-date_created')
+        
+            # Get the IDs of the liked quotes
+            liked_quote_ids = QuotesLikes.objects.filter(user=user).values_list('quote_id', flat=True)
+
+            # Retrieve the quotes based on their IDs and order them by the latest timestamp
+            queryset = Quote.objects.filter(id__in=liked_quote_ids).select_related('author').annotate(latest_like_timestamp=Max('quoteslikes__timestamp')).order_by('-latest_like_timestamp')
+
+
+            return queryset        
         else:
             # Redirect anonymous users to the login page
             # return redirect('users:login')
@@ -100,10 +113,25 @@ class UserRegisterView(generic.CreateView):
 class LoginView(auth_views.LoginView):
     form_class = AuthenticationForm
     template_name = 'registration/login.html'
-    success_url = reverse_lazy('texts:home')
-    # def get_success_url(self):
-    #     # Redirect to the detail page of the newly created author
-    #     return reverse_lazy('users:get-user', kwargs={'slug': self.object.slug})    
+    
+
+    def form_valid(self, form):
+        # Call the parent form_valid method
+        response = super().form_valid(form)
+
+        # Retrieve the quote ID from the session
+        quote_id = self.request.GET.get('quote_id')
+        
+        # If the quote ID exists, like the quote and redirect the user
+        if quote_id:
+            # Like the quote (add your logic here)
+            like_quote(self.request, quote_id)
+            
+            # Redirect the user back to the initial page
+            return redirect(reverse('users:get-user-likes', kwargs={'slug': self.request.user.slug}))
+        
+
+        return response  # Return the original response if no quote ID is found    
     
 class LogoutView(auth_views.LogoutView):
     form_class = AuthenticationForm
@@ -149,10 +177,10 @@ class GetUserView(ListView):
           author = quote.author
           if author:
               translated_names[quote.id] = author.get_translation(user_language)
-              print("1")
+            #   print("1")
           else:
               translated_names[quote.id] = 'Unknown'
-              print('2')
+            #   print('2')
       
       context['translated_names'] = translated_names       
          
