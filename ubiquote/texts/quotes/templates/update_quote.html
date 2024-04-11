@@ -9,12 +9,13 @@
 
     {% if user.is_authenticated %}
         <h1>Edit a quote</h1>
-
-
+        
         <form action="" method="POST" class="form-control"> 
 
             {% csrf_token %}
             {{ form.as_p }}
+
+            <!-- {{ form.status.as_hidden }} -->
 
 
             <table style="display: none">

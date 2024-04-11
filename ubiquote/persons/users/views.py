@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.urls import reverse, reverse_lazy
 from django.db.models import Max
@@ -46,6 +47,8 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
         
         # Get the profil slug from the URL parameter
         profil_slug = self.kwargs['slug']
+        
+        context['profil_slug'] = profil_slug        
         # Get the profil object based on the slug
         profil = User.objects.get(slug=profil_slug)       
         context['profil'] = profil
@@ -82,6 +85,22 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
         
         context['translated_names'] = translated_names         
         
+        paginator = Paginator(self.get_queryset(), self.paginate_by)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        context['paginator'] = paginator
+        
+    
+        # if page_obj.has_next():
+        #     user_slug = profil.slug # Assuming you're passing the profil in the class
+        #     print(user_slug)
+        #     next_page_url = reverse('users:get-user-likes', kwargs={'slug': user_slug}) + f'?page={page_obj.next_page_number()}'
+        # context['next_page_url'] = next_page_url
+        
+        # print(next_page_url)
+        
+        
         return context
     
 
@@ -102,6 +121,23 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
             # return redirect('users:login')
             raise PermissionDenied
 
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ['quotes_cards.html']
+        return ['get_user_likes.html']        
+        
+
+
+
+    # def render_to_response(self, context, **response_kwargs):
+    #     if self.request.htmx:
+    #         # If request is htmx, return the corresponding template
+    #         template = self.get_template_names()
+    #         return super().render_to_response(context, template=template, **response_kwargs)
+    #     else:
+    #         # If regular request, return normal response
+    #         return super().render_to_response(context, **response_kwargs)
   
 
 class UserRegisterView(generic.CreateView):

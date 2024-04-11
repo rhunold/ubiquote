@@ -42,7 +42,7 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 INSTALLED_APPS = [
     'dal', # override the jquery.init.js script provided by the admin
     'dal_select2',
-    
+    # 'ubiquote.management',
     # 'autocomplete_light',    
     
     'django.contrib.admin',

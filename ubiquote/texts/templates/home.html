@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Ubiquote Homepage{% endblock %}
+{% block meta_decription %}The best quote listing{% endblock %}
+
+
+{% block body %}
+
+    {% include "quotes_cards.html" %}
+
+    {% include "quotes_pagination.html" %}        
+
+{% endblock %}  

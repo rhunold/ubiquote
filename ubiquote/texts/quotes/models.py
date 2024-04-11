@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
+# from django_pgvector.fields import VectorField
+
 # from django_elasticsearch_dsl import Document
 # from django_elasticsearch_dsl.registries import registry
 
@@ -18,6 +20,8 @@ from django.dispatch import receiver
 
 class Quote(Text):
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, related_name='author') #, default=1)
+    
+    # tfidf_vector = VectorField()    
 
     categories = models.ManyToManyField(
         Category,

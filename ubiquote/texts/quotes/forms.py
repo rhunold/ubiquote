@@ -35,12 +35,13 @@ class QuoteForm(forms.ModelForm):
                     },
                 # attrs={'class' : 'form-control'},
                 ),
-                                
-
             
             # 'contributor': forms.Select(attrs={'class' : 'form-control'}),
             'lang': forms.Select(attrs={'class' : 'form-control'}),
             'categories': forms.SelectMultiple(attrs={'class' : 'form-control'}),
+            
+            'status' : forms.HiddenInput(),
+            'contributor' : forms.HiddenInput()
         }
 
 

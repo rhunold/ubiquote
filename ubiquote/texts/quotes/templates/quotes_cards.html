@@ -1,9 +1,31 @@
+{% for quote in quotes %}
+    {% if forloop.last %}
+        <!-- Pagination -->
 
-    {% for quote in quotes %}
+        {{ request.path }}
+        {% if page_obj.has_next %}
+            {% comment %}
+            <div hx-get="{% url 'quotes:get-quotes' %}?page={{ page_obj.number|add:1  }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">
+            {% endcomment %}
 
-      {% include "quote_card.html" %} 
+              {% if '/likes/' in request.path %}
+                  <div hx-get="{% url 'users:get-user-likes' slug=profil_slug %}?page={{ page_obj.number|add:1  }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">
+              
+              {% elif '/quotes/' in request.path %}
+                  <div hx-get="{% url 'quotes:get-quotes' %}?page={{ page_obj.number|add:1  }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">
+              
+              {% else %}                    
+                <div hx-get="{% url 'texts:home' %}?page={{ page_obj.number|add:1  }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">                                  
+               
+              {% endif %}
 
-      {% empty %} 
-        <!-- If empty -->
+                Next page
+            </div>
+        {% endif %}
+    {% endif %}
 
-    {% endfor %}
+    {% include "quote_card.html" %}
+{% empty %}
+    <!-- If empty -->
+    <p>There is no quotes here. Let's create one !</p>
+{% endfor %}

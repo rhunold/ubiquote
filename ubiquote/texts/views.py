@@ -3,13 +3,19 @@ from django.shortcuts import render
 
 from django.utils.translation import gettext as _
 from django.utils.translation import get_language, activate
+from django.db.models import Count, Prefetch
+
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
-from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect, Http404
+
+from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
 from .models import Category
-from texts.quotes.models import Quote
+from texts.quotes.models import Quote, QuotesLikes
 from texts.quotes.views import LanguageFilterMixin
 # from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
@@ -83,6 +89,71 @@ class GetCategoryView(LanguageFilterMixin, ListView):
 
 
 
+
+class HomeView(ListView, LanguageFilterMixin): 
+    model = Quote   
+    context_object_name = 'quotes'
+    template_name = 'home.html'
+    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page
+
+    def get_queryset(self):
+        # Get the user
+        user = self.request.user
+        
+        # Get recommended quotes for the user
+        recommended_quotes = RecommendationService.recommend_quotes(user)
+        
+        # Sort the recommended quotes by date_created
+        sorted_quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)
+        
+        return sorted_quotes
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Get total number of quotes in the database
+        total_quotes = Quote.objects.count()
+        context['total_quotes'] = total_quotes
+        
+        # GET the search query / create pagination
+        search_query = self.request.GET.get('q')
+        context['search_query'] = search_query
+        paginator = Paginator(self.get_queryset(), self.paginate_by)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        context['paginator'] = paginator
+        
+        return context
+        
+    def get(self, request, *args, **kwargs):
+        try:
+            return super().get(request, *args, **kwargs)
+        except Http404:
+            page = self.request.GET.get('page', None)
+            paginator = Paginator(self.get_queryset(), self.paginate_by)
+            last_page = paginator.num_pages or 1
+            search_query = self.request.GET.get('q') or ''
+            if page:
+                return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
+            else:
+                raise
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ['quotes_cards.html']
+        return ['home.html']
+    
+    # def render_to_response(self, context, **response_kwargs):
+    #     if self.request.htmx:
+    #         # If request is htmx, return the corresponding template
+    #         template = self.get_template_names()
+    #         return super().render_to_response(context, template, **response_kwargs)
+    #     else:
+    #         # If regular request, return normal response
+    #         return super().render_to_response(context, **response_kwargs)   
+
+
 @login_required
 def home(request):
   
@@ -137,14 +208,14 @@ def home(request):
     return render(request, 'recommended_quotes.html', context)
   
   
-def translate(language):
-  cur_language = get_language()
-  try:
-    activate(language)
-    text = _('hello')
-  finally:
-    activate(cur_language)
-  return text
+# def translate(language):
+#   cur_language = get_language()
+#   try:
+#     activate(language)
+#     text = _('hello')
+#   finally:
+#     activate(cur_language)
+#   return text
   
 
 # # https://stackoverflow.com/a/66271685

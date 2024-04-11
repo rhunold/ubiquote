@@ -43,14 +43,14 @@ More informations on translation on the [Django Documentation](https://docs.djan
 
 Highly recommand this [Yourube video](https://www.youtube.com/watch?v=z_p8WxFGV5A)
 
-### pg_trgm to enhence search teach
+### activate extentions in Postgrsql (15.2 or highter)
 
 You must add 'django.contrib.postgres'  in INSTALLED_APPS of your settings.py
 
 In PGadmin, you can add extentions for your database that enable some capality such as trigram or unaccent query sets.
 Click on "Extentions" in your database, then click and choose "Create / Extentions..."
 You must select "pg_trgm" to add this capacity.
-You also have to add the extention "unaccent"
+You also have to add the extention "unaccent" and "pg_vector"
 
 Or you can do it by commande line :
 
@@ -62,3 +62,5 @@ psql -U <DB_USERNAME>
 
 3) Then install the extension as answered previously:
 CREATE EXTENSION pg_trgm;
+
+pg_vector is not installed by defaut by the postgresql used so it has to be installed.

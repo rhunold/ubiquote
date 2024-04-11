@@ -10,6 +10,8 @@ from django.http import HttpResponseRedirect, Http404
 from django.contrib import messages
 
 from django.urls import reverse_lazy, reverse
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 from .models import Quote, QuotesLikes
 from .forms import QuoteForm
@@ -46,7 +48,6 @@ from .services import RecommendationService
 def like_quote(request, id):
     quote = get_object_or_404(Quote, id=id)
     
-    
     if request.user.is_authenticated:
         if quote.likes.filter(id=request.user.id).exists():
             quote.likes.remove(request.user)
@@ -59,22 +60,12 @@ def like_quote(request, id):
         return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
     else:
 
-        # quote_id = request.session['quote_id'] = quote.id
-        # return redirect(reverse('users:login') + '?quote_id=' + str(quote_id) )
-
         # Store the quote ID in the session
         request.session['quote_id'] = id
         
         # Redirect the user to the login page with the quote ID included in the query string
         return redirect(reverse('users:login') + '?quote_id=' + str(id))        
         
-    
-    
-     
-
-
-
-
 
 def recommend_quotes(request, user_id):
     recommended_quotes = RecommendationService.recommend_quotes(user_id)
@@ -124,6 +115,8 @@ class GetQuotesView(ListView, LanguageFilterMixin): # LoginRequiredMixin
         
         
         quotes = context['quotes']  # Get the queryset of quotes
+        
+        print(quotes)
         quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
         liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
         context['liked_quotes'] = liked_quotes
@@ -154,22 +147,59 @@ class GetQuotesView(ListView, LanguageFilterMixin): # LoginRequiredMixin
         # GET the search query / create pagination
         search_query = self.request.GET.get('q')
         context['search_query'] = search_query
-        if search_query:
-            paginator = Paginator(self.get_queryset(), self.paginate_by)
-            page_number = self.request.GET.get('page')
-            page_obj = paginator.get_page(page_number)
-            context['page_obj'] = page_obj
-            context['paginator'] = paginator
+        # if search_query:
+        paginator = Paginator(self.get_queryset(), self.paginate_by)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        context['paginator'] = paginator
+        
+        
+        # if page_obj.has_next():
+        #     next_page_url = f"{reverse('texts:home')}?q={search_query}&page={page_obj.next_page_number()}"
+        # else:
+        #     next_page_url = None
+        # context['next_page_url'] = next_page_url        
+        
+        
+        # if page_obj.has_next():
+        #     next_page_url = f"{reverse('texts:home')}?q={search_query}&page={page_obj.next_page_number()}"
+        # else:
+        #     next_page_url = None
+        # context['next_page_url'] = next_page_url
+
+    
+        
+        # # Get the URL for the next page if it exists
+        # next_page_url = None
+        # if page_obj.has_next():
+        #     next_page_url = reverse('quotes:get-quotes')
+        #     if search_query:
+        #         next_page_url += f'&q={search_query}'
+        #     next_page_url += f'?page={page_obj.next_page_number()}'
+        # context['next_page_url'] = next_page_url
+        # print(next_page_url)
+        
         
         return context
         
     def get_queryset(self):
         queryset = super().get_queryset()  # Get the default queryset
         search_query = self.request.GET.get('q')
+        
+        
+        # Annotate queryset with the number of likes each quote has
+        queryset = queryset.annotate(num_likes=Count('quoteslikes'))
+
         if search_query:
+
             queryset = queryset.annotate(
-                search=SearchVector('text')
+                search=SearchVector('text', 'categories__title', 'author__fullname') # categories__text, tag__title
             ).filter(search=search_query)
+
+        # Order queryset by the number of likes in descending order
+        queryset = queryset.order_by('-num_likes')
+
         return queryset
         
     # REdirect if page number requested is empty
@@ -186,7 +216,23 @@ class GetQuotesView(ListView, LanguageFilterMixin): # LoginRequiredMixin
             if page:
                 return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
             else:
-                raise        
+                raise
+            
+            
+    def get_template_names(self):
+        if self.request.htmx:
+            return ['quotes_cards.html']
+        return ['get_quotes.html']
+    
+    # def render_to_response(self, context, **response_kwargs):
+    #     if self.request.htmx:
+    #         # If request is htmx, return the corresponding template
+    #         template = self.get_template_names()
+    #         return super().render_to_response(context, template, **response_kwargs)
+    #     else:
+    #         # If regular request, return normal response
+    #         return super().render_to_response(context, **response_kwargs)   
+        
 
 
 class GetQuoteView(DetailView): # LoginRequiredMixin

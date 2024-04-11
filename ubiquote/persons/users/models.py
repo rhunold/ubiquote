@@ -21,6 +21,16 @@ class User(AbstractUser, Person):
     
     avatar = models.ImageField(upload_to='avatars/users/', null=True, blank=True, default='avatars/default.png')
     
+    # recommended_quotes = models.TextField(null=True, blank=True)
+    
+    # recommended_quotes = models.ManyToManyField(
+    #     Quote,
+    #     through='QuotesRecommanded',
+    #     # related_name="quotesrecommanded"
+    #     )   
+        
+        
+    
     
     # # A mettre dans le model User (donc mettre Quote dans le champs M2M) et à renommer en quote_likes => copy past ou avant de vider bdd et recommancer import csv
     # likes = models.ManyToManyField(

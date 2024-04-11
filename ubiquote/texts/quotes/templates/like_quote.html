@@ -2,10 +2,12 @@
 
 {# block body #}
 
-        <span class="likes-count">{{ quote.likes.count }} likes</span>
+        
 
         {% if user.is_authenticated %}
         <form id="likesarea-{{quote.id}}">
+
+            <span class="likes-count">{{ quote.likes.count }} likes</span>
             {% csrf_token %}
             <button hx-post="{% url 'quotes:like-quote' quote.id %}" id="like-button" 
             hx-target="#likesarea-{{quote.id}}" hx-swap="outerHTML" class="btn m-1 {% if liked or has_user_liked or quote.id in liked_quotes %}btn-light{% else %}btn-primary{% endif %}" >
@@ -29,7 +31,8 @@
         
         <!-- <form action="{% url 'quotes:like-quote' quote.id  %}?next={{ request.path }}" method="post"> -->
 
-        <form action="{% url 'quotes:like-quote' quote.id  %}?next={{ request.path }}" method="post">            
+        <form action="{% url 'quotes:like-quote' quote.id  %}?next={{ request.path }}" method="post">
+            <span class="likes-count">{{ quote.likes.count }} likes</span>
             {% csrf_token %}
 
             {{ quote.id }}
