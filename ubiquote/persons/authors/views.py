@@ -82,57 +82,61 @@ class GetAuthorsView(ListView):
   
 
 class GetAuthorView(LoginRequiredMixin, LanguageFilterMixin, ListView):
-  model = Quote
-  queryset =  Quote.published.all()
-  context_object_name = 'quotes'  
-  template_name = 'get_author.html'
-  paginate_by = settings.DEFAULT_PAGINATION  
-  
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      
-      user = self.request.user
-      quotes = context['quotes']  # Get the queryset of quotes
-      quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
-      liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
-      context['liked_quotes'] = liked_quotes
-      
-      # Get the author slug from the URL parameter to Get the author object 
-      author_slug = self.kwargs['slug']
-      author = Author.objects.get(slug=author_slug)
-      context['author'] = author
-      
-      # Get translated names for authors
-      if hasattr(self, 'request'):
-          language_code = self.request.LANGUAGE_CODE
-      else:
-          language_code = 'en'  # Default language if language code is not available
-      
-      translated_names = {}
-      for quote in quotes:
-          author = quote.author
-          if author:
-              translated_names[quote.id] = author.get_translation(language_code)
-          else:
-              translated_names[quote.id] = 'Unknown'
-      
-      context['translated_names'] = translated_names
-      
-      first_result = next(iter(translated_names.values()), None)
-      context['translated_name'] = first_result
-      
-      
-      from datetime import datetime, timedelta
-      if author.date_birth_datefield  is not None:
-        author.date_birth_datefield = author.date_birth_datefield +timedelta(days=10)
-        # print(author.date_birth_datefield)
-      else:
-        print("operation impossible")
+    model = Quote
+    queryset =  Quote.published.all()
+    context_object_name = 'quotes'  
+    template_name = 'get_author.html'
+    paginate_by = settings.DEFAULT_PAGINATION  
 
- 
-      return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        user = self.request.user
+        quotes = context['quotes']  # Get the queryset of quotes
+        quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
+        liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
+        context['liked_quotes'] = liked_quotes
+        
+        # Get the author slug from the URL parameter to Get the author object 
+        author_slug = self.kwargs['slug']
+    #   context['author_slug'] = author_slug    
+        author = Author.objects.get(slug=author_slug)
+        context['author'] = author
+        
+        # Get translated names for authors
+        if hasattr(self, 'request'):
+            language_code = self.request.LANGUAGE_CODE
+        else:
+            language_code = 'en'  # Default language if language code is not available
+        
+        translated_names = {}
+        for quote in quotes:
+            author = quote.author
+            if author:
+                translated_names[quote.id] = author.get_translation(language_code)
+            else:
+                translated_names[quote.id] = 'Unknown'
+        
+        context['translated_names'] = translated_names
+        
+        first_result = next(iter(translated_names.values()), None)
+        context['translated_name'] = first_result
+        
+        
+        from datetime import datetime, timedelta
+        if author.date_birth_datefield  is not None:
+            author.date_birth_datefield = author.date_birth_datefield +timedelta(days=10)
+            # print(author.date_birth_datefield)
+        else:
+            print("operation impossible")
+
+
+        return context
   
-  
+    def get_template_names(self):
+        if self.request.htmx:
+            return ['quotes_cards.html']
+        return ['get_author.html']      
   
  
 class AddAuthorView(CreateView):

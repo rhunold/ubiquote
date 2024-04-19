@@ -6,7 +6,7 @@
     
 
     <div class="col-md">
-        <input class="form-control me-2" type="text" placeholder=" {% translate 'Search here' %} " arial-label="Search"name="q" value="{% if search_query %}{{ search_query }}{% endif %}">
+        <input class="form-control me-2" type="text" placeholder=" {% translate 'Search here' %} " arial-label="Search" name="q" value="{% if search_query %}{{ search_query }}{% else %}{% endif %}">
     </div>
     <div class="col-auto">
         <button class="btn btn-primary x-1" type="submit">Search</button>
