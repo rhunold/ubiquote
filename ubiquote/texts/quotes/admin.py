@@ -38,9 +38,10 @@ class QuoteAdmin(admin.ModelAdmin):
     # )
     inlines = [QuotesCategoriesInline]   
     
-    list_display = ('text', 'contributor', 'get_categories',)  
+    list_display = ('text', 'author', 'contributor', 'get_categories', 'slug')  
     ordering = ('-date_updated',)
-    list_filter = ('categories',)
+    list_filter = ('categories', )
+    search_fields = ['text', 'author__fullname__icontains',]
 
     
     def get_urls(self):
