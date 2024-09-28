@@ -44,27 +44,40 @@ from django.http import HttpResponse
 # from django.http import JsonResponse
 from .services import RecommendationService
 
-# @login_required
+import requests
+
+import logging
+
+from django.core.cache import cache
+
+# Set up logger for error handling
+logger = logging.getLogger(__name__)
+
+    
+@login_required
 def like_quote(request, id):
     quote = get_object_or_404(Quote, id=id)
+    user = request.user
+    liked = QuotesLikes.objects.filter(user=user, quote=quote).exists()
     
-    if request.user.is_authenticated:
-        if quote.likes.filter(id=request.user.id).exists():
-            quote.likes.remove(request.user)
-            liked = False
-        else:
-            quote.likes.add(request.user)
-            liked = True
-        likes_count = quote.likes.count()
-
-        return render(request, 'like_quote.html', {'quote': quote, 'liked':liked})
+    if liked:
+        # Unlike the quote
+        QuotesLikes.objects.filter(user=user, quote=quote).delete()
+        liked = False
     else:
-
-        # Store the quote ID in the session
-        request.session['quote_id'] = id
+        # Like the quote
+        QuotesLikes.objects.create(user=user, quote=quote)
+        liked = True
         
-        # Redirect the user to the login page with the quote ID included in the query string
-        return redirect(reverse('users:login') + '?quote_id=' + str(id))        
+
+    # Render the updated like area using the partial template
+    context = {
+        'quote': quote,
+        'liked': liked,
+    }
+    
+    return render(request, 'like_quote.html', context)          
+
         
 
 def recommend_quotes(request, user_id):
@@ -72,177 +85,107 @@ def recommend_quotes(request, user_id):
     return render(request, 'recommended_quotes.html', {'recommended_quotes': recommended_quotes})
 
 
-class LanguageFilterMixin:
-    def get_queryset(self, *args, **kwargs):
-        queryset = super().get_queryset(*args, **kwargs)
-                
-        lang = self.request.LANGUAGE_CODE  # Get the language code from the request
-        if lang == 'fr':
-            queryset = queryset.filter(lang='fr')
-        elif lang == 'en':
-            queryset = queryset.filter(lang='en')
-            
-            
-        # Retrieve the author slug from the kwargs 
-        author_slug =  self.kwargs.get('slug')
 
-        # If author slug is provided, filter queryset by author
-        if author_slug:
-            try:
-                author = Author.objects.get(slug=author_slug)
-                queryset = queryset.filter(author=author)
-            except Author.DoesNotExist:
-                # Handle case where author with given slug does not exist
-                pass
-
-                    
-        return queryset
-
-
-class GetQuotesView(ListView, LanguageFilterMixin): # LoginRequiredMixin
-    model = Quote
+class GetQuotesView(ListView):
     template_name = 'get_quotes.html'
     context_object_name = 'quotes'
-    ordering =['-date_created']
-    # status = 'published'
-    # queryset = Quote.published.all().select_related('author')
     paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page
+    api_url = 'http://127.0.0.1:8000/api/quotes/'
 
     def get_context_data(self, **kwargs):
+        """Add additional context if needed."""
         context = super().get_context_data(**kwargs)
-        
-        user = self.request.user # ATTENTION => si pas logué, page d'errreur => mettre en place redirection pour cas où on doit loguer l'utilisateur (avec un mixin, method_decoarator ou d'autre facon de faire... )
-        
-        
-        quotes = context['quotes']  # Get the queryset of quotes
-        
-        # print(quotes)
-        quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
-        liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
-        context['liked_quotes'] = liked_quotes
-        
-        # Get translated names for authors
-        if hasattr(self, 'request'):
-            language_code = self.request.LANGUAGE_CODE
-            # print(language_code)
-        else:
-            language_code = 'en'  # Default language if language code is not available
-        
-        translated_names = {}
-        for quote in quotes:
-            author = quote.author
-            if author:
-                translated_names[quote.id] = author.get_translation(language_code)
-            else:
-                translated_names[quote.id] = 'Unknown'
-        
-        # print(translated_names)
-        context['translated_names'] = translated_names
-           
-                    
-        # Get total number of quotes in the database
-        total_quotes = Quote.objects.count()
-        context['total_quotes'] = total_quotes
-        
-        # GET the search query / create pagination
-        search_query = self.request.GET.get('q')
-        context['search_query'] = search_query
-        
-        # if search_query:
-        #     paginator = Paginator(self.get_queryset(), self.paginate_by)
-        #     page_number = self.request.GET.get('page')
-        #     page_obj = paginator.get_page(page_number)
-        #     context['page_obj'] = page_obj
-        #     context['paginator'] = paginator
-
-        
         return context
-        
-    def get_queryset(self):
-        queryset = super().get_queryset()  # Get the default queryset
-        search_query = self.request.GET.get('q')
-        
-        # print(search_query)
-        
-        if search_query:
-            # Annotate queryset with the number of likes each quote has
-            queryset = queryset.annotate(num_likes=Count('quoteslikes'))            
 
-            queryset = queryset.annotate(
-                search=SearchVector('text', 'categories__title', 'author__fullname') # categories__text, tag__title
-            ).filter(search=search_query)
-            
-            # Order queryset by the number of likes in descending order
-            queryset = queryset.order_by('-num_likes')
-        
-        # print(queryset)
+    def get_api_data(self, page_number, search_query):
+        """Fetch data from the quotes API with error handling and caching."""
+        cache_key = f'quotes_page_{page_number}_query_{search_query}'
+        data = cache.get(cache_key)
 
-        return queryset
-        
-    # REdirect if page number requested is empty
+        if not data:
+            api_url = f'{self.api_url}?page={page_number}&q={search_query}'
+            try:
+                response = requests.get(api_url)
+                response.raise_for_status()  # Raise HTTPError for bad responses
+                data = response.json()
+                cache.set(cache_key, data, timeout=60 * 5)  # Cache for 5 minutes
+            except requests.exceptions.RequestException as e:
+                # Log the error and return an empty response
+                logger.error(f"Error fetching quotes from API: {e}")
+                data = {'results': [], 'count': 0, 'next': None, 'error': str(e)}
+
+        return data
+
+    def render_htmx_or_full(self, request, context):
+        """Render partial or full template based on the type of request (HTMX or not)."""
+        if request.htmx:
+            return render(request, 'quotes_cards.html', context)
+        return render(request, self.template_name, context)
+
     def get(self, request, *args, **kwargs):
-        # print(dir(request))
-        try:
-            return super().get(request, *args, **kwargs)
+        """Handle GET request and fetch data from the API."""
+        page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')
 
-        except Http404:
-            page = self.request.GET.get('page', None)
-            paginator = Paginator(self.get_queryset(), self.paginate_by)
-            last_page = paginator.num_pages or 1
-            search_query = self.request.GET.get('q') or ''
-            if page:
-                return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
-            else:
-                raise
-            
-            
-    def get_template_names(self):
-        if self.request.htmx:
-            return ['quotes_cards.html']
-        return ['get_quotes.html']
-    
-    # def render_to_response(self, context, **response_kwargs):
-    #     if self.request.htmx:
-    #         # If request is htmx, return the corresponding template
-    #         template = self.get_template_names()
-    #         return super().render_to_response(context, template, **response_kwargs)
-    #     else:
-    #         # If regular request, return normal response
-    #         return super().render_to_response(context, **response_kwargs)   
+        # Fetch data from the API
+        data = self.get_api_data(page_number, search_query)
+
+        # Extract quotes and other pagination-related data
+        quotes = data.get('results', [])
+        count = data.get('count', 0)
+        next_page_url = data.get('next')
+        error = data.get('error', None)
+
+        # Prepare the context for rendering
+        context = {
+            'quotes': quotes,
+            'count': count,
+            'page_number': page_number,
+            'next_page_url': next_page_url,
+            'search_query': search_query,
+            'error': error,  # Pass error information to the template if necessary
+        }
+
+        # Render the appropriate template based on the request type (HTMX or full page)
+        return self.render_htmx_or_full(request, context)
         
 
 
-class GetQuoteView(DetailView): # LoginRequiredMixin
-    model = Quote
+class GetQuoteView(DetailView):
     template_name = 'get_quote.html'
     context_object_name = 'quote'
-    status = 'published'
+    api_url = 'http://127.0.0.1:8000/api/quote/'  # API base URL
+
+    def get_api_data(self, quote_id):
+        """Fetch individual quote data from the API with error handling."""
+        api_url = f'{self.api_url}{quote_id}/'
+        try:
+            response = requests.get(api_url)
+            response.raise_for_status()  # Raise error if response status code is not 200
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            # Log the error and handle the failure case
+            return {'error': str(e)}
+
+    def get(self, request, *args, **kwargs):
+        """Fetch quote by slug, then use the API to get quote details."""
+        slug = self.kwargs.get('slug')
+        
+        # Fetch quote from the local DB to get the ID
+        quote = get_object_or_404(Quote, slug=slug)
+        quote_id = quote.id  # Get the ID of the quote
+    
+        
+        # Fetch the quote data from the API using the ID
+        data = self.get_api_data(quote_id)       
+
+        # Prepare context with the API data
+        context = {
+            'quote': data,
+        }
+
+        return render(request, self.template_name, context)
   
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['has_user_liked'] = QuotesLikes.has_user_liked(self.request.user, self.object) 
-        
-        quote = self.object
-        
-        # Get translated names for authors
-        if hasattr(self, 'request'):
-            language_code = self.request.LANGUAGE_CODE
-            # print(language_code)
-        else:
-            language_code = 'en'  # Default language if language code is not available        
-        
-        # Assuming the Quote model has a foreign key field named 'author'
-        author = quote.author  # Retrieve the author associated with the quote
-        
-        # Assuming LANGUAGES is defined elsewhere
-        if author:
-            translated_names = {}
-            translated_names[quote.id] = author.get_translation(language_code)
-            context['translated_names'] = translated_names
-        else:
-            pass
-        
-        return context
   
 
 class AddQuoteView(LoginRequiredMixin, CreateView):
@@ -277,15 +220,22 @@ class UpdateQuoteView(LoginRequiredMixin, UpdateView):
         # Redirect to the detail page of the newly created author
         return reverse_lazy('quotes:get-quote', kwargs={'slug': self.object.slug})
 
-@login_required
-class DeleteQuoteView(DeleteView):
+# @method_decorator(login_required, name='dispatch')
+class DeleteQuoteView(LoginRequiredMixin, DeleteView):
     model = Quote
     # form_class = QuoteForm
     template_name = 'delete_quote.html'
     success_url = reverse_lazy('quotes:get-quotes')
     # fields = '__all__' 
     
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    
+    # def get_object(self, queryset=None):
+    #     try:
+    #         return Quote.objects.get(slug=self.kwargs['slug'])
+    #     except Quote.DoesNotExist:
+    #         raise Http404("Quote not found")    
+    
+    # @method_decorator(login_required)
+    # def dispatch(self, *args, **kwargs):
+    #     return super().dispatch(*args, **kwargs)
     
