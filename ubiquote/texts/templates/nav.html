@@ -1,7 +1,7 @@
-{% load i18n %}
+<!-- {% load i18n %} -->
 
 
-{% url 'texts:home' as home %}
+{% url 'texts:get-home' as home %}
 {% url 'quotes:get-quotes' as quotes %}
 {% url 'quotes:add-quote' as add_quote %}
 {% url 'authors:get-authors' as authors %}
@@ -13,44 +13,44 @@
 
 {% url 'users:get-user' user.slug as user_connected %}
 
-<nav class="navbar sticky-top bg-body-tertiary">
-  <div class="container-fluid">
+<nav class="container-fluid">
+
 
 <ul class="nav nav-tabs">
 
     <li class="nav-item">
-      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:home' %}">{% translate "Home" %}</a>
+      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:get-home' %}"><i class="fa fa-fw fa-home"></i><span>{% translate "Home" %}</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}">{% translate "Quotes" %}</a>
+      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}"><i class="fa fa-fw fa-search"></i><span>{% translate "Quotes" %}</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}">{% translate "Authors" %}</a>
+      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}"><i class="fa fa-fw  fa-address-book-o"></i><span>{% translate "Authors" %}</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}">{% translate "Categories" %}</a>
+      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}"><i class="fa fa-fw fa-tags"></i><span>{% translate "Categories" %}</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}">{% translate "Users" %}</a>
+      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}"><i class="fa fa-fw fa-users"></i><span>{% translate "Users" %}</span></a>
     </li>
     
     {% if user.is_authenticated %}
     <li class="nav-item">
-      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}">{% translate "Add Quote" %}</a>
+      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}">{% translate "Likes" %}</a>
+      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}"><i class="fa fa-fw fa-heart"></i><span>{% translate "Likes" %}</span></a>
     </li>
 
       <li class="nav-item">
-        <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"> {{ user }}</a>
+        <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"><i class="fa fa-fw fa-user"></i><span>{{ user }}</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:logout' %}">{% translate "Logout" %}</a>
+        <a class="nav-link" href="{% url 'users:logout' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Logout" %}</span></a>
       </li>
     {% else %}
       <li class="nav-item">
-        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}">{% translate "Login" %}</a>
+        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}"><span>{% translate "Login" %}</span></a>
       </li>
       <li class="nav-item">
         <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"></a>
@@ -62,7 +62,7 @@
 
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        {% translate "Languages" %}
+        <i class="fa fa-fw fa-language"></i><span>{% translate "Languages" %}</span>
       </a>
 
 
@@ -106,5 +106,5 @@
 
 <!-- <p>{% translate "hello" %}</p> -->
 
-</div>
+
 </nav>
