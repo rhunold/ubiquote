@@ -1,41 +1,36 @@
 {% extends 'base.html' %}
+{% load get_item %} 
 
+{% block title %}
+Auteur
+{% endblock %}
 
-{% block title %}Auteur{% endblock %}
-
-{% block meta_decription %}{{ author.lastname }} - {% endblock %}
+{% block meta_decription %}
+{{ author.lastname }}
+{% endblock %}
 
 {% block body %}
 
 
 
     <h1>
+     
+      
+      {% if author.translated_name %}
+        {% with language_code=request.LANGUAGE_CODE %}
 
+            {% if language_code in author.translated_name %}
 
+                {{ author.translated_name|get_item:language_code|default:author.fullname }}
 
-      {% if '/en/' in request.path %}
-        {{ translated_name }} 
-
+            {% else %}
+                {{ author.fullname }}  {# Fallback to the author's fullname if the translation isn't available #}
+            {% endif %}
+        {% endwith %}
       {% else %}
+          {{ author.fullname }}  {# Fallback if no translations exist #}
+      {% endif %}
 
-
-
-        {{ author.first_name|default_if_none:""  }}
-        {{ author.middle_name|default_if_none:" " }}
-        {{ author.particul|default_if_none:"" }}
-        {{ author.last_name|default_if_none:"" }}
-
-
-
-        {% if author.nickname and author.last_name %}
-          also known as
-          {{ author.nickname|default_if_none:"" }}
-        {% else %}
-        {{ author.nickname|default_if_none:"" }}
-        {% endif %}      
-
-
-      {% endif %}      
 
     </h1>
 
@@ -84,16 +79,19 @@
       </a>
     </p>
 
+    <p>{{ count|safe }} quotes</p>
+    
+    
 
 
     {% include "quotes_cards.html" %}
 
 
-
-    {% if user.is_authenticated and user.is_superuser %}
+    {% if user.is_superuser or user.id is request.user %}
       <a href="{% url 'authors:update-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update author</a>
       <a href="{% url 'authors:delete-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete author</a>      
     {% endif %}    
+
 
 
 {% endblock %}  
