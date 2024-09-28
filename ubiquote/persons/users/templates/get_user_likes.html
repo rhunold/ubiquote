@@ -1,18 +1,15 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}Likes of {{ profil }}{% endblock %}
+{% block title %}Likes of {{ profil.username }}{% endblock %}
 {% block meta_decription %}List of my likes{% endblock %}
 
 {% block body %}
 
     <h1>{% translate "Likes of" %} {{ user }}</h1>
 
-    <p>{{ total_quotes }} quotes liked by {{ user }}</p>  
+    <p>{{ count }} quotes liked by {{ user }}</p>  
 
     {% include "quotes_cards.html" %}    
-
-
-
 
 {% endblock %}  
