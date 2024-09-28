@@ -2,7 +2,8 @@
 {% load get_item %} 
 
 
-<div class="card m-md-5">
+
+<div class="card mt-3">
     <div class="card-header">
       {% translate "Quote" %}
     </div>
@@ -12,46 +13,38 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-sm">
-
-
-
       
             <blockquote class="blockquote mb-0">
               <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|safe }}</a></p>
-              
               {% if quote.author %}
                 <footer class="blockquote-footer">
+
                   <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">
-      
-      
-      
-      
-                    {% if '/en/' in request.path %}
-      
-                    
-                      {% if translated_names|get_item:quote.id %}
-                        {{ translated_names|default_if_none:''|get_item:quote.id }}
+
+
+                    {% if quote.lang != "en" and quote.author.translated_name %}
+                      {% if quote.lang in quote.author.translated_name %}
+                          {{ quote.author.translated_name|get_item:quote.lang|default:quote.author.fullname }}
                       {% else %}
-                        {{ quote.author|default_if_none:""|safe }}
+                          {{ quote.author.fullname|default_if_none:""|safe }}
                       {% endif %}
-                      
-      
-                    {% else %}                              
-                      {{ quote.author|default_if_none:""|safe }}
+                    {% else %}
+                        {{ quote.author.fullname|default_if_none:""|safe }}
                     {% endif %}
-      
-      
-      
-      
-                    
-                  
+                
+
+
+
                   </a>
+
                   in <cite title="Source Title">Source Title</cite>
                 </footer>
       
               {% endif %}            
             </blockquote>
           </div>
+
+          {% comment %} 
           <div class="col-sm-1"> <!-- bg-danger -->
 
 
@@ -63,8 +56,9 @@
             <!-- </div>   -->
 
           </div>
-
+          {% endcomment %}             
         </div>
+      
       </div>
 
 
@@ -73,12 +67,14 @@
 
       <li class="list-group-item">
         {% translate "categories" %} :
-            {% for category in quote.categories.all %}
-            <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a> &nbsp;
+            {% for quote_category in quote.categories %}
+            <a href="{% url 'texts:get-category' quote_category.slug   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title }}</a> &nbsp;
             {% endfor %}   
+
+      
       </li>
-      <li class="list-group-item">
-        {% if user.is_authenticated and user == quote.contributor %}
+      <li class="list-group-item">      
+        {% if user.is_authenticated and user.id == quote.contributor.id %}
         <div class="float-end">                  
           <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "update" %}</a>
           <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "delete" %}</a>
@@ -88,19 +84,19 @@
         {% endif %}         
         
         {% translate "published" %} {{ quote.date_created }}  {% translate "by" %} 
-        <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+        <a href="{% url 'users:get-user' quote.contributor.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
           {{ quote.contributor.username|safe }}
         </a>
          
       </li>
-      <!-- <li class="list-group-item">
+      <li class="list-group-item">
         <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
           
               
           {% include "like_quote.html" %} 
               
         </div>  
-      </li> -->
+      </li>
 
       <!-- Display when the quote was liked on the Favorite page -->
       {% if '/likes/' in request.path %}
