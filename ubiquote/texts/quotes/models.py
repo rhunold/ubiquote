@@ -70,6 +70,7 @@ class Quote(Text):
     #     QuoteCategory.objects.create(quote=self, category=category_instance)  
     
     class Meta:
+        ordering = ['-date_created'] 
         # ordering =['-date_created'],
         indexes = [
                 models.Index(fields=['-date_created','text','author'], name='quotes_idx',)
@@ -96,6 +97,7 @@ class QuotesCategories(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
     
     class Meta:
+        # ordering = ['category']    
         constraints = [
             # models.CheckConstraint(
             #     # check=models.Q(quote__count__lte=3,),
@@ -113,7 +115,7 @@ class QuotesCategories(models.Model):
     
 class QuotesLikes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE) # related_name='likes'
     timestamp = models.DateTimeField(auto_now_add=True)
     
     # @classmethod
