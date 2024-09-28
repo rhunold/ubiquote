@@ -22,6 +22,7 @@ class AuthorForm(forms.ModelForm):
         model = Author
         # fields = ('first_name', 'middle_name', 'last_name', 'nickname', 'avatar', 'biography', 'sex', 'date_birth') # 'contributor' 
         fields = '__all__'
+   
      
         # date_birth = forms.DateInput(
         #      input_formats=['%Y-%m-%d'], attrs={'class': 'form-control'})     
@@ -68,7 +69,8 @@ class AuthorAutoCompleteForm(forms.ModelForm):
 
 
 class AuthorTranslationForm(forms.ModelForm):
-
+    list_display_links = ('first_name', 'last_name', 'nickname')     
+    
     class Meta:
         model = AuthorTranslation
         fields = ('author', 'language_code', 'translated_name')
