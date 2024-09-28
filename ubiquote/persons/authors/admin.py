@@ -30,6 +30,7 @@ class AuthorAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'middle_name', 'last_name', 'nickname', 'date_created', 'date_birth', 'slug' ) # 'test_date'
     ordering = ('fullname',)
     search_fields = ['first_name', 'middle_name', 'last_name', 'nickname', 'title']
+    list_display_links = ('first_name', 'last_name', 'nickname')
     # autocomplete_fields = ['last_name']
 
     # widgets = {
@@ -107,7 +108,12 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 class AuthorTranslationAdmin(admin.ModelAdmin):
-    form = AuthorTranslationForm   
+    form = AuthorTranslationForm
+    
+    list_display = ('translated_name', 'language_code', 'author') # 'test_date'
+    ordering = ('author',)
+    search_fields = ['author', 'language_code', 'translated_name']
+
     
     # class Meta:
     #     model = AuthorTranslation
