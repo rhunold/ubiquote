@@ -11,7 +11,7 @@ SEX_CHOICES = (
     )
 
 NATIONALITIES_CHOICES= (
-    # To do : add country that no longer exist (prussia, etc... )
+    # To do : add country that no longer exist (prussia, persia etc... )
     ('Afghan', _('Afghan')),
     ('Albanian', _('Albanian')),
     ('Algerian', _('Algerian')),
@@ -151,6 +151,7 @@ NATIONALITIES_CHOICES= (
     ('Northern Irish', _('Northern Irish')),
     ('Norwegian', _('Norwegian')),
     ('Omani', _('Omani')),
+    ('Other', _('Other')),    
     ('Pakistani', _('Pakistani')),
     ('Palauan', _('Palauan')),
     ('Panamanian', _('Panamanian')),
@@ -210,3 +211,5 @@ NATIONALITIES_CHOICES= (
     ('Zambian', _('Zambian')),
     ('Zimbabwean', _('Zimbabwean'))
     )
+
+
