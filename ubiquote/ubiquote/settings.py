@@ -15,6 +15,7 @@ import os
 from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key
 from django.utils.translation import gettext_lazy as _
+from datetime import timedelta
 
 # Load environments variables
 load_dotenv()
@@ -60,11 +61,15 @@ INSTALLED_APPS = [
     'persons',
     'persons.users',
     'persons.authors',
+    
+    'api',
+    'rest_framework',
+    'rest_framework_simplejwt',
+        
     # 'interactions.likes',  
     # 'interactions.follows',
     'django_htmx',    
     'rosetta', # managing translations in admin
-
     
     'debug_toolbar'
 ]
@@ -161,7 +166,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# For debut tool
+# For debug tool
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
@@ -169,7 +174,10 @@ INTERNAL_IPS = [
 # Absolute filesystem path to the directory that will hold collectstatic files.
 STATIC_ROOT = BASE_DIR / "static"
 
-STATICFILES_DIRS = [BASE_DIR / "static/custom/"]
+STATICFILES_DIRS = [
+    BASE_DIR / "static/custom/",
+    BASE_DIR / "static/img_generator/",    
+    ]
 
 
 # Default primary key field type
@@ -192,6 +200,7 @@ DEFAULT_PAGINATION = 10  # Define your default pagination value here
 LANGUAGES = (
     ('en', _('English')),
     ('fr', _('French')),
+    ('es', _('Spanish')),    
 )
 
 LOCALE_PATHS = (
@@ -201,11 +210,33 @@ LOCALE_PATHS = (
 AUTH_USER_MODEL = 'users.User'
 
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = 'texts:home'
-LOGOUT_REDIRECT_URL = 'texts:home'
+LOGIN_REDIRECT_URL = 'texts:get-home'
+LOGOUT_REDIRECT_URL = 'texts:get-home'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # to disable the security when you want to proceed more than 1000 operations at once (delete all authors...)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # Adjust this to your desired number of items per page
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',       
+        # 'rest_framework.authentication.TokenAuthentication',  
+        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',        
+    ),    
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Or AllowAny
+    ),    
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set a duration for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Set a duration for refresh tokens
+    'ROTATE_REFRESH_TOKENS': True,  # Optional: rotate refresh tokens on usage
+    'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklist old tokens after rotation
+}
