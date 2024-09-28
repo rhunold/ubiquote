@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 
 from .models import Category
 from texts.quotes.models import Quote, QuotesLikes
-from texts.quotes.views import LanguageFilterMixin
+# from texts.quotes.views import LanguageFilterMixin
 # from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 
@@ -24,188 +24,243 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.conf import settings
 LANGUAGES = settings.LANGUAGES
+from django.utils.translation import get_language
 
-from texts.quotes.services import RecommendationService
+import requests
+
+from rest_framework.permissions import AllowAny
+
+# from texts.quotes.services import RecommendationService
 
 
 class GetCategoriesView(ListView):
-  model = Category
-  template_name = 'get_categories.html'
-  context_object_name = 'categories'  
-  # ordering =['-date_created']
-
-
-class GetCategoryView(LanguageFilterMixin, ListView):
-  model = Quote
-  queryset = Quote.published.all()  
-  context_object_name = 'quotes'
-  template_name = 'get_category.html'
-  ordering =['-date_created'] 
-  paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
-  
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      
-      # Get user likes for buton status           
-      
-      # Get the category id from the URL parameter
-      category_slug = self.kwargs['slug']
-      
-      # Get the category object based on the id
-      category = Category.objects.get(slug=category_slug)
-      
-      context['category'] = category  # Pass the category object to the template
-      
-      # Get translated names for authors
-      if hasattr(self, 'request'):
-          language_code = self.request.LANGUAGE_CODE
-      else:
-          language_code = 'en'  # Default language if language code is not available
-      
-      translated_names = {}
-      
-      
-      quotes = context['quotes']  # Get the queryset of quotes      
-      for quote in quotes:
-          author = quote.author
-          if author:
-              translated_names[quote.id] = author.get_translation(language_code)
-          else:
-              translated_names[quote.id] = 'Unknown'
-      
-      context['translated_names'] = translated_names      
-      
-      
-      return context  
-  
-  def get_queryset(self):
-      # Get the category id from the URL parameter
-      category_slug = self.kwargs['slug']    
-      
-      # Filter quotes by the category id
-      queryset = Quote.published.filter(categories__slug=self.kwargs['slug']  )
-      
-      return queryset
-
-
-
-
-class HomeView(ListView, LanguageFilterMixin): 
-    model = Quote   
-    context_object_name = 'quotes'
-    template_name = 'home.html'
-    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page
-
-    def get_queryset(self):
-        # Get the user
-        user = self.request.user
-        
-        # Get recommended quotes for the user
-        recommended_quotes = RecommendationService.recommend_quotes(user)
-        
-        # Sort the recommended quotes by date_created
-        sorted_quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)
-        
-        return sorted_quotes
+    template_name = 'get_categories.html'
+    context_object_name = 'categories'  
+    paginate_by = settings.DEFAULT_PAGINATION 
+    api_url = 'http://127.0.0.1:8000/api/categories/'
     
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Get total number of quotes in the database
-        total_quotes = Quote.objects.count()
-        context['total_quotes'] = total_quotes
-        
-        # GET the search query / create pagination
-        search_query = self.request.GET.get('q')
-        context['search_query'] = search_query
-        paginator = Paginator(self.get_queryset(), self.paginate_by)
-        page_number = self.request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        context['page_obj'] = page_obj
-        context['paginator'] = paginator
-        
+
         return context
-        
+    
+
     def get(self, request, *args, **kwargs):
-        try:
-            return super().get(request, *args, **kwargs)
-        except Http404:
-            page = self.request.GET.get('page', None)
-            paginator = Paginator(self.get_queryset(), self.paginate_by)
-            last_page = paginator.num_pages or 1
-            search_query = self.request.GET.get('q') or ''
-            if page:
-                return HttpResponseRedirect(reverse('quotes:get-quotes') + f'?q={search_query}&page={last_page}')
-            else:
-                raise
+        page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')
+        
+        api_url = f'{self.api_url}?page={page_number}&q={search_query}'
+        response = requests.get(api_url)
 
-    def get_template_names(self):
-        if self.request.htmx:
-            return ['quotes_cards.html']
-        return ['home.html']
-    
-    # def render_to_response(self, context, **response_kwargs):
-    #     if self.request.htmx:
-    #         # If request is htmx, return the corresponding template
-    #         template = self.get_template_names()
-    #         return super().render_to_response(context, template, **response_kwargs)
-    #     else:
-    #         # If regular request, return normal response
-    #         return super().render_to_response(context, **response_kwargs)   
+        if response.status_code == 200:
+            data = response.json()  
+            categories = data.get('results', [])
+            count = data.get('count')               
+            # next_page_url = data.get('next')
+        else:
+            categories = []
+            # next_page_url = None
 
-
-@login_required
-def home(request):
-  
-    recommended_quotes = RecommendationService.recommend_quotes(request.user)
-    
-    
-    # Order the recommended quotes by their primary key (id) to provide a consistent order
-    # quotes = recommended_quotes.order_by('date_created')
-    
-    quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)    
-    
-    if hasattr(request, 'LANGUAGE_CODE'):
-        language_code = request.LANGUAGE_CODE
-    else:
-        language_code = 'en'  # Default language if language code is not available
+        context = {
+            'categories': categories,
+            'count': count,            
+            # 'page_number': page_number,            
+            # 'next_page_url': next_page_url,
+            # 'search_query': search_query,
+        }
     
         
-    translated_names = {}
-    for quote in quotes:
-        author = quote.author
-        if author:
-            translated_names[quote.id] = author.get_translation(language_code)
+        # If it's an HTMX request, return only the quotes part
+        # if request.htmx:
+
+        #     return render(request, 'quotes_cards.html', context)        
+
+        return render(request, self.template_name, context)
+        
+
+
+class GetCategoryView(ListView): #LanguageFilterMixin
+    context_object_name = 'quotes'
+    template_name = 'get_category.html'  
+    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
+    api_url = 'http://127.0.0.1:8000/api/'
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  
+        return context
+
+
+    def get(self, request, *args, **kwargs):
+        page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')
+        
+        category_slug = self.kwargs['slug']        
+        category = get_object_or_404(Category, slug=category_slug)
+        # user = request.user
+        
+        api_url = f'{self.api_url}category/{category.slug}/quotes/?page={page_number}&q={search_query}'
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            data = response.json()  
+            # print(type(data))
+            # print(data)
+            count = data.get('count')                   
+            quotes = data.get('results', [])
+            next_page_url = data.get('next')
         else:
-            translated_names[quote.id] = 'Unknown'    
+            quotes = []
+            next_page_url = None
+
+
+        category_api_url = f'{self.api_url}category/{category.slug}/'
+        response_category = requests.get(category_api_url)
+
+        if response_category.status_code == 200:
+            category = response_category.json()
+        else:
+            category = [] # Raise an error ?
+
+        context = {
+            'category': category,
+            'quotes': quotes,
+            'page_number': page_number,    
+            'count': count,                      
+            'next_page_url': next_page_url,            
+        }
+        
+        # print(context['category'])
+        
+        # If it's an HTMX request, return only the quotes part
+        if request.htmx:
+            return render(request, 'quotes_cards.html', context)        
+
+        return render(request, self.template_name, context)
     
-    # context['translated_names'] = translated_names
+  
+
+
+class HomeView(ListView): # LoginRequiredMixin
+    context_object_name = 'quotes'
+    template_name = 'home.html'
+    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page 
+    api_url = 'http://127.0.0.1:8000/api/'    
     
-    # Shuffle the list of recommended quotes
-    # random.shuffle(quotes)    
 
-    # Paginate the recommended quotes
-    page_number = request.GET.get('page', 1)
-    paginator = Paginator(quotes, 10)  # Change 10 to the desired number of quotes per page
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  
+        return context
 
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
 
-    # Pass pagination variables to the template
-    context = {
-        'translated_names': translated_names,
-        'quotes': page_obj,
-        # 'quotes': recommended_quotes,
-        'page_obj' : page_obj,
-        'paginator': paginator,
-        'is_paginated': page_obj.has_other_pages(),
-    }
+    def get(self, request, *args, **kwargs):
+        page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')
 
-    return render(request, 'recommended_quotes.html', context)
+        # user = self.request.user
+         
+        access_token = self.request.session.get('access_token')
+
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+        }
+        
+        recommandation_api_url = f'{self.api_url}home/?page={page_number}&q={search_query}'
+        
+        
+
+
+        response = requests.get(recommandation_api_url, headers=headers)
+        
+        
+        # If unauthorized, try to refresh token and retry request
+        if response.status_code == 401:
+            new_access_token = self.refresh_access_token()
+            if new_access_token:
+                headers['Authorization'] = f'Bearer {new_access_token}'
+                response = requests.get(recommandation_api_url, headers=headers)
+            else:
+                response = requests.get(recommandation_api_url)
+
+        if response.status_code == 200:
+            data = response.json()  
+            count = data.get('count')                   
+            quotes = data.get('results', [])
+            next_page_url = data.get('next')
+       
+        else:
+            quotes = []
+            count = 0       
+            next_page_url = None 
+
+
+        context = {
+            'quotes': quotes,
+            'page_number': page_number,    
+            'count': count,                      
+            'next_page_url': next_page_url,            
+        }
+        
+        
+        # If it's an HTMX request, return only the quotes part
+        if request.htmx:
+            return render(request, 'quotes_cards.html', context)        
+
+        return render(request, self.template_name, context)    
+    
+    
+    def refresh_access_token(self):
+        refresh_token = self.request.session.get('refresh_token')
+        if refresh_token:
+            response = requests.post(
+                'http://127.0.0.1:8000/api/token/refresh/',
+                json={'refresh': refresh_token},
+                headers={'Content-Type': 'application/json'},
+            )
+            if response.status_code == 200:
+                data = response.json()
+                new_access_token = data.get('access')
+                if new_access_token:
+                    self.request.session['access_token'] = new_access_token
+                    return new_access_token
+        return None    
+
+    # def get_queryset(self):
+    #     # Get the user
+    #     user = self.request.user
+        
+    #     # Get recommended quotes for the user
+    #     recommended_quotes = RecommendationService.recommend_quotes(user)
+        
+    #     # Sort the recommended quotes by date_created
+    #     sorted_quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)
+        
+    #     return sorted_quotes
+    
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+        
+    #     # Get total number of quotes in the database
+    #     total_quotes = Quote.objects.count()
+    #     context['total_quotes'] = total_quotes
+        
+    #     # GET the search query / create pagination
+    #     search_query = self.request.GET.get('q')
+    #     context['search_query'] = search_query
+    #     paginator = Paginator(self.get_queryset(), self.paginate_by)
+    #     page_number = self.request.GET.get('page')
+    #     page_obj = paginator.get_page(page_number)
+    #     context['page_obj'] = page_obj
+    #     context['paginator'] = paginator
+        
+    #     return context
+        
+    # def get_template_names(self):
+    #     if self.request.htmx:
+    #         return ['quotes_cards.html']
+    #     return ['home.html']
+    
   
   
 # def translate(language):
