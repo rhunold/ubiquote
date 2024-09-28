@@ -21,7 +21,9 @@ app_name = 'ubiquote'
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path(_('admin/'), admin.site.urls),    
+    path(_('admin/'), admin.site.urls),
+    
+    path(_('api/'), include("api.urls")),
 
     path(
         r'author-autocomplete/',
