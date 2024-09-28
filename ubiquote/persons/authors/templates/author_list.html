@@ -1,51 +1,48 @@
 {% load static %}
 {% load i18n %}
-{% load get_item %} 
+
+{% load translated_author %}
+{% load highlight %}
+
+{% comment %}  {% load get_item %}  {% endcomment %} 
 
 
-<ul id="search-results">
-{% for author in authors %}
-<li>
-  <a href="{% url 'authors:get-author' author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
 
-    {% if '/en/' in request.path %}
-      {% if translated_names|get_item:author.id %}
-          {{ translated_names|get_item:author.id }}
-
-      {% else %}
-
-        {% if author.nickname %}
-          {{ author.nickname|default_if_none:""|safe }}
+        {% if search_query and page_number == 1 %}
+          <li>{{ count }} results for "{{ search_query }}"</li>
+          {% else %}
         {% endif %}
-        
-        {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} 
+
+        {% for author in authors %}
+
+          <!-- Trigger pagination/infinite scroll for loading more authors -->        
+          {% if forloop.last and next_page_url %}
+
+              <li class="list-group-item"
+                hx-get="{% url 'authors:get-authors' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                hx-trigger="revealed" 
+                hx-swap="afterend" 
+                hx-target="this">
+                
+            {% else %}
+              <li class="list-group-item">
+          {% endif %}
+                <a href="{% url 'authors:get-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">
+
+                  {% comment %}
+
+                  {{ author.display_name }} {% endcomment %}
+
+                  {{ author|translated_name|highlight_search:search_query|safe }} ({{ author.quote_count }} quotes)
+
+                </a>
+             </li>          
+
+        {% endfor %}
+      <!-- </ol> -->
 
 
-        
-        {{ author.particul|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
-
-      {% endif %}
-      
-    {% else %}
-
-      {% if author.nickname %}
-        {{ author.nickname|default_if_none:""|safe }}
-      {% endif %}
-      
-      {{ author.first_name|default_if_none:""|safe  }} {{ author.middle_name|default_if_none:""|safe }} 
-      {{ author.particul|default_if_none:""|safe }} {{ author.last_name|default_if_none:""|safe }}
-
-      {% comment %}
-        {{ author.fullname|default_if_none:""|safe  }}  
-      {% endcomment %}      
-
-    {% endif %}
-
-
-
-
-  </a>
-</li>  
-{% endfor %}
-</ul>
+{% if not authors %}
+  <li>Try a different search or explore our collection!</li>
+{% endif %}
 
