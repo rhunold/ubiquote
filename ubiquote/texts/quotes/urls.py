@@ -1,31 +1,26 @@
 from django.urls import path
 from django.urls import re_path
-from .views import GetQuotesView, GetQuoteView, AddQuoteView, UpdateQuoteView, DeleteQuoteView #, like_unlike_quote
-from .views import like_quote, recommend_quotes #, search_quotes, quote_result
+from . import views
 
 app_name = 'quotes'
 
 urlpatterns = [
-    path('quotes/', GetQuotesView.as_view(), name='get-quotes'),
-    path('quote/<str:slug>', GetQuoteView.as_view(), name='get-quote'),
-    path('add/quote/', AddQuoteView.as_view(), name='add-quote'),
-    path('update/quote/<str:slug>', UpdateQuoteView.as_view() , name='update-quote'),
-    path('delete/quote/<str:slug>', DeleteQuoteView, name='delete-quote'),
+    path('quotes/', views.GetQuotesView.as_view(), name='get-quotes'),
+    path('quote/<str:slug>', views.GetQuoteView.as_view(), name='get-quote'),
+    path('add/quote/', views.AddQuoteView.as_view(), name='add-quote'),
+    path('update/quote/<str:slug>', views.UpdateQuoteView.as_view(), name='update-quote'),
+    path('delete/quote/<str:slug>', views.DeleteQuoteView.as_view(), name='delete-quote'),
+
     
-  
-    # function to add / remove a like on a quote
-    path('quote/like/<int:id>/', like_quote, name='like-quote'),
-    
-    
-    path('recommendations/<int:user_id>/', recommend_quotes, name='recommend-quotes'),
+    path('quote/like/<int:id>/', views.like_quote, name='like_quote'),    
+    path('recommendations/<int:user_id>/', views.recommend_quotes, name='recommend-quotes'),
      
-    
-    # path('search/', search_quotes, name='search-quotes'),  
-        
-    # path('search_quotes/', search_quotes, name='search-quotes'),
-    # path('quote_results/', quote_results, name='quote-results'),     
-    
-    # path('search/', search, name='search'),    
+    # function to add / remove a like on a quote
+    # path('quote/like/<int:id>/', views.like_quote, name='like-quote'),     
+    # path('search/', views.search_quotes, name='search-quotes'),  
+    # path('search_quotes/', views.search_quotes, name='search-quotes'),
+    # path('quote_results/', views.quote_results, name='quote-results'),     
+    # path('search/', views.search, name='search'),    
     
 
 ]
