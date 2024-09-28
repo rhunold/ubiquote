@@ -2,58 +2,53 @@
 {% load static %}
 {% load i18n %}
 
-{% block title %}Authors{% endblock %}
+
+
+{% block title %}{{ count }} Authors{% endblock %}
 {% block meta_decription %}All the authors{% endblock %}
 
 {% block body %}
-    <h1>Authors</h1>
+    <!-- <h1>Authors</h1> -->
 
-    <p>{{ page_obj.paginator.count }} author available in the database</p>
-
-
-    <!-- Autocomplete input -->
-    <input type="text" name="q"
-    hx-get="{% url 'authors:search_authors' %}"
-    hx-trigger="keyup changed delay:500ms"
-    hx-target="#author-list"
-    hx-swap="innerHTML"
-    placeholder="{% translate 'Search authors...' %}">
-
-    <!-- Author list -->
-    <div id="author-list" hx-preserve="true" >  
-      <!-- This will be replaced with the updated author list -->
-    
-      {% include "author_list.html" %}
-
-    </div>
+    <!-- <p>{{ count }} authors available in the database</p> -->
 
 
+     
+
+    <form class="search_bar row g-3 bg-transparent">
+
+        <div class="col-md">
+            <!-- HTMX target for the list -->
+            <input 
+            placeholder="{% blocktrans %}Search {{ count }} authors{% endblocktrans %}"
+            value="{{ search_query }}"
+            class="form-control me-2" 
+            type="text" 
+            name="q"
+            hx-get="{% url 'authors:get-authors' %}"
+            hx-trigger="keyup changed delay:500ms"
+            hx-target="#results"
+            hx-swap="innerHTML">
+        </div>    
+
+        <div class="col-auto">
+            <button class="btn btn-primary x-1" type="submit">Search</button>
+        </div>  
+    </form>
+
+
+    <div class="row g-3 m-md-1 bg-transparent">
+    <!-- <p> {{ count }} auteurs</p>  -->
+    <ul id="results" class="list-group list-group-numbered col-md" >
+        {% include 'author_list.html' %}
+    </ul>   
+</div>       
 
 
 
-    {% if is_paginated %}
-        <div class="pagination m-md-5 align-items-center justify-content-center">
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; first</a>                
-                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>                    
-                {% endif %}
-            </span>
-        </div>
-    {% endif %}        
 
-
-    {% if user.is_superuser %} 
-      <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">{% translate "Add author" %}</a>
-    {% endif %}
-
-
+{% if user.is_superuser %} 
+<a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">{% translate "Add author" %}</a>
+{% endif %}
 
 {% endblock %}  
