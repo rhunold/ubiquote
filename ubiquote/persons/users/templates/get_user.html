@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ profil }} profil page {% endblock %}
+{% block title %}{{ profil.username }} profil page {% endblock %}
 
 {% block meta_decription %}{{ profil}} - {% endblock %}
 
@@ -12,8 +12,10 @@
     <h2>{{ profil.first_name|default_if_none:""  }} {{ profil.middle_name|default_if_none:"" }} {{ profil.last_name|default_if_none:"" }}</h2>
 
     {% if profil.avatar.url is not None %}
-      <img src="{{ user.avatar.url }}" class="rounded-circle">
+      <img src="{{ profil.avatar.url }}" class="rounded-circle">
     {% endif %}
+
+
 
 
     <!-- <p>{{ quotes.count }} quotes published.</p>     -->
@@ -43,11 +45,11 @@
       </a>
     </p>
 
-    Total contribution : {{ total_quotes }}
+    Total contribution : {{ count }}
     {% include "quotes_cards.html" %}
 
 
-    {% if user.is_authenticated and user.slug == profil.slug or user.is_superuser  %}
+    {% if user.is_authenticated and profil.slug == user.slug or user.is_superuser  %}
       <a href="{% url 'users:update-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update user</a>
       <a href="{% url 'users:delete-user' user.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete user</a>      
     {% endif %}
