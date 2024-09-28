@@ -1,20 +1,24 @@
 from django.urls import path, include
-from .views import UserRegisterView, LoginView, GetUsersView, GetUserView, UpdateUserView, DeleteUserView, GetUserLikesView, LogoutView
+from . import views
+
 
 app_name = 'users'
 
 urlpatterns = [
-    path('register/', UserRegisterView.as_view(), name='user-register'),
+    path('register/', views.UserRegisterView.as_view(), name='user-register'),
   
     # path('', include('django.contrib.auth.urls')),
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),      
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),      
     
-    path('users/', GetUsersView.as_view(), name='get-users'),
-    path('user/<str:slug>/', GetUserView.as_view(), name='get-user'),
-    path('user/<str:slug>/likes/', GetUserLikesView.as_view(), name='get-user-likes'),        
-    path('update/user/<str:slug>/', UpdateUserView.as_view(), name='update-user'),
-    path('delete/user/<str:slug>/', DeleteUserView.as_view(), name='delete-user'),   
+    path('users/', views.GetUsersView.as_view(), name='get-users'),
+    path('user/<str:slug>/', views.GetUserView.as_view(), name='get-user'),
+      
+    path('update/user/<str:slug>/', views.UpdateUserView.as_view(), name='update-user'),
+    path('delete/user/<str:slug>/', views.DeleteUserView.as_view(), name='delete-user'), 
+    
+    
+    path('likes/<str:slug>/', views.GetUserLikesView.as_view(), name='get-user-likes'),        
   
     # path('add/user/', AddUserView.as_view(), name='add-user'),       
     
