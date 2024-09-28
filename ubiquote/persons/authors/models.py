@@ -11,6 +11,12 @@ from django.db.models import Q
 
 from django.conf import settings
 LANGUAGES = settings.LANGUAGES
+from django.utils.translation import get_language
+
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # from flexidate import FlexiDate
 
@@ -31,17 +37,17 @@ class Author(Person):
     avatar = models.ImageField(_('avatar'),upload_to='avatars/authors/', null=True, blank=True, default='avatars/default.png')
  
     
-    slug = AutoSlugField(populate_from='generate_slug', unique=True, null=True, default=None)
+    slug = AutoSlugField(populate_from='generate_fullname', unique=True, null=True, default=None)
   
     
-    def generate_slug(self):
-        # Customize this method to generate the slug from the desired field(s)
-        if self.nickname:
-            return self.nickname
-        elif self.title:
-            return f'{self.title} {self.last_name}'       
-        else:
-            return f'{self.first_name or ""}{self.middle_name or ""}{self.particul or ""}{self.last_name or ""}'
+    # def generate_slug(self):
+    #     # Customize this method to generate the slug from the desired field(s)
+    #     if self.nickname:
+    #         return self.nickname
+    #     elif self.title:
+    #         return f'{self.title} {self.last_name}'       
+    #     else:
+    #         return f'{self.first_name or ""}{self.middle_name or ""}{self.particul or ""}{self.last_name or ""}'
         
     
     
@@ -49,33 +55,29 @@ class Author(Person):
     #     return f'avatars/authors/{instance.generate_slug()}_{filename}'    
     
     def __str__(self):
-
-        # if self.nickname:
-        #     return self.nickname
-        # elif self.title:
-        #     return f'{self.title} {self.last_name}'       
-        # else:
-        #     return f'{self.first_name or ""}{self.middle_name or ""}{self.particul or ""}{self.last_name or ""}'
                 
         return f'{self.fullname or ""}'
     
     def generate_fullname(self):
-        # order = self.ordering.split(',') if self.ordering else None
-        components = [ self.last_name ,self.nickname, self.first_name, self.middle_name]
+        # Customize this method to generate the slug from the desired field(s)
+        if self.nickname:
+            return self.nickname
+        elif self.title:
+            return f'{self.title} {self.last_name}'       
+        else:
+            return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
 
-        # if order:
-        #     # Sort the components based on the specified order
-        #     components.sort(key=lambda x: order.index(x) if x in order else len(order))
+        # components = [ self.last_name ,self.nickname, self.first_name, self.middle_name]
             
 
 
-        non_empty_components = [component for component in components if component]
+        # non_empty_components = [component for component in components if component]
 
-        if non_empty_components:
-            # print(" ".join(non_empty_components))
-            return " ".join(non_empty_components)
-        else:
-            return None
+        # if non_empty_components:
+        #     # print(" ".join(non_empty_components))
+        #     return " ".join(non_empty_components)
+        # else:
+        #     return None
             
     
     def save(self, *args, **kwargs):
@@ -89,24 +91,11 @@ class Author(Person):
     #     count = Author.objects.count()
     #     return count
     
-    def get_translation(self, language_code):
-        try:
-            translation = self.authortranslation_set.get(language_code="en")
-            return translation.translated_name
-        except AuthorTranslation.DoesNotExist:
-            
-            if self.nickname:
-                return self.nickname
-            elif self.title:
-                return f'{self.title} {self.last_name}'       
-            else:
-                return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'
-                                
-            
-            # return self.fullname    
+    
     
     class Meta:
-       ordering = ['fullname']
+    #    ordering = ['last_name']
+       ordering = ['nickname', 'last_name', 'middle_name', 'first_name']
        
 # # Save all instance to generate the new fullname
 # for author in Author.objects.all():
@@ -119,13 +108,9 @@ class AuthorTranslation(models.Model):
     language_code = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="en") # first lang to be translated : en . Because I'm fr
     translated_name = models.CharField(max_length=255)
     
-    def __str__(self):
-        # if self.nickname:
-        #     return self.nickname
-        # else:
-        #     return f' {self.title or ""} {self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
+    def __str__(self):      
         
-        return f'{self.translated_name or ""}'    
+        return f'{self.translated_name}'    
 
     class Meta:
         unique_together = ('author', 'language_code')
@@ -139,7 +124,7 @@ class AuthorAutocomplete(autocomplete.Select2QuerySetView):
         if not self.request.user.is_authenticated:
             return Author.objects.none()
 
-        qs = Author.objects.all().order_by('last_name')
+        qs = Author.objects.all()
 
         # if self.q:
             # qs = qs.filter(last_name__istartswith=self.q)
