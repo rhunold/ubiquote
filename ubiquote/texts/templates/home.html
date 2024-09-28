@@ -7,8 +7,12 @@
 
 {% block body %}
 
+    <h1>{{ count }} recommandations for you !</h1>
+
     {% include "quotes_cards.html" %}
 
+    {% comment %} 
     {% include "quotes_pagination.html" %}        
+    {% endcomment %} 
 
 {% endblock %}  
