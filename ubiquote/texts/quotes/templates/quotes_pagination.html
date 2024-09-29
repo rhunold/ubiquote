@@ -1,55 +1,20 @@
 
+<!-- Show pagination only if javascript is desactivated -->
+<noscript> 
 
-<!-- Pagination -->
-<!-- {% if page_obj.has_next %}
-  <a href="#" hx-get="{% url 'quotes:get-quotes' %}?q={{ search_query }}&page={{ page_obj.next_page_number }}" hx-trigger="load more" hx-target="#quotes-container">
-    Load More
-  </a>
-{% endif %} -->
-
-<!-- <div class="progress">
-    <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
-  </div> -->
-
-<!-- 
-{% if is_paginated %}
-<div class="pagination m-md-5 align-items-center justify-content-center">
-    <span class="page-links">
-        {% if page_obj.has_previous %}
-            <a href="?q={% if search_query %}q={{ search_query }}&{% endif %}page=1">&laquo; first</a>                
-            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
-        <span class="page-current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+{% if next_page_url or previous_page_url  %}
+    <div class="pagination m-md-5 align-items-center justify-content-center">
+        <span class="page-links">
+            {% if previous_page_url %}
+                <a href="{{ previous_page_url }}">&laquo; previous</a>
+            {% endif %}
+            <span class="page-current">
+                Page {{ page_number }}
+            </span>
+            {% if next_page_url %}
+                <a href="{{ next_page_url }}">next &raquo;</a>
+            {% endif %}
         </span>
-        {% if page_obj.has_next %}
-            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}">next</a>
-            <a href="?{% if search_query %}q={{ search_query }}&{% endif %}page={{ page_obj.paginator.num_pages }}">last &raquo;</a>                    
-        {% endif %}
-    </span>
-</div>
-{% endif %}  -->
-
-
-
-
-
-
-<!-- 
-{% if is_paginated %}
-<div class="pagination m-md-5 align-items-center justify-content-center">
-    <span class="page-links">
-        {% if page_obj.has_previous %}
-            <a href="?q={{ search_query }}&page=1">&laquo; first</a>                
-            <a href="?q={{ search_query }}&page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
-        <span class="page-current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
-        {% if page_obj.has_next %}
-            <a href="?q={{ search_query }}&page={{ page_obj.next_page_number }}">next</a>
-            <a href="?q={{ search_query }}&page={{ page_obj.paginator.num_pages }}">last &raquo;</a>                    
-        {% endif %}
-    </span>
-</div>
-{% endif %}  -->
+    </div>    
+{% endif %} 
+</noscript>

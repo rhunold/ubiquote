@@ -133,8 +133,17 @@ class GetQuotesView(ListView):
         # Extract quotes and other pagination-related data
         quotes = data.get('results', [])
         count = data.get('count', 0)
+        previous_page_url = data.get('previous')              
         next_page_url = data.get('next')
-        error = data.get('error', None)
+        # error = data.get('error', None)
+        
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/quotes/', f'/{lang}/quotes/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/quotes/', f'/{lang}/quotes/')        
 
         # Prepare the context for rendering
         context = {
@@ -142,8 +151,9 @@ class GetQuotesView(ListView):
             'count': count,
             'page_number': page_number,
             'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,      
             'search_query': search_query,
-            'error': error,  # Pass error information to the template if necessary
+            # 'error': error,  # Pass error information to the template if necessary
         }
 
         # Render the appropriate template based on the request type (HTMX or full page)

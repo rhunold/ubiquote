@@ -1,44 +1,24 @@
 <div id="quotes-container">
-    {{ next_page_url }}
+    {% comment %}{{ next_page_url }}{% endcomment %}
 
     {% for quote in quotes %}
 
         {% if forloop.last %}
             <!-- Pagination activated for infinite loop -->
-
             {% if next_page_url %}
-
-                {% if '/likes/' in request.path %}
-                    <div hx-get="{% url 'users:get-user-likes' slug=profil.slug %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">
-                                 
-                {% elif '/quotes/' in request.path %}
-                    <div hx-get="{% url 'quotes:get-quotes' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">        
-
-                {% elif '/author/' in request.path %}
-                    <div hx-get="{% url 'authors:get-author' slug=author.slug  %}?page={{ page_number|add:1 }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">
-
-                {% elif '/user/' in request.path %}
-                    <div hx-get="{% url 'users:get-user' slug=user.slug  %}?page={{ page_number|add:1 }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">     
-                        
-                {% elif '/category/' in request.path %}
-                    <div hx-get="{% url 'texts:get-category' slug=category.slug  %}?page={{ page_number|add:1 }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">  
-                        
-                {% elif '/category/' in request.path %}
-                    <div hx-get="{% url 'texts:get-category' slug=category.slug  %}?page={{ page_number|add:1 }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">  
-                                                                                  
-                {% else %}
-                
-                    <div hx-get="{% url 'texts:get-home' %}?page={{ page_number|add:1 }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this">  
-                        {{ page_number}} 
-                {% endif %}
-
-                </div>
+            <div hx-get="{{ next_page_url }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this"></div>
             {% endif %}
         {% endif %}
 
         {% include "quote_card.html" %}
+
+
+
+
     {% empty %}
         <!-- If empty -->
         <p>There is no quotes here. Let's create one !</p>
     {% endfor %}
 </div>
+
+{% include "quotes_pagination.html" %}

@@ -63,9 +63,19 @@ class GetAuthorsView(ListView):
             authors = data.get('results', [])
             count = data.get('count')            
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')                  
         else:
             authors = []
             next_page_url = None
+            
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/authors/', f'/{lang}/authors/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/authors/', f'/{lang}/authors/')
+            
 
         if search_query:
             escaped_query = re.escape(search_query)
@@ -90,13 +100,15 @@ class GetAuthorsView(ListView):
         context = {
             'authors': authors,
             'count': count,            
-            'page_number': page_number,            
+            'page_number': page_number,
             'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,      
             'search_query': search_query,
         }
         
         # Handle HTMX requests for partial rendering
-        if request.headers.get('HX-Request'):  # Check for HTMX request
+        # if request.headers.get('HX-Request'):  # Check for HTMX request
+        if request.htmx:            
             return render(request, 'author_list.html', context)
 
         # For regular requests, render the full page
@@ -113,103 +125,10 @@ class GetAuthorsView(ListView):
 
   
 
-# class GetAuthorsView(ListView):
-#     model = Author
-#     template_name = 'get_authors.html'
-#     context_object_name = 'authors'
-#     paginate_by = settings.DEFAULT_PAGINATION
-#     api_url = 'http://127.0.0.1:8000/api/authors/'  
-
-    
-
-#     def get(self, request, *args, **kwargs):
-#         page_number = request.GET.get('page', 1)
-#         search_query = request.GET.get('q', '')
-        
-#         api_url = f'http://127.0.0.1:8000/api/authors/?page={page_number}&q={search_query}'
-#         response = requests.get(api_url)
-
-#         if response.status_code == 200:
-#             data = response.json()
-#             # print(type(data))
-#             # print(data)
-#             authors = data.get('results', [])
-#             count = data.get('count')            
-#             next_page_url = data.get('next')
-#         else:
-#             authors = []
-#             next_page_url = None
-
-
-
-
-#         # Highlight the search query in the author names if it exists
-#         if search_query:
-#             escaped_query = re.escape(search_query)
-#             for author in authors:
-#                 author['highlighted_name'] = re.sub(
-#                     f'({escaped_query})', 
-#                     r'<strong>\1</strong>', 
-#                     author['fullname'], 
-#                     flags=re.IGNORECASE
-#                 )
-#                 author['highlighted_name'] = mark_safe(author['highlighted_name'])  # Mark safe for rendering HTML
-#         else:
-#             for author in authors:
-#                 author['highlighted_name'] = author['fullname']
-
-
-
-#         context = {
-#             'authors': authors,
-#             'count': count,            
-#             'page_number': page_number,            
-#             'next_page_url': next_page_url,
-#             'search_query': search_query,
-#         }
-        
-#         # Handle HTMX requests for partial rendering
-#         if request.headers.get('HX-Request'):  # Check for HTMX request
-#             return render(request, 'author_list.html', context)
-
-#         # For regular requests, render the full page
-#         return render(request, self.template_name, context)
-    
-#     def render_to_response(self, context, **response_kwargs):
-#         if request.htmx:
-#             authors_html = render_to_string('author_list.html', context)
-#             print(authors_html)
-#             return JsonResponse({'authors_html': authors_html})
-#         else:
-#             return super().render_to_response(context, **response_kwargs)
-
-
-  
-
 class GetAuthorView(LoginRequiredMixin, ListView): # LanguageFilterMixin
-    # model = Quote
-    # queryset =  Quote.published.all()
     context_object_name = 'quotes'  
     template_name = 'get_author.html'
     paginate_by = settings.DEFAULT_PAGINATION  
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     # context['quotes_count'] = self.get_queryset().count()        
-        
-    #     user = self.request.user
-    #     quotes = context['quotes']  # Get the queryset of quotes
-    #     quotes_like_statut = {quote.id: QuotesLikes.has_user_liked(user, quote) for quote in quotes}
-    #     liked_quotes = [quote_id for quote_id, liked in quotes_like_statut.items() if liked]  
-    #     context['liked_quotes'] = liked_quotes
-        
-    #     # Get the author slug from the URL parameter to Get the author object 
-    #     author_slug = self.kwargs['slug']
-    # #   context['author_slug'] = author_slug
-    #     author = Author.objects.get(slug=author_slug)
-    #     context['author'] = author
-
-    #     return context
 
 
     def get(self, request, *args, **kwargs):
@@ -228,6 +147,7 @@ class GetAuthorView(LoginRequiredMixin, ListView): # LanguageFilterMixin
             quotes = data.get('results', [])
             count = data.get('count')               
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')               
         else:
             quotes = []
             next_page_url = None
@@ -241,14 +161,24 @@ class GetAuthorView(LoginRequiredMixin, ListView): # LanguageFilterMixin
             # next_page_url = data.get('next')
         else:
             author = []
-            # next_page_url = None            
+            # next_page_url = None  
+            
+
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/quotes/', f'/{lang}/author/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/quotes/', f'/{lang}/author/')                      
 
         context = {
             'author': author, 
             'quotes': quotes,
-            'page_number': page_number,
             'count': count,                      
+            'page_number': page_number,              
             'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,     
             # 'search_query': search_query,                    
         }
         
@@ -339,7 +269,7 @@ def search_authors(request):
 
 
         # authors = Author.objects.annotate(similarity=TrigramSimilarity(Unaccent('last_name'), query),).filter(similarity__gt=0.3).order_by('-similarity')        
-        print(authors.query)  # Check the generated SQL query
+        # print(authors.query)  # Check the generated SQL query
 
     else:
         # If the query is too short, return an empty result
@@ -358,11 +288,11 @@ def search_authors(request):
         return render(request, 'author_list.html', {'authors': authors, 'translated_names': translated_names }) # 'translated_names': translated_names   
   
   
-def author_list(request):
+# def author_list(request):
   
-    # authors = Author.objects.all()[:20]
-    # authors = Author.objects.all().order_by('-last_name') 
-    pass
+#     # authors = Author.objects.all()[:20]
+#     # authors = Author.objects.all().order_by('-last_name') 
+#     pass
      
-    # return render(request, 'author_list.html', {'authors': authors})  
+#     # return render(request, 'author_list.html', {'authors': authors})  
   

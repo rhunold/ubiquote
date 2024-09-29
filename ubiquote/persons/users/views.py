@@ -53,48 +53,58 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
-        
         profil_slug = self.kwargs['slug']
         user = request.user
+                
 
         # Adjust API URL to pass pagination and search query
         likes_api_url = f'{self.api_url}/likes/{profil_slug}/?page={page_number}'
         # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
         
         # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
-        likes_response = requests.get(likes_api_url)
+        response = requests.get(likes_api_url)
 
-        if likes_response.status_code == 200:
-            data = likes_response.json()
+        if response.status_code == 200:
+            data = response.json()
             # print(data)
             quotes = data.get('results', [])
-            count = data.get('count')               
+            count = data.get('count', 0)             
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')            
         else:
             quotes = []
             next_page_url = None
+            previous_page_url = None            
 
+        lang = request.LANGUAGE_CODE
+        # Replace /api/likes/ with the correct frontend path
+        if next_page_url:
+            next_page_url = next_page_url.replace('/api/', f'/{lang}/')
+
+        print(previous_page_url)
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace('/api/', f'/{lang}/')
+        print(previous_page_url)            
 
         profil_api_url = f'{self.api_url}/user/{profil_slug}/'
         profil_response = requests.get(profil_api_url)
 
         if profil_response.status_code == 200:
             profil = profil_response.json()
-            # user = data.get('results', [])
-            # next_page_url = data.get('next')
+
         else:
             profil = []
-            # next_page_url = None            
 
 
         context = {
             'profil': profil, 
             'quotes': quotes,
-            'page_number': page_number,    
-            'count': count,                      
+            'count': count,
+            'page_number': page_number,
             'next_page_url': next_page_url,
-            # 'search_query': search_query,                    
-        }
+            'previous_page_url': previous_page_url,
+                  
+        }    
         
         # If it's an HTMX request, return only the quotes part
         if request.htmx:
@@ -195,28 +205,37 @@ class GetUserView(LoginRequiredMixin, ListView):
         # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
         
         # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
-        quote_response = requests.get(quote_api_url)
+        response = requests.get(quote_api_url)
 
-        if quote_response.status_code == 200:
-            data = quote_response.json()
+        if response.status_code == 200:
+            data = response.json()
             # print(data)
             quotes = data.get('results', [])
-            count = data.get('count')               
+            count = data.get('count', 0)             
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')            
         else:
             quotes = []
             next_page_url = None
+            previous_page_url = None            
+
+
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
 
         profil_api_url = f'{self.api_url}/user/{profil.slug}/'
         profil_response = requests.get(profil_api_url)
 
         if profil_response.status_code == 200:
             profil = profil_response.json()
-            # user = data.get('results', [])
-            # next_page_url = data.get('next')
         else:
             profil = []
-            # next_page_url = None            
+       
 
 
         context = {
@@ -224,8 +243,9 @@ class GetUserView(LoginRequiredMixin, ListView):
             'quotes': quotes,
             'page_number': page_number,    
             'count': count,                      
+            'page_number': page_number,
             'next_page_url': next_page_url,
-            # 'search_query': search_query,                    
+            'previous_page_url': previous_page_url,                  
         }
         
         # If it's an HTMX request, return only the quotes part

@@ -57,7 +57,8 @@ class GetCategoriesView(ListView):
             data = response.json()  
             categories = data.get('results', [])
             count = data.get('count')               
-            # next_page_url = data.get('next')
+            next_page_url = data.get('next')
+            
         else:
             categories = []
             # next_page_url = None
@@ -110,9 +111,19 @@ class GetCategoryView(ListView): #LanguageFilterMixin
             count = data.get('count')                   
             quotes = data.get('results', [])
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')                 
         else:
             quotes = []
             next_page_url = None
+            
+            
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/category/{category_slug}/quotes/', f'/{lang}/category/{category_slug}/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/category/{category_slug}/quotes/', f'/{lang}/category/{category_slug}/')            
 
 
         category_api_url = f'{self.api_url}category/{category.slug}/'
@@ -126,9 +137,11 @@ class GetCategoryView(ListView): #LanguageFilterMixin
         context = {
             'category': category,
             'quotes': quotes,
-            'page_number': page_number,    
-            'count': count,                      
-            'next_page_url': next_page_url,            
+            'count': count,                        
+            'page_number': page_number,              
+            'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,      
+            'search_query': search_query,    
         }
         
         # print(context['category'])
@@ -168,9 +181,6 @@ class HomeView(ListView): # LoginRequiredMixin
         
         recommandation_api_url = f'{self.api_url}home/?page={page_number}&q={search_query}'
         
-        
-
-
         response = requests.get(recommandation_api_url, headers=headers)
         
         
@@ -188,6 +198,7 @@ class HomeView(ListView): # LoginRequiredMixin
             count = data.get('count')                   
             quotes = data.get('results', [])
             next_page_url = data.get('next')
+            previous_page_url = data.get('previous')   
        
         else:
             quotes = []
@@ -195,11 +206,21 @@ class HomeView(ListView): # LoginRequiredMixin
             next_page_url = None 
 
 
+        # Replace /api/likes/ with the correct frontend path
+        lang = request.LANGUAGE_CODE        
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/home/', f'/{lang}/')
+
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/home/', f'/{lang}/')
+
         context = {
             'quotes': quotes,
             'page_number': page_number,    
             'count': count,                      
-            'next_page_url': next_page_url,            
+            'page_number': page_number,              
+            'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,         
         }
         
         
@@ -226,41 +247,6 @@ class HomeView(ListView): # LoginRequiredMixin
                     return new_access_token
         return None    
 
-    # def get_queryset(self):
-    #     # Get the user
-    #     user = self.request.user
-        
-    #     # Get recommended quotes for the user
-    #     recommended_quotes = RecommendationService.recommend_quotes(user)
-        
-    #     # Sort the recommended quotes by date_created
-    #     sorted_quotes = sorted(recommended_quotes, key=lambda quote: quote.date_created)
-        
-    #     return sorted_quotes
-    
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-        
-    #     # Get total number of quotes in the database
-    #     total_quotes = Quote.objects.count()
-    #     context['total_quotes'] = total_quotes
-        
-    #     # GET the search query / create pagination
-    #     search_query = self.request.GET.get('q')
-    #     context['search_query'] = search_query
-    #     paginator = Paginator(self.get_queryset(), self.paginate_by)
-    #     page_number = self.request.GET.get('page')
-    #     page_obj = paginator.get_page(page_number)
-    #     context['page_obj'] = page_obj
-    #     context['paginator'] = paginator
-        
-    #     return context
-        
-    # def get_template_names(self):
-    #     if self.request.htmx:
-    #         return ['quotes_cards.html']
-    #     return ['home.html']
-    
   
   
 # def translate(language):
