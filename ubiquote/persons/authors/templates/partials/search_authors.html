@@ -1,20 +1,17 @@
 {% load static %}
 {% load i18n %}
 
-
-
-    <form class="search_bar row g-3 bg-transparent" method="GET" >
+    <form class="search_bar row g-3 bg-transparent">
 
         <div class="col-md">
             <!-- HTMX target for the list -->
             <input 
-            arial-label="Search"
-            placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %}"
-            value="{% if search_query %}{{ search_query }}{% else %}{% endif %}"
+            placeholder="{% blocktrans %}Search {{ count }} authors{% endblocktrans %}"
+            value="{{ search_query }}"
             class="form-control me-2" 
             type="text" 
             name="q"
-            hx-get="{% url 'quotes:get-quotes' %}"
+            hx-get="{% url 'authors:get-authors' %}"
             hx-trigger="keyup changed delay:500ms"
             hx-target="#results"
             hx-swap="innerHTML">
@@ -24,5 +21,3 @@
             <button class="btn btn-primary x-1" type="submit">Search</button>
         </div>  
     </form>
-
- 

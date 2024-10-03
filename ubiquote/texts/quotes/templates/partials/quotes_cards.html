@@ -1,17 +1,28 @@
-<div id="quotes-container">
-    {% comment %}{{ next_page_url }}{% endcomment %}
+
+
+
+
+{% if search_query and page_number == 1 %}
+<p>{{ count }} results for "{{ search_query }}"...</p>
+{% else %}
+{% endif %}       
 
     {% for quote in quotes %}
 
-        {% if forloop.last %}
-            <!-- Pagination activated for infinite loop -->
-            {% if next_page_url %}
-            <div hx-get="{{ next_page_url }}" hx-trigger="revealed" hx-swap="afterend" hx-target="this"></div>
-            {% endif %}
+      <!-- Trigger pagination/infinite scroll -->        
+        {% if forloop.last and next_page_url %}
+            <div class="card mt-3"
+            hx-get="{% url 'quotes:get-quotes' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+            hx-trigger="revealed" 
+            hx-swap="afterend" 
+            hx-target="this">
+        {% else %}
+            <div class="card mt-3">
         {% endif %}
 
         {% include "quote_card.html" %}
 
+    
 
 
 
@@ -19,6 +30,6 @@
         <!-- If empty -->
         <p>There is no quotes here.</p>
     {% endfor %}
-</div>
 
-{% include "quotes_pagination.html" %}
+
+

@@ -61,19 +61,19 @@ class GetAuthorsView(DataFetchingMixin, ListView):
         count = data.get('count', 0)
 
 
-        if search_query:
-            escaped_query = re.escape(search_query)
-            for author in authors:
-                author['highlighted_name'] = re.sub(
-                    f'({escaped_query})', 
-                    r'(<strong>\1</strong>)', 
-                    author['fullname'], 
-                    flags=re.IGNORECASE
-                )
-                author['highlighted_name'] = mark_safe(author['highlighted_name'])
-        else:
-            for author in authors:
-                author['highlighted_name'] = author['fullname']
+        # if search_query:
+        #     escaped_query = re.escape(search_query)
+        #     for author in authors:
+        #         author['highlighted_name'] = re.sub(
+        #             f'({escaped_query})', 
+        #             r'(<strong>\1</strong>)', 
+        #             author['fullname'], 
+        #             flags=re.IGNORECASE
+        #         )
+        #         author['highlighted_name'] = mark_safe(author['highlighted_name'])
+        # else:
+        #     for author in authors:
+        #         author['highlighted_name'] = author['fullname']
 
         context = {
             'authors': authors,  

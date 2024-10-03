@@ -2,8 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-
-
 {% block title %}{{ count }} Authors{% endblock %}
 {% block meta_decription %}All the authors{% endblock %}
 
@@ -13,44 +11,19 @@
     <!-- <p>{{ count }} authors available in the database</p> -->
 
 
-     
-
-    <form class="search_bar row g-3 bg-transparent">
-
-        <div class="col-md">
-            <!-- HTMX target for the list -->
-            <input 
-            placeholder="{% blocktrans %}Search {{ count }} authors{% endblocktrans %}"
-            value="{{ search_query }}"
-            class="form-control me-2" 
-            type="text" 
-            name="q"
-            hx-get="{% url 'authors:get-authors' %}"
-            hx-trigger="keyup changed delay:500ms"
-            hx-target="#results"
-            hx-swap="innerHTML">
-        </div>    
-
-        <div class="col-auto">
-            <button class="btn btn-primary x-1" type="submit">Search</button>
-        </div>  
-    </form>
-
+    {% include 'partials/search_authors.html' %}     
+ 
 
     <div class="row g-3 m-md-1 bg-transparent">
-    <!-- <p> {{ count }} auteurs</p>  -->
-    <ul id="results" class="list-group list-group-numbered col-md" >
-        {% include 'partials/authors_cards.html' %}
-    </ul>   
-</div>
-
-{% include "quotes_pagination.html" %}
+        <!-- <p> {{ count }} auteurs</p>  -->
+        <ul id="results" class="list-group list-group-numbered col-md" >
+            {% include 'partials/authors_cards.html' %}
+        </ul>   
+    </div>
 
 
-
-
-{% if user.is_superuser %} 
-<a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">{% translate "Add author" %}</a>
-{% endif %}
+    {% if user.is_superuser %} 
+    <a href="{% url 'authors:add-author' %}" class="link-offset-2 link-underline link-underline-opacity-10">{% translate "Add author" %}</a>
+    {% endif %}
 
 {% endblock %}  

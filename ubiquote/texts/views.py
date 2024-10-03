@@ -119,6 +119,7 @@ class HomeView(DataFetchingMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')           
 
         # Fetch data for the home view (e.g., recommendations)
         data = self.get_api_data(page_number, endpoint='')  # Custom endpoint for HomeView
@@ -134,6 +135,7 @@ class HomeView(DataFetchingMixin, ListView):
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
+            'search_query' : search_query,
         }
         return self.render_htmx_or_full_quotes(request, context)
 

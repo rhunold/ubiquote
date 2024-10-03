@@ -86,12 +86,14 @@ class DataFetchingMixin(TokenRefreshMixin):
         """Helper method to handle pagination and URL manipulation."""
         next_page_url = data.get('next')
         previous_page_url = data.get('previous')
+        # search_query = request.GET.get('q', '')   
+                
         lang = request.LANGUAGE_CODE
         if next_page_url:
             next_page_url = next_page_url.replace(f'/api/', f'/{lang}/')
         if previous_page_url:
             previous_page_url = previous_page_url.replace(f'/api/', f'/{lang}/')
-        return next_page_url, previous_page_url
+        return next_page_url, previous_page_url #, search_query
 
 
 

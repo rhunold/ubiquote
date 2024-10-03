@@ -1,45 +1,43 @@
-{% load static %}
-{% load i18n %}
+
 
 {% load translated_author %}
 {% load highlight %}
 
-{% comment %}  {% load get_item %}  {% endcomment %} 
+{% comment %}
+  {% load get_item %}
+  {% load static %}
+  {% load i18n %}
+{% endcomment %} 
 
 
 
-        {% if search_query and page_number == 1 %}
-          <li>{{ count }} results for "{{ search_query }}"</li>
-          {% else %}
-        {% endif %}
+    {% if search_query and page_number == 1 %}
+      <li>{{ count }} results for "{{ search_query }}"</li>
+      {% else %}
+    {% endif %}
 
-        {% for author in authors %}
+    {% for author in authors %}
 
-          <!-- Trigger pagination/infinite scroll for loading more authors -->        
-          {% if forloop.last and next_page_url %}
+      <!-- Trigger pagination/infinite scroll -->        
+      {% if forloop.last and next_page_url %}
 
-              <li class="list-group-item"
-                hx-get="{% url 'authors:get-authors' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
-                hx-trigger="revealed" 
-                hx-swap="afterend" 
-                hx-target="this">
-                
-            {% else %}
-              <li class="list-group-item">
-          {% endif %}
-                <a href="{% url 'authors:get-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">
+          <li class="list-group-item"
+            hx-get="{% url 'authors:get-authors' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+            hx-trigger="revealed" 
+            hx-swap="afterend" 
+            hx-target="this">
+            
+        {% else %}
+          <li class="list-group-item">
+      {% endif %}
+            <a href="{% url 'authors:get-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">
+              {{ author|translated_name|highlight_search:search_query|safe }} ({{ author.quote_count }} quotes)
 
-                  {% comment %}
+            </a>
+          </li>          
 
-                  {{ author.display_name }} {% endcomment %}
+    {% endfor %}
 
-                  {{ author|translated_name|highlight_search:search_query|safe }} ({{ author.quote_count }} quotes)
-
-                </a>
-             </li>          
-
-        {% endfor %}
-      <!-- </ol> -->
 
 
 {% if not authors %}

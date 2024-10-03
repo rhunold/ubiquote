@@ -63,6 +63,9 @@ class QuotesAPIView(generics.ListAPIView):
         
         # print(queryset)
         return queryset 
+    
+    
+    
         
     # queryset = models.Quote.objects.all().order_by('-date_created') 
     

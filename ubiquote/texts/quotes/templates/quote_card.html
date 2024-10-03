@@ -1,9 +1,10 @@
 {% load i18n %}
 {% load get_item %} 
+{% load highlight %}
 
 
 
-<div class="card mt-3">
+
     <div class="card-header">
       {% translate "Quote" %}
     </div>
@@ -15,7 +16,7 @@
           <div class="col-sm">
       
             <blockquote class="blockquote mb-0">
-              <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|safe }}</a></p>
+              <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|highlight_search:search_query|safe }}</a></p>
               {% if quote.author %}
                 <footer class="blockquote-footer">
 
@@ -24,12 +25,12 @@
 
                     {% if quote.lang != "en" and quote.author.translated_name %}
                       {% if quote.lang in quote.author.translated_name %}
-                          {{ quote.author.translated_name|get_item:quote.lang|default:quote.author.fullname }}
+                          {{ quote.author.translated_name|get_item:quote.lang|default:quote.author.fullname|highlight_search:search_query|safe }}
                       {% else %}
-                          {{ quote.author.fullname|default_if_none:""|safe }}
+                          {{ quote.author.fullname|default_if_none:""|highlight_search:search_query|safe }}
                       {% endif %}
                     {% else %}
-                        {{ quote.author.fullname|default_if_none:""|safe }}
+                        {{ quote.author.fullname|default_if_none:""|highlight_search:search_query|safe }}
                     {% endif %}
                 
 
@@ -68,7 +69,7 @@
       <li class="list-group-item">
         {% translate "categories" %} :
             {% for quote_category in quote.categories %}
-            <a href="{% url 'texts:get-category' quote_category.slug   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title }}</a> &nbsp;
+            <a href="{% url 'texts:get-category' quote_category.slug   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title|highlight_search:search_query|safe }}</a> &nbsp;
             {% endfor %}   
 
       
