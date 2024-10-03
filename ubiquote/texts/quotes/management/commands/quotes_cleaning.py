@@ -43,19 +43,22 @@ class Command(BaseCommand):
         text = re.sub(r'\s\s+', ' ', text)
         
         # before a  dot, remove a space if there is one
-        re.sub(r'\s\.', '\.', text)   
+        re.sub(r'\s\.', '\.', text)
+        
+        # Rules to remove space if at the start and/or end of text.
+        re.sub(r'^\s+|\s+(?=\.)|\s+$', '', text)
         
         # After a dot, put a space 
         # text = re.sub(r'\.(?!(\.\.\.))(\S)', r'. \2', text)
         
-        # If there is no dot at the end, add one
+        # If there is no dot at the end,
         if not text.endswith('.'):
             text += '.'
             
-        # The word after a . is a uppercased
+        # The first letter of word after a . is a uppercased
         text = re.sub(r'\.(\s*)(\w)', lambda x: f'.{x.group(1)}{x.group(2).capitalize()}', text)            
             
-        # The word after a ? is a uppercased
+        # The first letter of word after a ? is a uppercased
         text = re.sub(r'\?(\s*)(\w)', lambda x: f'?{x.group(1)}{x.group(2).capitalize()}', text)
             
      

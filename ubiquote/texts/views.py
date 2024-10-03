@@ -16,9 +16,8 @@ from django.shortcuts import get_object_or_404
 
 from .models import Category
 from texts.quotes.models import Quote, QuotesLikes
-# from texts.quotes.views import LanguageFilterMixin
-# from texts.quotes.views import get_user_quotes_likes
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
+from texts.mixins import DataFetchingMixin, TokenRefreshMixin 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -40,10 +39,9 @@ class GetCategoriesView(ListView):
     api_url = 'http://127.0.0.1:8000/api/categories/'
     
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     return context
     
 
     def get(self, request, *args, **kwargs):
@@ -66,189 +64,80 @@ class GetCategoriesView(ListView):
         context = {
             'categories': categories,
             'count': count,            
-            # 'page_number': page_number,            
-            # 'next_page_url': next_page_url,
-            # 'search_query': search_query,
         }
-    
-        
-        # If it's an HTMX request, return only the quotes part
-        # if request.htmx:
-
-        #     return render(request, 'quotes_cards.html', context)        
 
         return render(request, self.template_name, context)
         
 
 
-class GetCategoryView(ListView): #LanguageFilterMixin
-    context_object_name = 'quotes'
-    template_name = 'get_category.html'  
-    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
-    api_url = 'http://127.0.0.1:8000/api/'
-    
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)  
-        return context
+class GetCategoryView(DataFetchingMixin, ListView):
+    template_name = 'get_category.html'
+    api_url = settings.API_URL
 
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')
-        
-        category_slug = self.kwargs['slug']        
-        category = get_object_or_404(Category, slug=category_slug)
-        # user = request.user
-        
-        api_url = f'{self.api_url}category/{category.slug}/quotes/?page={page_number}&q={search_query}'
-        response = requests.get(api_url)
+        category_slug = self.kwargs['slug']
 
-        if response.status_code == 200:
-            data = response.json()  
-            # print(type(data))
-            # print(data)
-            count = data.get('count')                   
-            quotes = data.get('results', [])
-            next_page_url = data.get('next')
-            previous_page_url = data.get('previous')                 
-        else:
-            quotes = []
-            next_page_url = None
-            
-            
-        # Replace /api/likes/ with the correct frontend path
+        # Fetch quotes of the author
+        quotes_data = self.get_api_data(page_number, endpoint=f'category/{category_slug}/quotes/')
+        category_data = self.get_api_data(page_number, endpoint=f'category/{category_slug}/')
+
+
+        # Handle pagination for quotes
+        quotes = quotes_data.get('results', [])
+        next_page_url = quotes_data.get('next')
+        previous_page_url = quotes_data.get('previous')
+        count = quotes_data.get('count', 0)
+
+        # overide url generation to fit this special case
         lang = request.LANGUAGE_CODE        
         if next_page_url:
             next_page_url = next_page_url.replace(f'/api/category/{category_slug}/quotes/', f'/{lang}/category/{category_slug}/')
 
         if previous_page_url:
-            previous_page_url = previous_page_url.replace(f'/api/category/{category_slug}/quotes/', f'/{lang}/category/{category_slug}/')            
-
-
-        category_api_url = f'{self.api_url}category/{category.slug}/'
-        response_category = requests.get(category_api_url)
-
-        if response_category.status_code == 200:
-            category = response_category.json()
-        else:
-            category = [] # Raise an error ?
+            previous_page_url = previous_page_url.replace(f'/api/category/{category_slug}/quotes/', f'/{lang}/category/{category_slug}/')    
 
         context = {
-            'category': category,
+            'category': category_data,
             'quotes': quotes,
-            'count': count,                        
-            'page_number': page_number,              
+            'count': count,
+            'page_number': page_number,
             'next_page_url': next_page_url,
-            'previous_page_url': previous_page_url,      
-            'search_query': search_query,    
+            'previous_page_url': previous_page_url,
+            
         }
-        
-        # print(context['category'])
-        
-        # If it's an HTMX request, return only the quotes part
-        if request.htmx:
-            return render(request, 'quotes_cards.html', context)        
-
-        return render(request, self.template_name, context)
-    
-  
+        return self.render_htmx_or_full_quotes(request, context)
 
 
-class HomeView(ListView): # LoginRequiredMixin
-    context_object_name = 'quotes'
+
+class HomeView(DataFetchingMixin, ListView):
     template_name = 'home.html'
-    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page 
-    api_url = 'http://127.0.0.1:8000/api/'    
-    
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)  
-        return context
+    api_url = settings.API_URL
 
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')
 
-        # user = self.request.user
-         
-        access_token = self.request.session.get('access_token')
+        # Fetch data for the home view (e.g., recommendations)
+        data = self.get_api_data(page_number, endpoint='')  # Custom endpoint for HomeView
 
-        headers = {
-            'Authorization': f'Bearer {access_token}',
-        }
-        
-        recommandation_api_url = f'{self.api_url}home/?page={page_number}&q={search_query}'
-        
-        response = requests.get(recommandation_api_url, headers=headers)
-        
-        
-        # If unauthorized, try to refresh token and retry request
-        if response.status_code == 401:
-            new_access_token = self.refresh_access_token()
-            if new_access_token:
-                headers['Authorization'] = f'Bearer {new_access_token}'
-                response = requests.get(recommandation_api_url, headers=headers)
-            else:
-                response = requests.get(recommandation_api_url)
-
-        if response.status_code == 200:
-            data = response.json()  
-            count = data.get('count')                   
-            quotes = data.get('results', [])
-            next_page_url = data.get('next')
-            previous_page_url = data.get('previous')   
-       
-        else:
-            quotes = []
-            count = 0       
-            next_page_url = None 
-
-
-        # Replace /api/likes/ with the correct frontend path
-        lang = request.LANGUAGE_CODE        
-        if next_page_url:
-            next_page_url = next_page_url.replace(f'/api/home/', f'/{lang}/')
-
-        if previous_page_url:
-            previous_page_url = previous_page_url.replace(f'/api/home/', f'/{lang}/')
+        # Handle pagination and results
+        results = data.get('results', [])
+        next_page_url, previous_page_url = self.process_pagination(data, request)
+        count = data.get('count', 0)
 
         context = {
-            'quotes': quotes,
-            'page_number': page_number,    
-            'count': count,                      
-            'page_number': page_number,              
+            'quotes': results,  # Keep this as 'quotes' if your template expects it
+            'count': count,
+            'page_number': page_number,
             'next_page_url': next_page_url,
-            'previous_page_url': previous_page_url,         
+            'previous_page_url': previous_page_url,
         }
-        
-        
-        # If it's an HTMX request, return only the quotes part
-        if request.htmx:
-            return render(request, 'quotes_cards.html', context)        
+        return self.render_htmx_or_full_quotes(request, context)
 
-        return render(request, self.template_name, context)    
-    
-    
-    def refresh_access_token(self):
-        refresh_token = self.request.session.get('refresh_token')
-        if refresh_token:
-            response = requests.post(
-                'http://127.0.0.1:8000/api/token/refresh/',
-                json={'refresh': refresh_token},
-                headers={'Content-Type': 'application/json'},
-            )
-            if response.status_code == 200:
-                data = response.json()
-                new_access_token = data.get('access')
-                if new_access_token:
-                    self.request.session['access_token'] = new_access_token
-                    return new_access_token
-        return None    
 
-  
-  
 # def translate(language):
 #   cur_language = get_language()
 #   try:

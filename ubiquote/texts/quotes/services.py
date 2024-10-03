@@ -75,15 +75,8 @@ class RecommendationService:
         
         else:
             # If the user has not liked any quotes, generate recommendations from top 100 most liked quotes
-            # top_quotes = Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
-            # paginator = Paginator(top_quotes, num_recommendations)
-            # page = 1  # Assuming this is the default page
-            # recommended_quotes = paginator.get_page(page)
-            
             recommended_quotes = Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
-            
-            # print("the user has not liked any quotes,")
-            # print(type(recommended_quotes))
+
         
         end_time = time.time()  # Record end time
         execution_time = end_time - start_time

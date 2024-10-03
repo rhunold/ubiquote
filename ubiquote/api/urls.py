@@ -14,7 +14,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),   
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),     
     
-    path("home/", views.HomeQuotesAPIView.as_view(), name="home-api-view"),
+    path("", views.HomeQuotesAPIView.as_view(), name="home-api-view"),
     
     
     path("quotes/", views.QuotesAPIView.as_view(), name="quotes-list-api-view"),
@@ -28,7 +28,7 @@ urlpatterns = [
     
     path("authors/", views.AuthorsAPIView.as_view(), name="authors-list-api-view"),
     path("author/<str:slug>/", views.AuthorAPIView.as_view(), name="author-api-view"),        
-    path('quotes/<str:slug>/', views.AuthorQuotesAPIView.as_view(), name='author-quotes-api-view'),
+    path('author/quotes/<str:slug>/', views.AuthorQuotesAPIView.as_view(), name='author-quotes-api-view'),
 
     path("users/", views.UsersAPIView.as_view(), name="users-list-api-view"),    
     path("user/<str:slug>/", views.UserAPIView.as_view(), name="user-api-view"),   # User info

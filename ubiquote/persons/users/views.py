@@ -21,6 +21,7 @@ from .forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from texts.quotes.models import Quote, QuotesLikes
+from texts.mixins import DataFetchingMixin, TokenRefreshMixin 
 
 
 from .models import User
@@ -180,80 +181,125 @@ class GetUsersView(ListView):
     ordering =['username']
 
 
-class GetUserView(LoginRequiredMixin, ListView):
-    model = Quote 
-    context_object_name = 'quotes'  
-    template_name = 'get_user.html'
-    paginate_by = settings.DEFAULT_PAGINATION   
     
-    # API URL for quotes list
-    api_url = 'http://127.0.0.1:8000/api'     
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
+class GetUserView(DataFetchingMixin, ListView):
+    template_name = 'get_user.html'
+    api_url = settings.API_URL
+    
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
+        profil_slug = self.kwargs['slug']
+
+        profil = User.objects.get(slug=profil_slug)        
+
+        # Fetch quotes of the author
+        quotes_data = self.get_api_data(page_number, endpoint=f'user/{profil.slug}/quotes/')
+        profil_data = self.get_api_data(page_number=0, endpoint=f'user/{profil.slug}/')
+
+
+        # Handle pagination for quotes
+        quotes = quotes_data.get('results', [])
+        next_page_url = quotes_data.get('next')
+        previous_page_url = quotes_data.get('previous')
+        count = quotes_data.get('count', 0)
         
-        user_slug = self.kwargs['slug']
-        profil = User.objects.get(slug=user_slug)
-
-        # Adjust API URL to pass pagination and search query
-        quote_api_url = f'{self.api_url}/user/{profil.slug}/quotes/?page={page_number}'
-        # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
         
-        # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
-        response = requests.get(quote_api_url)
-
-        if response.status_code == 200:
-            data = response.json()
-            # print(data)
-            quotes = data.get('results', [])
-            count = data.get('count', 0)             
-            next_page_url = data.get('next')
-            previous_page_url = data.get('previous')            
-        else:
-            quotes = []
-            next_page_url = None
-            previous_page_url = None            
-
-
-        # Replace /api/likes/ with the correct frontend path
-        lang = request.LANGUAGE_CODE        
+        
+        # overide url generation to fit this special case
+        lang = request.LANGUAGE_CODE
         if next_page_url:
-            next_page_url = next_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
-
+            next_page_url = next_page_url.replace(f'/api/user/{profil.slug}/quotes/', f'/{lang}/user/{profil.slug}/')
         if previous_page_url:
-            previous_page_url = previous_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
+            previous_page_url = previous_page_url.replace(f'/api/user/{profil.slug}/quotes/', f'/{lang}/user/{profil.slug}/')    
 
-        profil_api_url = f'{self.api_url}/user/{profil.slug}/'
-        profil_response = requests.get(profil_api_url)
+        context = {
+            'profil': profil_data,
+            'quotes': quotes,
+            'count': count,
+            'page_number': page_number,
+            'next_page_url': next_page_url,
+            'previous_page_url': previous_page_url,
+            
+        }
+        return self.render_htmx_or_full_quotes(request, context)
+    
 
-        if profil_response.status_code == 200:
-            profil = profil_response.json()
-        else:
-            profil = []
+# class GetUserView(LoginRequiredMixin, ListView):
+#     model = Quote 
+#     context_object_name = 'quotes'  
+#     template_name = 'get_user.html'
+#     paginate_by = settings.DEFAULT_PAGINATION   
+    
+#     # API URL for quotes list
+#     api_url = 'http://127.0.0.1:8000/api'     
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         return context
+
+
+#     def get(self, request, *args, **kwargs):
+#         page_number = request.GET.get('page', 1)
+        
+#         user_slug = self.kwargs['slug']
+#         profil = User.objects.get(slug=user_slug)
+
+#         # Adjust API URL to pass pagination and search query
+#         quote_api_url = f'{self.api_url}/user/{profil.slug}/quotes/?page={page_number}'
+#         # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
+        
+#         # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
+#         response = requests.get(quote_api_url)
+
+#         if response.status_code == 200:
+#             data = response.json()
+#             # print(data)
+#             quotes = data.get('results', [])
+#             count = data.get('count', 0)             
+#             next_page_url = data.get('next')
+#             previous_page_url = data.get('previous')            
+#         else:
+#             quotes = []
+#             next_page_url = None
+#             previous_page_url = None            
+
+
+#         # Replace /api/likes/ with the correct frontend path
+#         lang = request.LANGUAGE_CODE        
+#         if next_page_url:
+#             next_page_url = next_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
+
+#         if previous_page_url:
+#             previous_page_url = previous_page_url.replace(f'/api/user/{user_slug}/quotes/', f'/{lang}/user/{user_slug}/')
+
+#         profil_api_url = f'{self.api_url}/user/{profil.slug}/'
+#         profil_response = requests.get(profil_api_url)
+
+#         if profil_response.status_code == 200:
+#             profil = profil_response.json()
+#         else:
+#             profil = []
        
 
 
-        context = {
-            'profil': profil, 
-            'quotes': quotes,
-            'page_number': page_number,    
-            'count': count,                      
-            'page_number': page_number,
-            'next_page_url': next_page_url,
-            'previous_page_url': previous_page_url,                  
-        }
+#         context = {
+#             'profil': profil, 
+#             'quotes': quotes,
+#             'page_number': page_number,    
+#             'count': count,                      
+#             'page_number': page_number,
+#             'next_page_url': next_page_url,
+#             'previous_page_url': previous_page_url,                  
+#         }
         
-        # If it's an HTMX request, return only the quotes part
-        if request.htmx:
+#         # If it's an HTMX request, return only the quotes part
+#         if request.htmx:
 
-            return render(request, 'quotes_cards.html', context)        
+#             return render(request, 'quotes_cards.html', context)        
 
-        return render(request, self.template_name, context)    
+#         return render(request, self.template_name, context)    
 
 
 

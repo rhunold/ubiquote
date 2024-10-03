@@ -70,9 +70,11 @@ Auteur
       <p>nationality :  {{ author.nationality|safe }}</p>
     {% endif %}
 
-    <p>date_created : {{ author.date_created|date:"d M Y à G:i"|safe }}</p>
-    <p>date_updated : {{ author.date_updated|date:"d M Y à G:i"|safe }}</p>
+    <!-- <p>date_created : {{ author.date_created|date:"d M Y à G:i"|safe }}</p>
+    <p>date_updated : {{ author.date_updated|date:"d M Y à G:i"|safe }}</p> -->
 
+    <p>date_created : {{ author.date_created }}</p>
+    <p>date_updated : {{ author.date_updated }}</p>    
     <p>
       <a href="{{ author.twitter_url|safe }}" class="link-offset-2 link-underline link-underline-opacity-10">
       twitter
@@ -84,14 +86,17 @@ Auteur
     
 
 
-    {% include "quotes_cards.html" %}
+    {% include "partials/quotes_cards.html" %}
 
 
-    {% if user.is_superuser or user.id is request.user %}
+  
+    {% if user.is_superuser or user.id == request.user %}
       <a href="{% url 'authors:update-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update author</a>
       <a href="{% url 'authors:delete-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete author</a>      
     {% endif %}    
 
+{% comment%}      
+{% endcomment%}    
 
 
 {% endblock %}  

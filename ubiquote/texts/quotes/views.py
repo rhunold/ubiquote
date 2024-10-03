@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from texts.mixins import DataFetchingMixin, TokenRefreshMixin
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -44,11 +45,16 @@ from django.http import HttpResponse
 # from django.http import JsonResponse
 from .services import RecommendationService
 
+from django.contrib.auth import logout
+
+
 import requests
 
 import logging
 
 from django.core.cache import cache
+
+
 
 # Set up logger for error handling
 logger = logging.getLogger(__name__)
@@ -80,95 +86,50 @@ def like_quote(request, id):
 
         
 
-def recommend_quotes(request, user_id):
-    recommended_quotes = RecommendationService.recommend_quotes(user_id)
-    return render(request, 'recommended_quotes.html', {'recommended_quotes': recommended_quotes})
+# def recommend_quotes(request, user_id):
+#     recommended_quotes = RecommendationService.recommend_quotes(user_id)
+#     return render(request, 'recommended_quotes.html', {'recommended_quotes': recommended_quotes})
 
 
 
-class GetQuotesView(ListView):
+
+
+class GetQuotesView(DataFetchingMixin, ListView):
     template_name = 'get_quotes.html'
-    context_object_name = 'quotes'
-    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page
-    api_url = 'http://127.0.0.1:8000/api/quotes/'
-
-    def get_context_data(self, **kwargs):
-        """Add additional context if needed."""
-        context = super().get_context_data(**kwargs)
-        return context
-
-    def get_api_data(self, page_number, search_query):
-        """Fetch data from the quotes API with error handling and caching."""
-        cache_key = f'quotes_page_{page_number}_query_{search_query}'
-        data = cache.get(cache_key)
-
-        if not data:
-            api_url = f'{self.api_url}?page={page_number}&q={search_query}'
-            try:
-                response = requests.get(api_url)
-                response.raise_for_status()  # Raise HTTPError for bad responses
-                data = response.json()
-                cache.set(cache_key, data, timeout=60 * 5)  # Cache for 5 minutes
-            except requests.exceptions.RequestException as e:
-                # Log the error and return an empty response
-                logger.error(f"Error fetching quotes from API: {e}")
-                data = {'results': [], 'count': 0, 'next': None, 'error': str(e)}
-
-        return data
-
-    def render_htmx_or_full(self, request, context):
-        """Render partial or full template based on the type of request (HTMX or not)."""
-        if request.htmx:
-            return render(request, 'quotes_cards.html', context)
-        return render(request, self.template_name, context)
+    api_url = settings.API_URL
+    
 
     def get(self, request, *args, **kwargs):
-        """Handle GET request and fetch data from the API."""
         page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')
 
-        # Fetch data from the API
-        data = self.get_api_data(page_number, search_query)
+        # Fetch data for the home view (e.g., recommendations)
+        data = self.get_api_data(page_number, endpoint='quotes/')  # Custom endpoint for HomeView
 
-        # Extract quotes and other pagination-related data
-        quotes = data.get('results', [])
+        # Handle pagination and results
+        results = data.get('results', [])
+        next_page_url, previous_page_url = self.process_pagination(data, request)
         count = data.get('count', 0)
-        previous_page_url = data.get('previous')              
-        next_page_url = data.get('next')
-        # error = data.get('error', None)
-        
-        # Replace /api/likes/ with the correct frontend path
-        lang = request.LANGUAGE_CODE        
-        if next_page_url:
-            next_page_url = next_page_url.replace(f'/api/quotes/', f'/{lang}/quotes/')
 
-        if previous_page_url:
-            previous_page_url = previous_page_url.replace(f'/api/quotes/', f'/{lang}/quotes/')        
-
-        # Prepare the context for rendering
         context = {
-            'quotes': quotes,
+            'quotes': results,  # Keep this as 'quotes' if your template expects it
             'count': count,
             'page_number': page_number,
             'next_page_url': next_page_url,
-            'previous_page_url': previous_page_url,      
-            'search_query': search_query,
-            # 'error': error,  # Pass error information to the template if necessary
+            'previous_page_url': previous_page_url,
         }
+        return self.render_htmx_or_full_quotes(request, context)
 
-        # Render the appropriate template based on the request type (HTMX or full page)
-        return self.render_htmx_or_full(request, context)
         
-
 
 class GetQuoteView(DetailView):
     template_name = 'get_quote.html'
-    context_object_name = 'quote'
-    api_url = 'http://127.0.0.1:8000/api/quote/'  # API base URL
+    # context_object_name = 'quote'
+    api_url = settings.API_URL
+    
 
     def get_api_data(self, quote_id):
         """Fetch individual quote data from the API with error handling."""
-        api_url = f'{self.api_url}{quote_id}/'
+        api_url = f'{self.api_url}quote/{quote_id}/'
         try:
             response = requests.get(api_url)
             response.raise_for_status()  # Raise error if response status code is not 200

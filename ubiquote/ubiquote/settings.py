@@ -213,11 +213,18 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = 'texts:get-home'
 LOGOUT_REDIRECT_URL = 'texts:get-home'
 
+ROOT_URL = "http://127.0.0.1:8000/"
+API_URL = "http://127.0.0.1:8000/api/"
+
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # to disable the security when you want to proceed more than 1000 operations at once (delete all authors...)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
+
+
+
 
 
 REST_FRAMEWORK = {
@@ -235,8 +242,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set a duration for access tokens
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Set a duration for refresh tokens
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Set a duration for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # days=1 / Set a duration for refresh tokens
     'ROTATE_REFRESH_TOKENS': True,  # Optional: rotate refresh tokens on usage
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklist old tokens after rotation
 }

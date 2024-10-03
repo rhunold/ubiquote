@@ -46,7 +46,7 @@
     </p>
 
     Total contribution : {{ count }}
-    {% include "quotes_cards.html" %}
+    {% include "partials/quotes_cards.html" %}
 
 
     {% if user.is_authenticated and profil.slug == user.slug or user.is_superuser  %}

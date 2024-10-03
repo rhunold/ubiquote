@@ -21,8 +21,10 @@ urlpatterns = [
     # ),    
     
     # path(r'^author-autocomplete/$/', views.AuthorAutocomplete.as_view(), name='author-autocomplete'),
-    
     # path('author-autocomplete/', views.AuthorAutocomplete.as_view(), name='author-autocomplete'),    
+    
+    # path('search_authors/',views.search_authors, name='search_authors'),
+    # path('author_list/', views.author_list, name='author_list'),      
     
     path('authors/', views.GetAuthorsView.as_view(), name='get-authors'),
     path('author/<str:slug>/', views.GetAuthorView.as_view(), name='get-author'),
@@ -30,7 +32,6 @@ urlpatterns = [
     path('update/author/<str:slug>/', views.UpdateAuthorView.as_view(), name='update-author'),
     path('delete/author/<str:slug>/', views.DeleteAuthorView.as_view(), name='delete-author'),
     
-    # path('search_authors/',views.search_authors, name='search_authors'),
-    # path('author_list/', views.author_list, name='author_list'),    
+  
    
 ]

@@ -13,14 +13,7 @@ urlpatterns = [
 
     
     path('quote/like/<int:id>/', views.like_quote, name='like_quote'),    
-    path('recommendations/<int:user_id>/', views.recommend_quotes, name='recommend-quotes'),
-     
-    # function to add / remove a like on a quote
-    # path('quote/like/<int:id>/', views.like_quote, name='like-quote'),     
-    # path('search/', views.search_quotes, name='search-quotes'),  
-    # path('search_quotes/', views.search_quotes, name='search-quotes'),
-    # path('quote_results/', views.quote_results, name='quote-results'),     
-    # path('search/', views.search, name='search'),    
+    # path('recommendations/<int:user_id>/', views.recommend_quotes, name='recommend-quotes'),
     
 
 ]
