@@ -17,25 +17,58 @@
     /* CSS for the main navigation bar */
 
 
-    .search_bar {
-        position: sticky;
-        top: 3vw;
-        background-color:white;
-        /* padding-top:1rem; */
-        width: 100%;
-        z-index: 1000;
-    }    
-
-    nav {
+    #nav_search_sticky {
+        padding-top:1rem;        
         /* padding: 10px 20px; */
         background-color:white;
-        padding-top:1rem;
+        /* height: 100px;          */
+
         width: 100%;
         z-index: 1000;
-    }      
+    }
+
+    
+
+    #nav_search_sticky div.container-fluid   { 
+    padding:1rem;
+    }
+
+    .nav .dropdown-menu li {
+      position: relative;
+    }    
+
+
+    .nav .dropdown-menu .dropdown-submenu {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: -7px;
+    }
+    
+    .nav .dropdown-menu .dropdown-submenu-left {
+      right: 100%;
+      left: auto;
+    }
+    
+    .nav .dropdown-menu>li:hover>.dropdown-submenu {
+      display: block;
+    }    
+
+
+    /* To ensure the search bar and button don't overflow on smaller screens */
+    @media (max-width: 768px) {
+        .search_bar .col-12 {
+            margin-bottom: 10px;
+        }
+        .search_bar .btn {
+            width: 100%;
+        }
+    }
+
+
     /* Sticky navigation for desktop (sticky at the top) */
     @media (min-width: 768px) {
-        nav {
+        #nav_search_sticky {
             position: sticky;
             top: 0;
         }
@@ -43,7 +76,7 @@
 
     /* Sticky navigation for mobile (sticky at the bottom) */
     @media (max-width: 767px) {
-        nav {
+        #nav_search_sticky {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -64,6 +97,52 @@
             display: none;
         }
     }
+/*  */
+
+    /* https://codepen.io/argyleink/pen/yLovWjz */
+    /* html, body, .card {
+    block-size: 100%;
+    } */
+/* 
+
+
+/* 
+    #results {
+    scroll-snap-type: y mandatory;
+    } 
+    
+*/
+
+    html {
+    scroll-snap-type: y mandatory;
+    } 
+
+    .card {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    /* scroll-margin-top: calc(3vw + 85px); Adjust based on your sticky nav height     */
+    /* Smooth transition for blur */    
+    transition: filter 0.25s ease-in-out; 
+    }
+
+    /* Initially, all cards will have no blur when JS is disabled (because of the `no-js` class) */
+    .no-js .card {
+    filter: none;
+    }    
+
+    /* Initially blur all cards */
+    .card:not(.active) {
+    filter: blur(5px);
+    /* filter: opacity(0%); */
+    }    
+
+    /* Unblur the card that is active (snapped to top) */
+    .card.active, .card.last-card  {
+    filter: none;
+    }    
+
+
+
 
     
     </style>
@@ -85,7 +164,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">    
   
 
-    {% block custom_static %}{% endblock %}
+    {% block custom_static %}
+    {% endblock %}
 
   </head>
   <body>
@@ -106,32 +186,150 @@
     </script>
 
 
-<script>
-function refreshToken() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    
-    fetch('http://127.0.0.1:8000/api/token/refresh/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refresh: refreshToken }),
+    <script>
+    function refreshToken() {
+        const refreshToken = localStorage.getItem('refresh_token');
         
-    })
+        fetch('http://127.0.0.1:8000/api/token/refresh/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refresh: refreshToken }),
+            
+        })
 
-    console.log("Fetched")
-    
-    .then(response => response.json())
-    .then(data => {
-        if (data.access) {
-            // Store the new access token
-            localStorage.setItem('access_token', data.access);
-            console.error("New access token stored");
+        console.log("Fetched")
+        
+        .then(response => response.json())
+        .then(data => {
+            if (data.access) {
+                // Store the new access token
+                localStorage.setItem('access_token', data.access);
+                console.error("New access token stored");
+            } else {
+                console.error("Token refresh failed");
+            }
+        });
+    }
+    </script>    
+
+<script>
+    function updateScrollMargin() {
+        // Get the sticky nav element and its height
+        const stickyNav = document.querySelector('#nav_search_sticky');
+        const stickyNavHeight = stickyNav ? stickyNav.offsetHeight : 0;
+
+        // Set the scroll-margin-top dynamically for all cards
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.style.scrollMarginTop = `${stickyNavHeight}px`;
+        });
+    }
+
+    // Function to check if media query matches desktop and run the scroll margin update if needed
+    function checkMediaQueryAndRun() {
+        const mediaQuery = window.matchMedia('(min-width: 768px)');
+        if (mediaQuery.matches) {
+            // Media query matches, run the script
+            updateScrollMargin();
+
+            // Run the function whenever the window is resized or content changes
+            window.addEventListener('resize', updateScrollMargin);
+
+            // Recalculate height after HTMX updates
+            document.body.addEventListener('htmx:afterSettle', updateScrollMargin);
+
+            // Optional: MutationObserver to detect when the search bar or sticky content changes
+            const observer = new MutationObserver(updateScrollMargin);
+            observer.observe(document.querySelector('#nav_search_sticky'), { childList: true, subtree: true });
+        }
+    }
+
+    // Run the function on page load and check the media query
+    window.addEventListener('load', checkMediaQueryAndRun);
+
+    // Also run the check when resizing
+    window.addEventListener('resize', checkMediaQueryAndRun);
+</script>
+
+
+<script>
+
+
+let lastPageReached = false;
+
+function setActiveCard() {
+    const cards = document.querySelectorAll('.card');
+    let topCard = null;
+
+
+    // Loop through all cards and find the one snapped to the top
+    for (const card of cards) {
+        const rect = card.getBoundingClientRect();
+        if (rect.top >= 0 && rect.top <= window.innerHeight * 0.45) { 
+            // Check if the card is at the top of the viewport (within the first 55% of the viewport height)
+            topCard = card;
+            break;
+        }
+    }
+
+    // Apply the active class to the top snapped card, remove it from others
+    cards.forEach(card => {
+        if (card === topCard) {
+            card.classList.add('active'); // Unblur the card snapped to the top
         } else {
-            console.error("Token refresh failed");
+            card.classList.remove('active'); // Blur all others
         }
     });
+
+
+    // Unblur the true last card only if the last page is reached
+    if (lastPageReached) {
+        const lastCard = cards[cards.length - 1];
+        if (lastCard) {
+            lastCard.classList.add('last-card'); // Unblur the last card
+        }
+    }
+
+    // // Unblur the last card
+    // const lastCard = cards[cards.length - 1];
+    // if (lastCard) {
+    //     lastCard.classList.add('last-card'); // Unblur the last card
+    // }    
 }
-  </script>    
+
+
+// Function to detect when the last page is loaded
+function checkLastPage() {
+    // Check if the last page indicator is present (you can modify this based on your template)
+    const lastPageIndicator = document.querySelector('#last-page-indicator');
+    if (lastPageIndicator) {
+        lastPageReached = true;
+        setActiveCard(); // Re-run the card blur/unblur logic
+    }
+}
+
+// Initialize on page load and scroll events
+window.addEventListener('load', setActiveCard);
+window.addEventListener('scroll', setActiveCard);
+
+// Reapply blur/unblur logic after HTMX loads new content
+document.body.addEventListener('htmx:afterSettle', function(evt) {
+    setActiveCard();
+    checkLastPage(); // Check if the last page is loaded
+});
+
+
+// Remove 'no-js' class when JS is enabled
+document.addEventListener('load', function () {
+  document.getElementById("results").classList.remove('no-js');
+});
+
+
+</script>
+
+
+
   </body>
 </html>

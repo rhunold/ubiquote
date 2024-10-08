@@ -55,6 +55,7 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         profil_slug = self.kwargs['slug']
+        search_query = request.GET.get('q', '')           
         user = request.user
                 
 
@@ -82,10 +83,10 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
         if next_page_url:
             next_page_url = next_page_url.replace('/api/', f'/{lang}/')
 
-        print(previous_page_url)
+        # print(previous_page_url)
         if previous_page_url:
             previous_page_url = previous_page_url.replace('/api/', f'/{lang}/')
-        print(previous_page_url)            
+        # print(previous_page_url)            
 
         profil_api_url = f'{self.api_url}/user/{profil_slug}/'
         profil_response = requests.get(profil_api_url)
@@ -104,7 +105,7 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
-                  
+            'search_query': search_query,      
         }    
         
         # If it's an HTMX request, return only the quotes part
@@ -191,6 +192,7 @@ class GetUserView(DataFetchingMixin, ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         profil_slug = self.kwargs['slug']
+        search_query = request.GET.get('q', '')   
 
         profil = User.objects.get(slug=profil_slug)        
 
@@ -221,6 +223,7 @@ class GetUserView(DataFetchingMixin, ListView):
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
+            'search_query': search_query,
             
         }
         return self.render_htmx_or_full_quotes(request, context)

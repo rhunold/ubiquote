@@ -100,8 +100,22 @@ class DataFetchingMixin(TokenRefreshMixin):
     def render_htmx_or_full_quotes(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
         if request.htmx:
-            return render(request, 'partials/quotes_cards.html', context)
+            response = render(request, 'partials/quotes_cards.html', context)
+            # response['HX-Reswap'] = 'innerHTML'            
+            return response
+            
+        
         return render(request, self.template_name, context)
+    
+
+    
+
+    # if request.htmx:
+    #     context = {'quotes': quotes, 'search_query': search_query, 'count': count}
+    #     return render(request, 'quotes/partials/quotes_list.html', context)
+    # else:
+    #     # Default return for non-HTMX requests
+    #     return render(request, 'search_quotes.html', {'search_query': search_query, 'count': count})    
     
     def render_htmx_or_full_authors(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""

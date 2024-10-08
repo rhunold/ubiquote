@@ -11,12 +11,15 @@
     <!-- <p>{{ count }} authors available in the database</p> -->
 
 
+{% comment %}      
     {% include 'partials/search_authors.html' %}     
- 
+{% endcomment %}   
 
     <div class="row g-3 m-md-1 bg-transparent">
         <!-- <p> {{ count }} auteurs</p>  -->
         <ul id="results" class="list-group list-group-numbered col-md" >
+
+
             {% include 'partials/authors_cards.html' %}
         </ul>   
     </div>

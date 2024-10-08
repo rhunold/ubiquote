@@ -5,6 +5,7 @@
 {% url 'quotes:get-quotes' as quotes %}
 {% url 'quotes:add-quote' as add_quote %}
 {% url 'authors:get-authors' as authors %}
+{% url 'authors:get-author' author.slug as author_url %}
 {% url 'texts:get-categories' as categories %}
 {% url 'users:get-users' as users %}
 {% url 'users:user-register' as register %}
@@ -13,77 +14,121 @@
 
 {% url 'users:get-user' user.slug as user_connected %}
 
+
+
+
+<div id="nav_search_sticky">
+
+
+
 <nav class="container-fluid">
 
 
-<ul class="nav nav-tabs">
+  <ul class="nav nav-tabs">
 
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:get-home' %}"><i class="fa fa-fw fa-home"></i><span>{% translate "Home" %}</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}"><i class="fa fa-fw fa-search"></i><span>{% translate "Quotes" %}</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}"><i class="fa fa-fw  fa-address-book-o"></i><span>{% translate "Authors" %}</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}"><i class="fa fa-fw fa-tags"></i><span>{% translate "Categories" %}</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}"><i class="fa fa-fw fa-users"></i><span>{% translate "Users" %}</span></a>
-    </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == home %}active{% endif %}"  aria-current="page" href="{% url 'texts:get-home' %}"><i class="fa fa-fw fa-home"></i><span>{% translate "Home" %}</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == quotes %}active{% endif %}" href="{% url 'quotes:get-quotes' %}"><i class="fa fa-fw fa-search"></i><span>{% translate "Quotes" %}</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == authors %}active{% endif %}" href="{% url 'authors:get-authors' %}"><i class="fa fa-fw  fa-address-book-o"></i><span>{% translate "Authors" %}</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}"><i class="fa fa-fw fa-tags"></i><span>{% translate "Categories" %}</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}"><i class="fa fa-fw fa-users"></i><span>{% translate "Users" %}</span></a>
+      </li>
+       
+      <!-- <li class="nav-item">
+        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+      </li> -->
+
+      {% if user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
+      </li>
+      {% else %}
+
+      {% endif %}         
+
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa fa-fw fa-user"></i><span>Profil</span>
+        </a>
+
+        <ul class="dropdown-menu">
+
+          {% if user.is_authenticated %}
+          <!-- <li class="nav-item">
+            <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
+          </li> -->
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}"><i class="fa fa-fw fa-heart"></i><span>{% translate "Likes" %}</span></a>
+          </li>
     
-    {% if user.is_authenticated %}
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}"><i class="fa fa-fw fa-heart"></i><span>{% translate "Likes" %}</span></a>
-    </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"><i class="fa fa-fw fa-user"></i><span>{{ user }}</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'users:logout' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Logout" %}</span></a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}"><span>{% translate "Login" %}</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"><span>{% translate "Register" %}</span></a>
+            </li>
+          {% endif %}     
 
-      <li class="nav-item">
-        <a class="nav-link {% if request.path == user_connected %}active{% endif %}" href="{% url 'users:get-user' user.slug  %}"><i class="fa fa-fw fa-user"></i><span>{{ user }}</span></a>
+
+          <!-- <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-fw fa-language"></i><span>{% translate "Languages" %}</span>
+            </a>
+    
+    
+            {% get_current_language as current_language %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+    
+            <ul class="dropdown-menu dropdown-submenu">
+              {% for lang in languages %}
+              <li>
+                <a class="dropdown-item" href="{% if request.path|slice:'3:' != lang.code|default:'' %}/{{ lang.code }}{% endif %}{{ request.path|slice:'3:' }}">
+                  {{ lang.name_local|lower }}
+                </a>
+              </li>
+            {% endfor %}
+              <!-- <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li> -->
+            </ul>
+          </li>
+    
+
+
+        </ul>
+
+
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:logout' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Logout" %}</span></a>
-      </li>
-    {% else %}
-      <li class="nav-item">
-        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}"><span>{% translate "Login" %}</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"></a>
-      </li>
-    {% endif %}      
-    <!-- <li class="nav-item">
-      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-    </li> -->
-
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="fa fa-fw fa-language"></i><span>{% translate "Languages" %}</span>
-      </a>
 
 
-      {% get_current_language as current_language %}
-      {% get_available_languages as LANGUAGES %}
-      {% get_language_info_list for LANGUAGES as languages %}
 
-      <ul class="dropdown-menu">
-        {% for lang in languages %}
-        <li>
-          <a class="dropdown-item" href="{% if request.path|slice:'3:' != lang.code|default:'' %}/{{ lang.code }}{% endif %}{{ request.path|slice:'3:' }}">
-            {{ lang.name_local|lower }}
-          </a>
-        </li>
-      {% endfor %}
-        <!-- <li><a class="dropdown-item" href="#">Another action</a></li>
-        <li><a class="dropdown-item" href="#">Something else here</a></li> -->
-      </ul>
-    </li>
 
-  </ul>
+
+
+    </ul>
+
+
+
+
+
 
   <!-- <button hx-post="/clicked" hx-swap="outerHTML">
     Click Me
@@ -91,8 +136,6 @@
 
   <!-- <ul>
     {{ trans }}
-
-
 
     {% for lang in languages %}
       <li>
@@ -108,3 +151,32 @@
 
 
 </nav>
+
+<div class="container-fluid">
+{% if request.path == quotes %}
+  {% include "partials/search_quotes.html" %}
+{% endif %}
+
+{% if request.path == authors %}
+  {% include "partials/search_authors.html" %}
+{% endif %}
+
+{% if request.path == home %}
+<h5>{{ count }} recommandations for you !</h5>
+{% endif %}
+
+
+{% if request.path == categories %}
+{% endif %}
+
+{% if request.path == author_url %}
+  {% include "partials/author_card.html" %}
+{% endif %}
+
+</div>
+
+
+</div>
+
+
+

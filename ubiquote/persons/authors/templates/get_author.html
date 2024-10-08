@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
-{% load get_item %} 
 
 {% block title %}
-Auteur
+{{ author.fullname }} 
 {% endblock %}
 
 {% block meta_decription %}
@@ -11,92 +10,13 @@ Auteur
 
 {% block body %}
 
+{% comment%}   
+    {% include "partials/author_card.html" %}     
+{% endcomment%}    
 
-
-    <h1>
-     
-      
-      {% if author.translated_name %}
-        {% with language_code=request.LANGUAGE_CODE %}
-
-            {% if language_code in author.translated_name %}
-
-                {{ author.translated_name|get_item:language_code|default:author.fullname }}
-
-            {% else %}
-                {{ author.fullname }}  {# Fallback to the author's fullname if the translation isn't available #}
-            {% endif %}
-        {% endwith %}
-      {% else %}
-          {{ author.fullname }}  {# Fallback if no translations exist #}
-      {% endif %}
-
-
-    </h1>
-
-
-
-    {% if author.avatar.url is not None %}
-      <img src="{{ author.avatar.url }}" class="rounded-circle">
-    {% endif %}      
-
-
-    <h2>{{ author.biography|safe }}</h2>
-
-    {% if author.date_birth is not None %}
-
-      {% if author.date_birth_datefield  is  None %}
-      <p>date_birth : {{ author.date_birth  }}  </p>
-      {% else %} 
-      <p>date_birth : {{ author.date_birth_datefield|date:"d M Y"|safe}} </p>      
-      {% endif %} 
-
-    {% endif %}      
-
-    {% if author.date_death is not None %}
-      {% if author.date_death_datefield  is  None %}
-      <p>date_death : {{ author.date_death  }}  </p>
-      {% else %} 
-      <p>date_death : {{ author.date_death_datefield|date:"d M Y"|safe}} </p>      
-      {% endif %} 
-
-    {% endif %}           
-    
-    {% if author.sex is not None %}    
-      <p>sex : {{ author.sex|safe }}</p>
-    {% endif %}
-
-    {% if author.nationality is not None %}   
-      <p>nationality :  {{ author.nationality|safe }}</p>
-    {% endif %}
-
-    <!-- <p>date_created : {{ author.date_created|date:"d M Y à G:i"|safe }}</p>
-    <p>date_updated : {{ author.date_updated|date:"d M Y à G:i"|safe }}</p> -->
-
-    <p>date_created : {{ author.date_created }}</p>
-    <p>date_updated : {{ author.date_updated }}</p>    
-    <p>
-      <a href="{{ author.twitter_url|safe }}" class="link-offset-2 link-underline link-underline-opacity-10">
-      twitter
-      </a>
-    </p>
-
-    <p>{{ count|safe }} quotes</p>
-    
-    
 
 
     {% include "partials/quotes_cards.html" %}
-
-
-  
-    {% if user.is_superuser or user.id == request.user %}
-      <a href="{% url 'authors:update-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Update author</a>
-      <a href="{% url 'authors:delete-author' author.slug %}" class="link-offset-2 link-underline link-underline-opacity-10">Delete author</a>      
-    {% endif %}    
-
-{% comment%}      
-{% endcomment%}    
 
 
 {% endblock %}  

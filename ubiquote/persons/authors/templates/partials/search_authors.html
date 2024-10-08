@@ -1,9 +1,9 @@
-{% load static %}
-{% load i18n %}
+<!-- {% load static %}
+{% load i18n %} -->
 
-    <form class="search_bar row g-3 bg-transparent">
+    <form class="search_bar form-inline row g-3">
 
-        <div class="col-md">
+        <div class="col">
             <!-- HTMX target for the list -->
             <input 
             placeholder="{% blocktrans %}Search {{ count }} authors{% endblocktrans %}"
@@ -14,10 +14,11 @@
             hx-get="{% url 'authors:get-authors' %}"
             hx-trigger="keyup changed delay:500ms"
             hx-target="#results"
-            hx-swap="innerHTML">
+            hx-swap="innerHTML"
+            autofocus>
         </div>    
 
         <div class="col-auto">
-            <button class="btn btn-primary x-1" type="submit">Search</button>
+            <button class="btn btn-primary w-100" type="submit">Search</button>
         </div>  
     </form>

@@ -106,6 +106,7 @@ class GetAuthorView(DataFetchingMixin, ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         author_slug = self.kwargs['slug']
+        search_query = request.GET.get('q', '')           
 
         # Fetch quotes of the author
         quotes_data = self.get_api_data(page_number, endpoint=f'author/quotes/{author_slug}/')
@@ -133,8 +134,11 @@ class GetAuthorView(DataFetchingMixin, ListView):
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
+            'search_query': search_query,
             
         }
+        
+        # print(quotes)
         return self.render_htmx_or_full_quotes(request, context)
 
 

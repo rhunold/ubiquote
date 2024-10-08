@@ -1,0 +1,45 @@
+
+{% load i18n %}
+
+
+    <form class="search_bar form-inline row g-3" method="GET" >
+
+        <div class="col">
+
+            <!-- HTMX target for the list -->
+            <input 
+            arial-label="Search"
+            placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %}"
+            value="{% if search_query %}{{ search_query }}{% else %}{% endif %}"
+            class="form-control me-2"
+            type="text" 
+            name="q"
+            hx-get="{% url 'quotes:get-quotes' %}?page=1#top"
+            hx-trigger="keyup changed delay:500ms"
+            hx-target="#results" 
+            hx-swap="innerHTML"      
+
+{% comment %}
+    hx-select="#results"   
+    hx-select-oob="#search_count"   
+    hx-get="{% url 'quotes:get-quotes' %}"
+    hx-select="#results"   
+    hx-swap="afterbegin"  
+    hx-headers='{"HX-Request": "true"}'               
+{% endcomment %}
+
+            autofocus>
+        </div>    
+
+        <div class="col-auto">
+            <button class="btn btn-primary w-100" type="submit">Search</button>
+        </div>  
+    </form>
+
+    
+
+    <div id="search_count" hx-swap-oob="true"></div>
+
+
+
+
