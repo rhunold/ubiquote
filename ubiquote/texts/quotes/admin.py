@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 
 from django.contrib.auth.admin import UserAdmin
 from .forms import QuoteForm
-from .models import Quote, QuotesCategories, QuotesLikes
+from .models import Quote, QuotesCategories, QuotesLikes, UserQuoteRecommendation  
 from persons.authors.models import Author
 
 from django import forms
@@ -146,6 +146,15 @@ class QuotesLikesAdmin(admin.ModelAdmin):
     list_display = ('user', 'quote', 'timestamp',)  
     ordering = ('-timestamp',)
     list_filter = ('user',)    
+    
+    
+class QuotesRecommandationAdmin(admin.ModelAdmin):
+    model = UserQuoteRecommendation
+    list_display = ('user', 'quote', 'created_at',)  
+    ordering = ('created_at',)
+    list_filter = ('user',)        
 
 admin.site.register(Quote, QuoteAdmin)
 admin.site.register(QuotesLikes, QuotesLikesAdmin)
+
+admin.site.register(UserQuoteRecommendation, QuotesRecommandationAdmin)

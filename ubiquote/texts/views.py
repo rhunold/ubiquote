@@ -15,7 +15,8 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404
 
 from .models import Category
-from texts.quotes.models import Quote, QuotesLikes
+from texts.quotes.models import Quote, QuotesLikes, UserQuoteRecommendation
+
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
 from texts.mixins import DataFetchingMixin, TokenRefreshMixin 
 
@@ -28,6 +29,9 @@ from django.utils.translation import get_language
 import requests
 
 from rest_framework.permissions import AllowAny
+
+
+from django.db.models import F
 
 # from texts.quotes.services import RecommendationService
 
@@ -117,19 +121,85 @@ class GetCategoryView(DataFetchingMixin, ListView):
 class HomeView(DataFetchingMixin, ListView):
     template_name = 'home.html'
     api_url = settings.API_URL
-
+    
+    
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')           
+        search_query = request.GET.get('q', '')
+        user = request.user
+        
+        # # Fetch data for the home view (e.g., recommendations) and disable cache if randomization is required
+        # session = request.session
+        # disable_cache = False
+
+        # if not session.get('randomized_homepage', False):
+        #     disable_cache = True        
+        
+        # disable_cache = not request.session.get('randomized_homepage', False)        
 
         # Fetch data for the home view (e.g., recommendations)
-        data = self.get_api_data(page_number, endpoint='')  # Custom endpoint for HomeView
+        data = self.get_api_data(page_number, endpoint='', disable_cache=True)  # Custom endpoint for HomeView
 
         # Handle pagination and results
         results = data.get('results', [])
         next_page_url, previous_page_url = self.process_pagination(data, request)
         count = data.get('count', 0)
+        
+        
+        # # Fetch recommendations for the user
+        # recommendations = UserQuoteRecommendation.objects.filter(user=user)
+
+        # # Update show_count for each recommendation
+        # recommendations.update(show_count=F('show_count') + 1)
+
+        # # Remove any recommendations that have been shown more than 3 times
+        # UserQuoteRecommendation.objects.filter(user=user, show_count__gt=3).delete()
+
+        # # Get the remaining recommendations to display
+        # results = [rec.quote for rec in recommendations]   
+        
+        
+        # Randomize if new session
+        # if not request.session.get('randomized_homepage', False):
+        #     # results = list(results)
+        #     random.shuffle(results)
+        #     request.session['randomized_homepage'] = True
+        #     request.session.save()
+             
+        
+
+        # # Randomize the results for each new session
+        # session = request.session
+        # if not session.get('randomized_homepage', False):
+        #     random.shuffle(results)  # Randomize quotes
+        #     session['randomized_homepage'] = True  # Mark session as randomized
+        
+
+        
+        # # Randomize the results for each new session
+        # if disable_cache:
+        #     random.shuffle(results)
+        #     session['randomized_homepage'] = True  # Mark session as randomized
+        
+        
+        # print(results.first())     
+                 
+        
+        # # Randomize for new session
+        # if not request.session.get('randomized_homepage', False):
+        #     # Shuffle the results list
+        #     results = list(results) 
+        #     results = random.shuffle(results)
+        #     # print(type(results))
+        #     request.session['randomized_homepage'] = True  # Mark session as randomized
+        #     request.session.save()  # Ensure session is saved
+        #     print("randomized_homepage")
+        
+        # # print(results[:10])
+        
+        # print(type(results))
+        # # print(results[0])    
 
         context = {
             'quotes': results,  # Keep this as 'quotes' if your template expects it

@@ -111,7 +111,7 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
         # If it's an HTMX request, return only the quotes part
         if request.htmx:
 
-            return render(request, 'quotes_cards.html', context)        
+            return render(request, 'partials/quotes_cards.html', context)        
 
         return render(request, self.template_name, context)    
 
@@ -173,6 +173,11 @@ class LogoutView(auth_views.LogoutView):
     form_class = AuthenticationForm
     template_name = 'registration/logout.html'
     success_url = reverse_lazy('texts:home')
+    
+    # def dispatch(self, request, *args, **kwargs):
+    #     # Clear the session variable for randomization /// Normalement natif et je devrais pas avoir besoin....
+    #     request.session.pop('randomized_homepage', None)
+    #     return super().dispatch(request, *args, **kwargs)    
 
 
 class GetUsersView(ListView):

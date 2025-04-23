@@ -14,15 +14,15 @@ class UserAdmin(UserAdmin):
     list_display = ('username', 'email', 'is_staff', 'is_active',)
     list_filter = ('email', 'is_staff', 'is_active',)
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password', 'first_name', 'middle_name', 'particul', 'last_name', 'sex', 'nationality', 'biography', 'avatar' )}),
+        (None, {'fields': ('username', 'email', 'password', 'first_name', 'middle_name', 'particul', 'last_name', 'sex', 'nationality', 'biography', 'avatar',   )}),
         ('Permissions', {'fields': ('is_staff', 'is_active')}),
     )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'first_name', 'middle_name', 'particul', 'last_name', 'is_staff', 'is_active', 'sex', 'nationality', 'biography', 'avatar')}
-        ),
-    )
+    # add_fieldsets = (
+    #     (None, {
+    #         'classes': ('wide',),
+    #         'fields': ('username', 'email', 'password1', 'password2', 'first_name', 'middle_name', 'particul', 'last_name', 'is_staff', 'is_active', 'sex', 'nationality', 'biography', 'avatar', 'slug')}
+    #     ),
+    # )
     search_fields = ('email',)
     ordering = ('email',)
 

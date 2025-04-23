@@ -38,7 +38,7 @@
 
                   </a>
 
-                  in <cite title="Source Title">Source Title</cite>
+                  <!-- in <cite title="Source Title">Source Title</cite> -->
                 </footer>
       
               {% endif %}            
@@ -67,12 +67,15 @@
     <ul class="list-group list-group-flush">
 
       <li class="list-group-item">
+
+        {% comment %} 
+        {% endcomment %}         
         {% translate "categories" %} :
             {% for quote_category in quote.categories %}
-            <a href="{% url 'texts:get-category' quote_category.slug   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title|highlight_search:search_query|safe }}</a> &nbsp;
+            <a href="{% url 'texts:get-category' quote_category.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title|highlight_search:search_query|safe }}</a> &nbsp;
             {% endfor %}   
 
-      
+
       </li>
       <li class="list-group-item">      
         {% if user.is_authenticated and user.id == quote.contributor.id %}
@@ -94,9 +97,16 @@
         <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
           
               
+          {% include "img_quote.html" %} 
+
           {% include "like_quote.html" %} 
+
+
+          {% include "share_quote.html" %} 
+
               
         </div>  
+        
       </li>
 
       <!-- Display when the quote was liked on the Favorite page -->
@@ -113,6 +123,8 @@
         </div>  
       </li>
       {% endif %}
+
+
 
     </ul>  
 

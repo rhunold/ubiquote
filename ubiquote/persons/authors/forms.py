@@ -22,6 +22,8 @@ class AuthorForm(forms.ModelForm):
         model = Author
         # fields = ('first_name', 'middle_name', 'last_name', 'nickname', 'avatar', 'biography', 'sex', 'date_birth') # 'contributor' 
         fields = '__all__'
+        exclude = ('date_birth_datefield','date_death_datefield')        
+        
    
      
         # date_birth = forms.DateInput(

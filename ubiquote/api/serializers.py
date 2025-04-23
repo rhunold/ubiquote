@@ -13,7 +13,8 @@ class ShortUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = musers.User
-        fields = "__all__"       
+        # fields = "__all__"       
+        fields = ["id", "username", "slug", "email", "avatar", "sex", "nationality", "twitter_url"]        
 
 
 class TranslatedNameMixin:
@@ -83,6 +84,47 @@ class QuoteSerializer(serializers.ModelSerializer):
     def get_likes_count(self, obj):
         return obj.likes.count()
     
+    
+
+
+class QuoteRecommandSerializer(serializers.ModelSerializer):
+    pass
+    
+    # # user = ShortUserSerializer()   
+    
+    # author = serializers.CharField(source='quote.author', read_only=True)  # Access author via related quote
+
+    # categories = serializers.CharField(source='quote.categories', read_only=True)  # Access categories via related quote
+    # contributor = serializers.CharField(source='quote.contributor', read_only=True)  # Access categories via related quote
+    
+    # likes_count = serializers.IntegerField(source='likes.count', read_only=True)
+    # has_user_liked = serializers.SerializerMethodField()    
+        
+
+    # class Meta:
+    #     model = mquotes.UserQuoteRecommendation  # or Quote if directly serializing quotes
+    #     fields = ['quote', 'author', 'contributor', 'has_user_liked', 'likes_count', 'categories', ]  # Adjust as per your fields
+    #     # fields = "__all__"     
+    #     print(fields)     
+
+    # # def get_user(self, obj):
+    # #     return obj.user
+
+    # def get_author(self, obj):
+    #     return obj.quote.author  # Make sure it retrieves the author from the related Quote model
+    
+    # def get_contributor(self, obj):
+    #     return obj.quote.contributor  # Make sure it retrieves the author from the related Quote model
+        
+
+    # def get_has_user_liked(self, obj):
+    #     user = self.context['request'].user  # Access request from context
+    #     if user.is_authenticated:
+    #         return mquotes.QuotesLikes.objects.filter(user=user, quote=obj).exists()
+    #     return False
+
+    # def get_likes_count(self, obj):
+    #     return obj.likes.count()    
     
 
 

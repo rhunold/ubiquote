@@ -173,6 +173,16 @@
   {% include "partials/author_card.html" %}
 {% endif %}
 
+
+{% if request.path == get_likes %}
+  <h1>{% translate "Likes of" %} {{ profil.username }}</h1>
+  <p>{{ count }} quotes liked by {{ profil.username }}</p>  
+{% endif %}
+
+{% if request.path == user_connected %}
+
+{% endif %}
+
 </div>
 
 

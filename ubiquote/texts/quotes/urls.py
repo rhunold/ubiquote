@@ -12,7 +12,10 @@ urlpatterns = [
     path('delete/quote/<str:slug>', views.DeleteQuoteView.as_view(), name='delete-quote'),
 
     
-    path('quote/like/<int:id>/', views.like_quote, name='like_quote'),    
+    path('quote/like/<int:id>/', views.like_quote, name='like_quote'),  
+    
+    path('quote/<str:slug>/img/', views.GetQuoteView.as_view(), name='get-img_quote'),      
+      
     # path('recommendations/<int:user_id>/', views.recommend_quotes, name='recommend-quotes'),
     
 

@@ -28,31 +28,42 @@
 
 
 
-    {% if author.avatar.url is not None %}
-      <img src="{{ author.avatar.url }}" class="rounded-circle">
+    {% if author.avatar is not None %}
+      <img src="{{ author.avatar }}" class="rounded-circle" style="height:200px;width:200px;" >
     {% endif %}      
 
 
     <h2>{{ author.biography|safe }}</h2>
 
-    {% if author.date_birth is not None %}
 
-      {% if author.date_birth_datefield  is  None %}
-      <p>date_birth : {{ author.date_birth  }}  </p>
-      {% else %} 
-      <p>date_birth : {{ author.date_birth_datefield|date:"d M Y"|safe}} </p>      
+    {% if author.date_birth_datefield %}
+      <p>date_birth datefield : {{ author.date_birth_datefield }}  </p>
+    
+    {% else %} 
+      {% if author.date_birth %}
+      <p>date_birth string : {{ author.date_birth }} </p>      
       {% endif %} 
 
-    {% endif %}      
+    {% endif %}  
+    
+    
 
-    {% if author.date_death is not None %}
-      {% if author.date_death_datefield  is  None %}
-      <p>date_death : {{ author.date_death  }}  </p>
-      {% else %} 
-      <p>date_death : {{ author.date_death_datefield|date:"d M Y"|safe}} </p>      
+
+    {% if author.date_death_datefield %}
+    <p>date_death datefield : {{ author.date_death_datefield }}  </p>
+  
+    {% else %} 
+      {% if author.date_death %}
+      <p>date_death string : {{ author.date_death }} </p>      
       {% endif %} 
 
-    {% endif %}           
+    {% endif %}  
+  
+
+
+
+
+       
     
     {% if author.sex is not None %}    
       <p>sex : {{ author.sex|safe }}</p>

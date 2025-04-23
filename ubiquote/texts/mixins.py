@@ -51,35 +51,78 @@ class TokenRefreshMixin:
 
         # Redirect to the login page with 'next' parameter for redirection after login
         return redirect(f'/login/?next={current_url}')
-
-
+    
+    
 class DataFetchingMixin(TokenRefreshMixin):
     api_url = None  # Set in the child class
-
-    def get_api_data(self, page_number, endpoint='quotes/', search_query=''): # endpoint='quotes/')
+        
+    def get_api_data(self, page_number, endpoint='quotes/', search_query='', disable_cache=False): 
         """Fetch quotes from the API with error handling and caching."""
         cache_key = f'{self.api_url}_{endpoint}_page_{page_number}_query_{search_query}'
-        data = cache.get(cache_key)
 
-        if not data:
-            api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
-            headers = {
-                'Authorization': f'Bearer {self.request.session.get("access_token")}',
-            }
-            try:
-                response = requests.get(api_url, headers=headers)
-                if response.status_code == 401:
-                    new_access_token = self.refresh_access_token()
-                    if new_access_token:
-                        headers['Authorization'] = f'Bearer {new_access_token}'
-                        response = requests.get(api_url, headers=headers)
-                data = response.json()
-                cache.set(cache_key, data)
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Error fetching data from API: {e}")
-                # data = {'results': [], 'count': 0, 'next': None}
+        # # Skip cache if randomization is required
+        # if not disable_cache:
+        #     data = cache.get(cache_key)
+        #     if data:
+        #         return data
+
+        api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
+
+        headers = {}
+
+        # Add authorization header only if the user is authenticated (token exists)
+        access_token = self.request.session.get("access_token")
+        if access_token:
+            headers['Authorization'] = f'Bearer {access_token}'
+
+        try:
+            response = requests.get(api_url, headers=headers)
+            
+            # Handle token refresh if authenticated and the token is expired
+            if response.status_code == 401 and access_token:
+                new_access_token = self.refresh_access_token()
+                if new_access_token:
+                    headers['Authorization'] = f'Bearer {new_access_token}'
+                    response = requests.get(api_url, headers=headers)
+                
+            data = response.json()
+            
+            # # Only cache if caching is enabled
+            # if not disable_cache:
+            #     cache.set(cache_key, data)
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error fetching data from API: {e}")
+            data = {'results': [], 'count': 0}
 
         return data
+
+    
+
+    # def get_api_data(self, page_number, endpoint='quotes/', search_query=''): # endpoint='quotes/')
+    #     """Fetch quotes from the API with error handling and caching."""
+    #     cache_key = f'{self.api_url}_{endpoint}_page_{page_number}_query_{search_query}'
+    #     data = cache.get(cache_key)
+
+    #     if not data:
+    #         api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
+    #         headers = {
+    #             'Authorization': f'Bearer {self.request.session.get("access_token")}',
+    #         }
+    #         try:
+    #             response = requests.get(api_url, headers=headers)
+    #             if response.status_code == 401:
+    #                 new_access_token = self.refresh_access_token()
+    #                 if new_access_token:
+    #                     headers['Authorization'] = f'Bearer {new_access_token}'
+    #                     response = requests.get(api_url, headers=headers)
+    #             data = response.json()
+    #             cache.set(cache_key, data)
+    #         except requests.exceptions.RequestException as e:
+    #             logger.error(f"Error fetching data from API: {e}")
+    #             # data = {'results': [], 'count': 0, 'next': None}
+
+    #     return data
     
 
     def process_pagination(self, data, request):
@@ -100,11 +143,20 @@ class DataFetchingMixin(TokenRefreshMixin):
     def render_htmx_or_full_quotes(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
         if request.htmx:
+        
+        # # A way to deal with multiple fragments https://www.reddit.com/r/gatewayittutorials/comments/zmw3yn/django_htmx_fragment_with_header/
+        # usr_username = request.POST.get("username").lower()
+        # if request.headers.get("Hx-Trigger") == "first_name":
+        #     field = "first_name"
+        # elif request.headers.get("Hx-Trigger") == "email_addr":
+        #     field = "email_addr"
+        # context = { "field": field }            
+            
+            
             response = render(request, 'partials/quotes_cards.html', context)
             # response['HX-Reswap'] = 'innerHTML'            
             return response
             
-        
         return render(request, self.template_name, context)
     
 

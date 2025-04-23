@@ -8,11 +8,12 @@
 
             <!-- HTMX target for the list -->
             <input 
+            id="search-quotes"                 
+            class="form-control me-2"               
             arial-label="Search"
             placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %}"
             value="{% if search_query %}{{ search_query }}{% else %}{% endif %}"
-            class="form-control me-2"
-            type="text" 
+            type="search" 
             name="q"
             hx-get="{% url 'quotes:get-quotes' %}?page=1#top"
             hx-trigger="keyup changed delay:500ms"

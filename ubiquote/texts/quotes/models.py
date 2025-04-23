@@ -145,3 +145,24 @@ class QuotesLikes(models.Model):
             ]           
           
 
+class UserQuoteRecommendation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quote = models.ForeignKey('Quote', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    show_count = models.PositiveIntegerField(default=0)  # Track how many times shown
+
+    def __str__(self):
+        return f"Recommendation for {self.user.username} (Quote ID: {self.quote.id})"
+    
+    
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(
+    #             name="%(app_label)s_%(class)s_unique_relationships",
+    #             fields=["quote", "user"],
+    #         ),    
+    #     ]
+    #     indexes = [
+    #             # models.Index(fields=['user',]),           
+    #             models.Index(fields=['user', 'quote']),
+    #         ]       

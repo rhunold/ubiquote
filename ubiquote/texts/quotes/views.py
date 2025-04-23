@@ -14,7 +14,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 
-from .models import Quote, QuotesLikes
+from .models import Quote, QuotesLikes, UserQuoteRecommendation
 from .forms import QuoteForm
 
 from django.db.models import Q
@@ -75,6 +75,10 @@ def like_quote(request, id):
         QuotesLikes.objects.create(user=user, quote=quote)
         liked = True
         
+        # Recommand quotes based on the quote liked
+        RecommendationService.recommend_quotes_for_liked_quote(quote=quote, user=user)
+
+        
 
     # Render the updated like area using the partial template
     context = {
@@ -84,7 +88,7 @@ def like_quote(request, id):
     
     return render(request, 'like_quote.html', context)          
 
-        
+ 
 
 # def recommend_quotes(request, user_id):
 #     recommended_quotes = RecommendationService.recommend_quotes(user_id)
@@ -155,9 +159,18 @@ class GetQuoteView(DetailView):
         # Prepare context with the API data
         context = {
             'quote': data,
+            'search_query':None,
         }
 
-        return render(request, self.template_name, context)
+        # return render(request, self.template_name, context)
+    
+        return render(request, self.get_template_names(), context)
+    
+    def get_template_names(self):
+            """Choose the template dynamically based on the URL or other criteria."""
+            if '/img/' in self.request.path:
+                return ['get_img_quote.html']  # Use another template
+            return ['get_quote.html']  # Default template    
   
   
 

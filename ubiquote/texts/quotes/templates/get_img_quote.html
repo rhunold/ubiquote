@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load get_item %} 
+{% load static %}
+
+{% block title %}Ubiquote {% endblock %}
+
+{% block meta_decription %}{{ quote.text }} - {% endblock %}
+
+{% block custom_static %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link crossorigin="anonymous" href='https://fonts.googleapis.com/css?family=Helvetica|Arimo|Ubuntu|Outfit|Instrument+Serif|Space+Mono|Hedvig+Letters+Serif|Hedvig+Letters+Sans|Courgette|Grandstander|Noto+Sans|Open+Sans|Roboto|WindSong|Euphoria+Script' rel='stylesheet' type='text/css'>
+
+
+<script src="{% static 'txt_to_img_generator.js' %}"></script>
+<link href="{% static 'txt_to_img_generator.css' %}" rel="stylesheet" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="{% static 'html2canvas_settings.js' %}"></script>
+
+{% endblock %}
+
+
+
+{% block body %}
+
+
+
+
+
+
+<div class="card mt-3">
+  <div class="card-header">
+    {% translate "Quote" %}
+  </div>
+
+  <ul class="list-group list-group-flush">
+    <li class="list-group-item">
+
+      <div class="float-end">       
+        
+        <label for="generate-image" class="btn btn-primary x-1">Generate</label>
+        <input type="radio" id="generate-image" name="action" value="generate-image">
+
+        <label for="download-image" class="btn btn-primary x-1">Download</label>
+        <input type="radio" id="download-image" name="action" value="download-image">
+
+
+      </div>
+
+      <div class="cd-grid gap-2 d-md-flex justify-content-md">
+    
+
+
+    <div id="template_options">
+
+
+
+    
+        <div class="dropdown">
+          <div class="dropbtn" id="font-dropdown-btn">
+            <p id="selected-font">Selected Font</p>
+            <div class="triangle">&#9660;</div>
+          </div>
+          <div id="font-container" class="dropdown-content">
+    
+            <!-- <hr>
+            <input type="radio" id="custom-font" name="typo" value="custom-font">
+            <label for="custom-font">Choose your Font</label> -->
+    
+          </div>
+        </div>
+    
+        <div class="dropdown">
+          <div class="dropbtn" id="template-dropdown-btn">
+            <p id="selected-template">Design</p>
+            <div class="triangle">&#9660;</div>
+          </div>
+          <div id="template-container" class="dropdown-content">
+            <input type="radio" id="white-black" name="template" value="white-black" checked>
+            <label for="white-black">Normal</label>
+    
+            <input type="radio" id="black-white" name="template" value="black-white">
+            <label for="black-white">Inverse</label>
+    
+            <input type="radio" id="author-visual" name="template" value="author-visual" >
+            <label for="author-visual">Author</label>        
+    
+            <hr>           
+    
+            <input type="radio" id="custom" name="template" value="custom">
+            <label for="custom">Custom</label>
+          </div>
+        </div>
+    
+        <div class="dropdown">
+          <div class="dropbtn" id="size-dropdown-btn">
+            <p id="selected-size">Format</p>
+            <div class="triangle">&#9660;</div>
+          </div>
+          <div id="size-container" class="dropdown-content">
+            <input type="radio" id="size-1.91/1" name="size" value="size-1.91/1" checked>
+            
+            <label for="size-1.91/1">
+                <div class="icon ratio-191-1">
+                </div>             
+                Normal
+            </label>
+        
+            <input type="radio" id="size-1/1" name="size" value="size-1/1">
+               
+            <label for="size-1/1">
+                <div class="icon ratio-1-1">
+                </div>      
+                Square
+            </label>
+    
+            <input type="radio" id="size-4/3" name="size" value="size-4/3">
+                   
+            <label for="size-4/3">
+                <div class="icon ratio-4-3">
+                </div>  
+                Old TV
+            </label>        
+    
+            <input type="radio" id="size-9/16" name="size" value="size-9/16">
+            <label for="size-9/16">
+                <div class="icon ratio-9-16">
+                    <!-- 9/16 -->
+                </div>
+                 Smartphone</label>        
+            
+            <input type="radio" id="size-16/9" name="size" value="size-16/9">
+            <label for="size-16/9">
+                <div class="icon ratio-16-9">
+                </div>
+                 Cinema</label>  
+            
+            <input type="radio" id="size-4/5" name="size" value="size-4/5">
+                  
+            <label for="size-4/5">
+                <div class="icon ratio-4-5">
+                </div>  
+                Instagramm
+            </label>     
+            
+            <input type="radio" id="size-2/3" name="size" value="size-2/3">
+                   
+            <label for="size-2/3">
+                <div class="icon ratio-2-3">
+                </div>  
+                Pinterest
+            </label>             
+    
+    
+            <!-- <hr>
+            <input type="radio" id="size-custom" name="size" value="custom">
+            <label for="size-custom">Custom</label> -->
+          </div>
+        </div>
+    
+    
+
+
+        <!-- <div class="dropdown">
+            <div class="dropbtn" id="action-dropdown-btn">
+              <p id="selected-action">Action</p>
+              <div class="triangle">&#9660;</div>
+            </div>
+            <div id="action-container" class="dropdown-content">
+              <input type="radio" id="generate-image" name="action" value="generate-image"  >
+              <label for="generate-image" > <img src="https://cdn.jsdelivr.net/gh/cj1128/emoji-images@1.2.1/imgs/1f44f.png" class="image" />Generate image</label>
+      
+              <input type="radio" id="download-image" name="action" value="download-image">
+              <label for="download-image" > <img src="https://cdn.jsdelivr.net/gh/cj1128/emoji-images@1.2.1/imgs/1f44f.png" class="image" />Download image</label>
+    
+              
+    
+              <hr>             
+              <input type="radio" id="save-image" name="action" value="save-image">
+              <label for="save-image">Save image</label>        
+              
+              <input type="radio" id="save-template" name="action" value="save-template">
+              <label for="save-template">Save template</label>          
+      
+              <input type="radio" id="custom" name="template" value="custom">
+              <label for="custom">Custom</label>
+            </div>
+          </div> -->
+      
+    
+      </div>
+    
+      <div id="custom-menu">
+    
+        <div id="custom-options" style="display: none;">
+            <div class="dropbtn">   
+      
+              <label for="bgColorPicker">Background Color</label>   
+              <input type="color" id="bgColorPicker" value="#e66465" >
+      
+              
+              
+              <label for="bgImageInput">Background Image</label> 
+              <input type="text" id="bgImageInput" placeholder="Enter image URL">
+        
+              <hr>      
+              
+              <!-- <label for="borderColorPicker">Border Color</label>
+              <input type="color" id="borderColorPicker"> -->
+      
+              <label for="borderWidth">Border Width</label>
+              <input type="range" id="borderWidth" min="0" max="9" step="1" value="1">
+      
+              <hr>      
+      
+              <label for="textColorPicker">Color</label>
+              <input type="color" id="textColorPicker">
+              
+              <label for="textAlign">Text Alignment</label>
+              <select id="textAlign">
+                <option value="center">Center</option>        
+                <option value="justify">Justify</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>        
+              </select>
+      
+              <hr>     
+              
+      
+              <label>Text Style</label>
+              <button id="boldBtn">Bold</button>
+              <button id="italicBtn">Italic</button>
+              <button id="underlineBtn">Underline</button>
+              <button id="uppercaseBtn">Uppercase</button>
+              
+              <hr>     
+      
+              <label for="quoteStyle">Quote Style</label>
+              <select id="quoteStyle">
+                <option value="none">None</option>
+                <option value="single">Single Quotes</option>
+                <option value="double">Double Quotes</option>
+                <option value="angle_quote">Angle Quotes</option>        
+              </select>
+            
+            </div>
+          </div>  
+      
+      
+      
+          <!-- <div id="custom-size-options" style="display: none;">
+            <div class="dropbtn">  
+              <label for="custom-width">Width</label>
+              <input type="number" id="custom-width" placeholder="Enter width">
+            
+              <label for="custom-height">Height</label>
+              <input type="number" id="custom-height" placeholder="Enter height">
+            
+              <label for="custom-aspect-ratio">Aspect Ratio</label>
+              <select id="custom-aspect-ratio">
+                <option value="1.91/1">1.91 / 1</option>
+                <option value="4/3">4 / 3</option>
+                <option value="1/1">1 / 1</option>
+                <option value="9/16">9 / 16</option>
+                <option value="16/9">16 / 9</option>   
+                <option value="4/5">4 / 5</option>   
+                <option value="2/3">2 /3</option>             
+      
+              </select>
+          </div>  
+        </div>      -->
+    
+      </div>
+    
+    </div>  
+    </li>
+  </ul>  
+  <div class="card-body">
+
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm" id="quote">
+
+
+
+
+          <blockquote class="blockquote mb-0 target">
+
+            <p class="txt"><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|safe }}</a></p>
+
+            
+
+              <footer class="blockquote-footer">
+                {% if quote.author %}                
+                <p class="author">
+                  <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">
+    
+    
+                  
+
+                    {% if quote.lang != "en" and quote.author.translated_name %}
+                      {% if quote.lang in quote.author.translated_name %}
+                          {{ quote.author.translated_name|get_item:quote.lang|default:quote.author.fullname }}
+                      {% else %}
+                          {{ quote.author.fullname|default_if_none:""|safe }}
+                      {% endif %}
+                    {% else %}
+                        {{ quote.author.fullname|default_if_none:""|safe }}
+                    {% endif %}
+                
+
+                
+                  </a>
+                </p>
+                <p class="source">
+                  <em>in</em>
+                  <a href="">
+                    <cite title="Source Title">Source Title</cite>
+                  </a>
+                </p>
+                {% endif %}                   
+                <p class="provider">
+                  <!-- Image must be light (less than 5ko) -->
+                  <a href="">
+                  <img src="https://cdn.jsdelivr.net/gh/cj1128/emoji-images@1.2.1/imgs/1f44f.png" class="image" />
+                  Imprimes ta citation sur Ubiquote.com/beta
+                  </a>
+              </p>                
+              </footer>
+    
+         
+          </blockquote>
+
+
+          <div id="result" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <img id="modalImage" src="" alt="Generated Image" />
+            </div>
+          </div>
+
+        </div>
+
+          
+      </div>
+    
+    </div>
+
+
+  </div>
+  <ul class="list-group list-group-flush">
+
+    <li class="list-group-item">
+        {% translate "categories" %} :
+        {% for quote_category in quote.categories %}
+        <a href="{% url 'texts:get-category' quote_category.slug   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title }}</a> &nbsp;
+        {% endfor %}   
+    </li>
+    <li class="list-group-item">
+      {% if user.is_authenticated and user == quote.contributor %}
+      <div class="float-end">                  
+        <a href="{% url 'quotes:update-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "update" %}</a>
+        <a href="{% url 'quotes:delete-quote' quote.slug  %}" class="btn btn-primary x-1"> {% translate "delete" %}</a>
+      </div>
+      {% else %}
+
+      {% endif %}         
+      
+      {% translate "published" %} {{ quote.date_created }}  {% translate "by" %} 
+      <a href="{% url 'users:get-user' quote.contributor  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+        {{ quote.contributor.username|safe }}
+      </a>
+       
+    </li>
+    <li class="list-group-item">
+      <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
+        
+            
+        {% include "img_quote.html" %} 
+
+        {% include "like_quote.html" %} 
+
+
+        {% include "share_quote.html" %} 
+            
+      </div>  
+    </li>
+
+    <!-- Display when the quote was liked on the Favorite page -->
+    {% if '/likes/' in request.path %}
+    <li class="list-group-item">
+      <div class="cd-grid gap-2 d-md-flex justify-content-md-end">
+
+          {% for liked_quote in liked_quotes_timestamps %}
+            {% if liked_quote.quote_id == quote.id %}
+                <p>You liked this quote on: {{ liked_quote.timestamp }}</p>
+            {% endif %}
+          {% endfor %}
+    
+      </div>  
+    </li>
+    {% endif %}
+
+  </ul>  
+
+</div>     
+
+
+<!-- Extend commenting -->
+{% comment %}
+
+
+<i class="fa fa-fw fa-envelope"></i> 
+
+    {% include "quote_card.html" %}
+
+    <h1>"{{ quote.text|safe }}"</h1>
+
+
+    {% if quote.author is not None %}
+    <h2>
+
+      <a href="{% url 'authors:get-author' quote.author.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+      <!-- {% if quote.author.nickname is not None %}
+        {{ quote.author.nickname|default_if_none:"" }}
+      {% else %}
+        {{ quote.author.first_name|default_if_none:""  }} {{ quote.author.middle_name|default_if_none:"" }} {{ quote.author.last_name|default_if_none:"" }}
+      {% endif %} -->
+      {{ quote.author }}
+      </a>
+    </h2>
+    {% else %}
+    <!-- <h2>Anonyme</h2> -->
+
+    {% endif %}
+
+    <h3>Contribor : {{ quote.contributor.username }}</h3>
+
+    {% if quote.categories is not None %}
+    <p>categories :
+      {% for category in quote.categories.all %}
+      <a href="{% url 'texts:get-category' category.title|slugify   %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title }}</a>
+      {% endfor %}        
+    </p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+      {% if fav %}
+        <p><a href="{% url 'quotes:like-quote' quote.id  %}" class="btn btn-outline-primary">UnLike</a></p>
+      {% else %}
+        <p><a href="{% url 'quotes:like-quote' quote.id  %}" class="btn btn-outline-primary">Like</a></p>      
+      {% endif %} 
+    {% else %}
+      <p><a href="{% url 'users:user-register' %}" class="btn btn-outline-primary">Like</a></p>    
+    {% endif %}  
+
+
+
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+
+
+
+    {% if user.is_authenticated and user.id == quote.contributor.id %}
+    <p>
+      <a href="{% url 'quotes:update-quote' quote.slug  %}" type="button" class="btn btn-info mx-2">update</a>
+      <a href="{% url 'quotes:delete-quote' quote.slug  %}" type="button" class="btn btn-info mx-2">delete</a>
+    </p>
+    {% else %}
+    {% endif %}  
+
+  {% endcomment %}    
+
+
+{% endblock %}  

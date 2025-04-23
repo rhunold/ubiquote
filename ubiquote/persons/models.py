@@ -14,6 +14,8 @@ LANGUAGES = settings.LANGUAGES
 
 from flexidate import parse
 
+from django.core.validators import RegexValidator
+
 
 class Person(models.Model):
     first_name = models.CharField(_('first name'), max_length=30, null=True, blank=True)
@@ -24,10 +26,37 @@ class Person(models.Model):
     
 
     date_birth_datefield = models.DateField(_('birthday_datefield'), null=True, blank=True)
-    date_birth = models.CharField(_('birthday'), max_length=30, null=True, blank=True) # in the view date_birth = FlexiDate(Author.date_birth)   
+    
+    date_birth = models.CharField(_('birthday'), 
+                                  max_length=30, null=True, blank=True,
+                                  validators=[
+                                        RegexValidator(
+                                            regex=r'^-?\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$',
+                                            message=_(
+                                                "Enter a valid date in the format 'YYYY-MM-DD' or '-YYYY-MM-DD'. "
+                                                "Year must be numeric. Month must be 01 to 12. Day must be 01 to 31."
+                                            ),
+                                        )
+                                    ],
+                                    help_text = "Format is YYYY-MM-DD or -YYYY-MM-DD",
+                                  
+                                  ) # in the view date_birth = FlexiDate(Author.date_birth)   
       
     date_death_datefield = models.DateField(_('death_datefield'), null=True, blank=True)
-    date_death = models.CharField(_('death'), max_length=30, null=True, blank=True)    
+    
+    date_death = models.CharField(_('death'), 
+                                  max_length=30, null=True, blank=True,
+                                  validators=[
+                                        RegexValidator(
+                                            regex=r'^-?\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$',
+                                            message=_(
+                                                "Enter a valid date in the format 'YYYY-MM-DD' or '-YYYY-MM-DD'. "
+                                                "Year must be numeric. Month must be 01 to 12. Day must be 01 to 31."
+                                            ),
+                                        )
+                                    ],
+                                    help_text = "Format is YYYY-MM-DD or -YYYY-MM-DD",                                  
+                                  )    
     
     sex = models.CharField(_('sex'), max_length=1,choices=SEX_CHOICES, null=True, blank=True)
     nationality = models.CharField(_('nationality'), choices=NATIONALITIES_CHOICES, null=True, blank=True)

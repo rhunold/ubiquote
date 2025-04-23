@@ -10,6 +10,8 @@ from rest_framework.exceptions import NotAuthenticated
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
+import random
+from django.db.models import Case, Value, When
 
 from django.db.models import Q
 from texts.quotes import models as QuoteModel
@@ -21,7 +23,7 @@ from django.db.models import Count
 from texts.models import Category
 from texts.quotes.services import RecommendationService
 
-from .serializers import QuoteSerializer, AuthorSerializer, UserSerializer, ShortAuthorSerializer, ShortUserSerializer,  ShortQuoteSerializer, ShortQuotesLikesSerializer, CategorySerializer
+from .serializers import QuoteSerializer, AuthorSerializer, UserSerializer, ShortAuthorSerializer, ShortUserSerializer,  ShortQuoteSerializer, ShortQuotesLikesSerializer, CategorySerializer, QuoteRecommandSerializer
 
 # import . from serializers
 
@@ -247,77 +249,78 @@ class UserQuotesLikesAPIView(generics.ListAPIView):
     #     # Return the serialized data with the like status
     #     return Response(serializer.data)    
 
-class UserLikesAPIView(generics.GenericAPIView):
-    """
-    API view to allow a user to like or dislike a quote
-    """
+
+# class UserLikesAPIView(generics.GenericAPIView):
+#     """
+#     API view to allow a user to like or dislike a quote
+#     """
         
-    pagination_class = CustomPagination    
-    serializer_class = ShortQuoteSerializer       
-    permission_classes = [IsAuthenticated]
+#     pagination_class = CustomPagination    
+#     serializer_class = ShortQuoteSerializer       
+#     permission_classes = [IsAuthenticated]
     
     
-    def get(self, request, id):
-        # Get the quote
-        quote = QuoteModel.Quote.objects.get(id=id)
-        user = request.user
+#     def get(self, request, id):
+#         # Get the quote
+#         quote = QuoteModel.Quote.objects.get(id=id)
+#         user = request.user
         
-        # Check if the quote is liked by the user
-        has_user_liked = QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).exists()
+#         # Check if the quote is liked by the user
+#         has_user_liked = QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).exists()
 
-        # # Serialize the quote and pass the request to the context
-        # serializer = ShortQuoteSerializer(quote, context={'request': request})
+#         # # Serialize the quote and pass the request to the context
+#         # serializer = ShortQuoteSerializer(quote, context={'request': request})
 
-        # Return the serialized data with the like status
-        return Response(serializer.data)
+#         # Return the serialized data with the like status
+#         return Response(serializer.data)
     
     
-# def get_object(self):
-#     queryset = self.get_queryset()
-#     filter = {}
-#     for field in self.multiple_lookup_fields:
-#         filter[field] = self.kwargs[field]
+# # def get_object(self):
+# #     queryset = self.get_queryset()
+# #     filter = {}
+# #     for field in self.multiple_lookup_fields:
+# #         filter[field] = self.kwargs[field]
 
-#     obj = get_object_or_404(queryset, **filter)
-#     self.check_object_permissions(self.request, obj)
-#     return obj    
+# #     obj = get_object_or_404(queryset, **filter)
+# #     self.check_object_permissions(self.request, obj)
+# #     return obj    
     
 
-    def post(self, request, id):
-        quote = QuoteModel.Quote.objects.get(id=id)
-        user = request.user
+#     def post(self, request, id):
+#         quote = QuoteModel.Quote.objects.get(id=id)
+#         user = request.user
 
-        # Check if the user already liked the quote
-        liked = QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).exists()
+#         # Check if the user already liked the quote
+#         liked = QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).exists()
         
-        if liked:
-            # Unlike the quote
-            QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).delete()
-            # has_user_liked = False
-        else:
-            # Like the quote
-            QuoteModel.QuotesLikes.objects.create(user=user, quote=quote)
-            # has_user_liked = True
+#         if liked:
+#             # Unlike the quote
+#             QuoteModel.QuotesLikes.objects.filter(user=user, quote=quote).delete()
+#             # has_user_liked = False
+#         else:
+#             # Like the quote
+#             QuoteModel.QuotesLikes.objects.create(user=user, quote=quote)
+#             # has_user_liked = True
 
-        # Update the likes count
-        likes = quote.likes.count()
+#         # Update the likes count
+#         likes = quote.likes.count()
         
-        # Update the list of user who like the quote        
-        # likes = quote.likes.append(user.id)
+#         # Update the list of user who like the quote        
+#         # likes = quote.likes.append(user.id)
 
 
-        # Render the updated like area using the partial template
-        context = {
-            'quote': quote,
-            'quote.likes': likes,
-            # 'likes_count': likes_count,
-            # 'has_user_liked': has_user_liked
-        }
+#         # Render the updated like area using the partial template
+#         context = {
+#             'quote': quote,
+#             'quote.likes': likes,
+#             # 'likes_count': likes_count,
+#             # 'has_user_liked': has_user_liked
+#         }
         
-        # print(context)
+#         # print(context)
         
         
-        return render(request, 'like_quote.html', context)
+#         return render(request, 'like_quote.html', context)
     
     
 class QuoteAPIView(generics.RetrieveAPIView):
@@ -397,30 +400,111 @@ class HomeQuotesAPIView(generics.ListAPIView):
     API list view recommanded quotes to user based on his previous likes 
     OR 100 most liked quotes for anonymous or not quote liked yet
     """    
-    serializer_class = QuoteSerializer
+    # queryset = QuoteModel.UserQuoteRecommendation.objects.all()
+    # serializer_class = QuoteRecommandSerializer
+    serializer_class = QuoteSerializer    
+    
+    permission_classes = [IsAuthenticatedOrReadOnly] # [AllowAny] [IsAuthenticated]
     pagination_class = CustomPagination
-    # permission_classes = [IsAuthenticated]   
-    permission_classes = [IsAuthenticatedOrReadOnly]       
+    # ordering = ['?']     
+
 
 
     def get_queryset(self):
-        # Check if user is authenticated
         if self.request.user.is_authenticated:
-            print("There is a permission ")
-            user_id = self.request.user.id
-            recommended_quotes = RecommendationService.recommend_quotes(user_id)
-            print(type(recommended_quotes))
+            # Get the user profile
+            try:
+                user = UserModel.User.objects.get(id=self.request.user.id)
+            except UserModel.User.DoesNotExist:
+                raise serializers.ValidationError({"detail": "User does not exist."})
+
+            # Get all the quote IDs recommanded to the user except if not like any quote yet
+            if not QuoteModel.UserQuoteRecommendation.objects.filter(user=user).exists():
+                recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+            else:
+                recommanded_quotes_ids = QuoteModel.UserQuoteRecommendation.objects.filter(user=user).values_list('quote', flat=True)
+                liked_quotes = QuoteModel.QuotesLikes.objects.filter(user=user).values_list('quote__id', flat=True)                
+                recommended_quotes = QuoteModel.Quote.objects.filter(id__in=recommanded_quotes_ids).exclude(id__in=liked_quotes)
+                
+                        
+                # Shuffle the queryset for each session
+                session_key = 'shuffled_quote_ids'
+                if session_key not in self.request.session:
+                    # Shuffle only once per session
+                    quote_ids = list(recommended_quotes.values_list('id', flat=True))
+                    random.shuffle(quote_ids)
+                    self.request.session[session_key] = quote_ids
+
+                # Get the shuffled quote IDs from session and maintain order
+                shuffled_ids = self.request.session[session_key]
+                recommended_quotes = QuoteModel.Quote.objects.filter(id__in=shuffled_ids).order_by(Case(*[When(id=id, then=pos) for pos, id in enumerate(shuffled_ids)]))                
+                            
+
         else:
         # Handle anonymous user case by showing popular quotes
-            print("There is no permission ")
             recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
-            print(recommended_quotes)
-            print(type(recommended_quotes))
-                
-        # recommended_quotes = Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
-    
 
         return recommended_quotes
+    
+
+
+    # def get_queryset(self):
+    #     # Check if user is authenticated
+    #     if self.request.user.is_authenticated:
+
+    #         # user_id = self.request.user.id
+    #         # recommended_quotes = RecommendationService.recommend_quotes(user_id)
+            
+    #         user = self.request.user            
+    #         recommended_quotes = QuoteModel.UserQuoteRecommendation.objects.filter(user=user)
+    #         print("TEST")
+            
+            
+    #     else:
+    #     # Handle anonymous user case by showing popular quotes
+    #         recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+    #         # recommended_quotes = QuoteModel.Quote.objects.all()[:100]
+            
+    #         print("Hello")
+
+
+    #     return recommended_quotes
+
+
+
+
+
+    # def get_queryset(self):
+    #     if self.request.user.is_authenticated:
+    #         user = self.request.user
+    #         recommended_quotes = QuoteModel.UserQuoteRecommendation.objects.filter(user=user).order_by('id')  # Ensure it's ordered
+    #         return recommended_quotes
+    #     else:
+    #         recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+    #         return recommended_quotes            
+            
+
+
+    # def get_queryset(self):
+    #     # Check if user is authenticated
+    #     if self.request.user.is_authenticated:
+    #         print("There is a permission ")
+    #         user = self.request.user
+    #         recommended_quotes = QuoteModel.UserQuoteRecommendation.objects.filter(user=user).order_by('id') 
+    #         # print(type(recommended_quotes))
+    #     else:
+    #     # Handle anonymous user case by showing popular quotes
+    #         print("There is no permission ")
+    #         recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+    #         print(recommended_quotes)
+    #         # print(type(recommended_quotes))
+                
+    #     # recommended_quotes = Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+    
+    #     return recommended_quotes
+
+
+
 
     # Optionally, raise an error if you want to restrict this to authenticated users
     # def get(self, request, *args, **kwargs):
