@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
+from texts.mixins import CleaningMixin
+
 # from django_pgvector.fields import VectorField
 
 # from django_elasticsearch_dsl import Document
@@ -21,13 +23,16 @@ from django.dispatch import receiver
 class Quote(Text):
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, related_name='author') #, default=1)
     
+    
+    # work = models.ForeignKey(Work, on_delete=models.SET_NULL, null=True, blank=True)
+    
     # tfidf_vector = VectorField()    
 
     categories = models.ManyToManyField(
         Category,
         # related_query_name="%(app_label)s_%(class)ss",        
         # related_name="%(app_label)s_%(class)s_related",        
-        # blank=True,
+        blank=True,
         # default=None,
         through='QuotesCategories',
         # validators=[validate_categories_count]
@@ -90,7 +95,27 @@ class Quote(Text):
                 # date_updated
             ]             
 
+# # Save all instance to generate the new slug
+# for quote in Quote.objects.all():
+#     quote.save()
 
+
+class QuoteRaw(Text, CleaningMixin):  # hérite de text, lang, date_created
+    author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, related_name='raw_author') #, default=1)
+
+
+    processed = models.BooleanField(default=False)  # Marque comme traité ou non
+
+
+    def __str__(self):
+        return f'"{self.text[:100]}" - Raw Author : {self.author}'
+
+    def save(self, *args, **kwargs):
+        self.clean_fields()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-date_created']
 
 class QuotesCategories(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

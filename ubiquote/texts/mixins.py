@@ -4,6 +4,7 @@ import requests
 import logging
 from django.core.cache import cache
 from django.contrib.auth import logout
+from django.contrib import messages
 
 
 # Set up logger for error handling
@@ -54,20 +55,15 @@ class TokenRefreshMixin:
     
     
 class DataFetchingMixin(TokenRefreshMixin):
-    api_url = None  # Set in the child class
+    # api_url = None  # Set in the child class
         
     def get_api_data(self, page_number, endpoint='quotes/', search_query='', disable_cache=False): 
         """Fetch quotes from the API with error handling and caching."""
-        cache_key = f'{self.api_url}_{endpoint}_page_{page_number}_query_{search_query}'
-
-        # # Skip cache if randomization is required
-        # if not disable_cache:
-        #     data = cache.get(cache_key)
-        #     if data:
-        #         return data
+        if not self.api_url:
+            logger.error("API URL not set in the view")
+            return {'results': [], 'count': 0, 'detail': 'Configuration error'}
 
         api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
-
         headers = {}
 
         # Add authorization header only if the user is authenticated (token exists)
@@ -76,101 +72,164 @@ class DataFetchingMixin(TokenRefreshMixin):
             headers['Authorization'] = f'Bearer {access_token}'
 
         try:
-            response = requests.get(api_url, headers=headers)
+            response = requests.get(api_url, headers=headers, timeout=10)  # Add timeout
             
             # Handle token refresh if authenticated and the token is expired
             if response.status_code == 401 and access_token:
                 new_access_token = self.refresh_access_token()
                 if new_access_token:
                     headers['Authorization'] = f'Bearer {new_access_token}'
-                    response = requests.get(api_url, headers=headers)
-                
-            data = response.json()
+                    response = requests.get(api_url, headers=headers, timeout=10)
+
+            # Log non-200 responses
+            if response.status_code != 200:
+                logger.error(f"API error: {response.status_code} - URL: {api_url}")
+                if response.content:
+                    logger.error(f"API response: {response.content.decode()}")
+                return {'results': [], 'count': 0, 'detail': f'API error: {response.status_code}'}
             
-            # # Only cache if caching is enabled
-            # if not disable_cache:
-            #     cache.set(cache_key, data)
+            try:
+                data = response.json()
+                return data
+            except ValueError as e:
+                logger.error(f"JSON decode error: {str(e)} - Content: {response.content.decode()}")
+                return {'results': [], 'count': 0, 'detail': 'Invalid JSON response'}
+            
+        except requests.exceptions.Timeout:
+            logger.error(f"API timeout: {api_url}")
+            return {'results': [], 'count': 0, 'detail': 'API request timed out'}
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request error: {str(e)} - URL: {api_url}")
+            return {'results': [], 'count': 0, 'detail': 'API request failed'}
+
+    def create_api_data(self, endpoint, data):
+        """Create a new resource through the API."""
+        api_url = f'{self.api_url}{endpoint}'
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        # Add authorization header if user is authenticated
+        access_token = self.request.session.get("access_token")
+        if access_token:
+            headers['Authorization'] = f'Bearer {access_token}'
+        
+        try:
+            response = requests.post(api_url, json=data, headers=headers)
+            
+            # Handle token refresh if authenticated and token is expired
+            if response.status_code == 401 and access_token:
+                new_access_token = self.refresh_access_token()
+                if new_access_token:
+                    headers['Authorization'] = f'Bearer {new_access_token}'
+                    response = requests.post(api_url, json=data, headers=headers)
+            
+            return response.json() if response.status_code in [200, 201] else None
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"Error fetching data from API: {e}")
-            data = {'results': [], 'count': 0}
+            logger.error(f"Error creating data through API: {e}")
+            return None
 
-        return data
+    def update_api_data(self, endpoint, data):
+        """Update a resource through the API."""
+        api_url = f'{self.api_url}{endpoint}'
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        
+        # Add authorization header if user is authenticated
+        access_token = self.request.session.get("access_token")
+        if access_token:
+            headers['Authorization'] = f'Bearer {access_token}'
+        
+        try:
+            response = requests.put(api_url, json=data, headers=headers)
+            
+            # Handle token refresh if authenticated and token is expired
+            if response.status_code == 401 and access_token:
+                new_access_token = self.refresh_access_token()
+                if new_access_token:
+                    headers['Authorization'] = f'Bearer {new_access_token}'
+                    response = requests.put(api_url, json=data, headers=headers)
+            
+            return response.json() if response.status_code == 200 else None
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error updating data through API: {e}")
+            return None
 
-    
-
-    # def get_api_data(self, page_number, endpoint='quotes/', search_query=''): # endpoint='quotes/')
-    #     """Fetch quotes from the API with error handling and caching."""
-    #     cache_key = f'{self.api_url}_{endpoint}_page_{page_number}_query_{search_query}'
-    #     data = cache.get(cache_key)
-
-    #     if not data:
-    #         api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
-    #         headers = {
-    #             'Authorization': f'Bearer {self.request.session.get("access_token")}',
-    #         }
-    #         try:
-    #             response = requests.get(api_url, headers=headers)
-    #             if response.status_code == 401:
-    #                 new_access_token = self.refresh_access_token()
-    #                 if new_access_token:
-    #                     headers['Authorization'] = f'Bearer {new_access_token}'
-    #                     response = requests.get(api_url, headers=headers)
-    #             data = response.json()
-    #             cache.set(cache_key, data)
-    #         except requests.exceptions.RequestException as e:
-    #             logger.error(f"Error fetching data from API: {e}")
-    #             # data = {'results': [], 'count': 0, 'next': None}
-
-    #     return data
-    
+    def delete_api_data(self, endpoint):
+        """Delete a resource through the API."""
+        api_url = f'{self.api_url}{endpoint}'
+        headers = {}
+        
+        # Add authorization header if user is authenticated
+        access_token = self.request.session.get("access_token")
+        if access_token:
+            headers['Authorization'] = f'Bearer {access_token}'
+        
+        try:
+            response = requests.delete(api_url, headers=headers)
+            
+            # Handle token refresh if authenticated and token is expired
+            if response.status_code == 401 and access_token:
+                new_access_token = self.refresh_access_token()
+                if new_access_token:
+                    headers['Authorization'] = f'Bearer {new_access_token}'
+                    response = requests.delete(api_url, headers=headers)
+            
+            return response.status_code == 204  # Returns True if deletion was successful
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error deleting data through API: {e}")
+            return False
 
     def process_pagination(self, data, request):
         """Helper method to handle pagination and URL manipulation."""
         next_page_url = data.get('next')
         previous_page_url = data.get('previous')
-        # search_query = request.GET.get('q', '')   
-                
+        
         lang = request.LANGUAGE_CODE
         if next_page_url:
             next_page_url = next_page_url.replace(f'/api/', f'/{lang}/')
         if previous_page_url:
             previous_page_url = previous_page_url.replace(f'/api/', f'/{lang}/')
-        return next_page_url, previous_page_url #, search_query
-
-
+        return next_page_url, previous_page_url
 
     def render_htmx_or_full_quotes(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
-        if request.htmx:
-        
-        # # A way to deal with multiple fragments https://www.reddit.com/r/gatewayittutorials/comments/zmw3yn/django_htmx_fragment_with_header/
-        # usr_username = request.POST.get("username").lower()
-        # if request.headers.get("Hx-Trigger") == "first_name":
-        #     field = "first_name"
-        # elif request.headers.get("Hx-Trigger") == "email_addr":
-        #     field = "email_addr"
-        # context = { "field": field }            
-            
-            
-            response = render(request, 'partials/quotes_cards.html', context)
-            # response['HX-Reswap'] = 'innerHTML'            
-            return response
-            
-        return render(request, self.template_name, context)
-    
+        try:
+            if request.htmx:
+                return render(request, 'partials/quotes_cards.html', context)
+            return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Template rendering error: {str(e)}")
+            messages.error(request, "An error occurred while rendering the page.")
+            return redirect('get-home')
 
-    
-
-    # if request.htmx:
-    #     context = {'quotes': quotes, 'search_query': search_query, 'count': count}
-    #     return render(request, 'quotes/partials/quotes_list.html', context)
-    # else:
-    #     # Default return for non-HTMX requests
-    #     return render(request, 'search_quotes.html', {'search_query': search_query, 'count': count})    
-    
     def render_htmx_or_full_authors(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
-        if request.htmx:
-            return render(request, 'partials/authors_cards.html', context)
-        return render(request, self.template_name, context)    
+        try:
+            if request.htmx:
+                return render(request, 'partials/authors_cards.html', context)
+            return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Template rendering error: {str(e)}")
+            messages.error(request, "An error occurred while rendering the page.")
+            return redirect('get-home')
+    
+
+    
+
+class CleaningMixin:
+    def clean_fields(self):
+        print("Cleaning process")
+        # self.text = self.text.strip()
+        # if not self.lang:
+        #     try:
+        #         self.lang = detect(self.text)
+        #     except Exception:
+        #         self.lang = None
+
+        # if not self.author_name:
+        #     self.needs_review = True

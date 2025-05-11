@@ -122,10 +122,15 @@ DATABASES = {
         'PASSWORD': os.environ.get('DATABASES_PASSWORD'),
         'HOST': os.environ.get('DATABASES_HOST'),
         'PORT': os.environ.get('DATABASES_PORT'),
+        
+        'TEST': {
+            'NAME': 'test_ubiquote_db',
+        },        
     }
 }
 
-
+# TESTING = True
+# TEST_DATABASES = {}
 
 
 # Password validation
@@ -221,7 +226,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # to disable the security when you want to proceed more than 1000 operations at once (delete all authors...)
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
+# DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
 
 
 

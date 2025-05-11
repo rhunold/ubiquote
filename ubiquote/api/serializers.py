@@ -39,10 +39,18 @@ class ShortAuthorSerializer(TranslatedNameMixin, serializers.ModelSerializer):
 
 class AuthorSerializer(TranslatedNameMixin, serializers.ModelSerializer):
     translated_name = serializers.SerializerMethodField()
+    quote_count = serializers.SerializerMethodField()
 
     class Meta:
         model = mauthors.Author
-        fields = "__all__"  # This includes all fields from the model, plus the translated_name field
+        fields = ["id", "slug", "fullname", "last_name", "first_name", "translated_name",
+                # "birth_date", "death_date", "nationality", "avatar", "sex", 
+                # "occupation", "biography", 
+                 "quote_count", ]
+        read_only_fields = ["id", "slug"]
+
+    def get_quote_count(self, obj):
+        return mquotes.Quote.objects.filter(author=obj).count()
 
 
 
@@ -55,36 +63,41 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class QuoteSerializer(serializers.ModelSerializer):
-    
-    # Nest the Author and Category serializers
-    author = ShortAuthorSerializer()  # Nested author data
-    categories = CategorySerializer(many=True, read_only=True)  # Nested categories data
-    contributor = ShortUserSerializer()    
-    
-    # user = ShortUserSerializer()       
-    
-    # likes_count = serializers.IntegerField(source='likes.count', read_only=True)
-    # has_user_liked = serializers.SerializerMethodField()    
-    
+    author = ShortAuthorSerializer(read_only=True)  # Nested author data for reading
+    author_id = serializers.PrimaryKeyRelatedField(
+        queryset=mauthors.Author.objects.all(),
+        write_only=True,
+        source='author'
+    )
+    categories = CategorySerializer(many=True, read_only=True)  # Nested categories data for reading
+    category_ids = serializers.PrimaryKeyRelatedField(
+        queryset=tmodels.Category.objects.all(),
+        write_only=True,
+        source='categories',
+        many=True,
+        required=False
+    )
+    contributor = ShortUserSerializer(read_only=True)
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
-    has_user_liked = serializers.SerializerMethodField()    
-    
+    has_user_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = mquotes.Quote
-        fields = "__all__"  
-        # fields = ["id", "text", "author", "categories", "lang", "likes", "contributor", "date_created", "likes_count", "has_user_liked", "slug" ]
+        fields = ["id", "text", "author", "author_id", "categories", "category_ids", 
+                 "lang", "likes", "contributor", "date_created", "likes_count", 
+                 "has_user_liked", "slug"]
+        read_only_fields = ["id", "likes"] # "slug", "date_created"
         
-    
+        
+
     def get_has_user_liked(self, obj):
-        user = self.context['request'].user  # Access request from context
-        if user.is_authenticated:
+        user = self.context['request'].user if 'request' in self.context else None
+        if user and user.is_authenticated:
             return mquotes.QuotesLikes.objects.filter(user=user, quote=obj).exists()
         return False
 
     def get_likes_count(self, obj):
         return obj.likes.count()
-    
-    
 
 
 class QuoteRecommandSerializer(serializers.ModelSerializer):

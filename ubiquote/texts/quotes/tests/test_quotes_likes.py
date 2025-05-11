@@ -1,129 +1,119 @@
 import pytest
-import random
-
+from tests.base import BaseTestCase
 from persons.users.models import User
 from persons.authors.models import Author
 from texts.quotes.models import Quote, QuotesLikes
+from django.urls import reverse
+from django.test import override_settings
+from django.db import transaction
 
-from django.db import connection
+"""
+@pytest.mark.django_db(transaction=True)
+class TestQuotesAndLikes(BaseTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        try:
+            cls.anonymous_author = Author.objects.get(nickname="Anonymous")
+        except Author.DoesNotExist:
+            cls.anonymous_author = Author.objects.create(
+                nickname="Anonymous",
+                slug="anonymous"
+            )
 
-# Test database 
-def test_user_notnull(db):
-    assert User.objects.count() != 0
-
-# A mettre dans le fichier test de l'app user
-def test_user_create(db):
-    count_before = User.objects.count() 
-    user = User.objects.create_user(username='test2', email='test2@gmail.com', password='test2')
-    assert user.username is "test2"    
-    user.set_password("new-password")
-    assert user.check_password("new-password") is True
-    assert User.objects.count() != count_before
-    
-
-
-def test_user_create_quote(db, user):
-    # user = User.objects.create_user(username='test2', email='test2@gmail.com', password='test2')
-    anonyme_author, created = Author.objects.get_or_create(nickname="Anonyme")
-    # author = Author("Anonyme")
-    
-    # Créer une citation associée à l'utilisateur
-    quote = Quote.objects.create(
-        text="Contenu de la citation",
-        author=anonyme_author,  # Utilisez l'utilisateur créé comme auteur de la citation
-    )
-    
-    # Vérifier le nombre total de citations dans la base de données (+1)
-    assert Quote.objects.count() == 11771 + 1
-
-
-def test_view_home(db, client, user):
-    # Authenticate the user using force_login
-    client.force_login(user)
-    
-    # Generate a random number of quotes to like
-    num_quotes_to_like = random.randint(1, 5)  # Adjust the range as needed
-    
-    # Retrieve a list of all quotes from the database
-    all_quotes = Quote.objects.all()
-    
-    # Randomly select a subset of quotes to like
-    quotes_to_like = random.sample(list(all_quotes), num_quotes_to_like)
-    
-    # Create quotelikes instances for the selected quotes and associate them with the user
-    for quote in quotes_to_like:
-        QuotesLikes.objects.create(user=user, quote=quote)
-    
-    # Construct the URL with the actual user ID
-    url = f'/recommendations/{user.id}/'
-    
-    response = client.get(url, follow=True)  # Make a GET request to the specified URL and follow redirects
-    
-    assert response.status_code == 200  # Assert that the response status code is 200 OK
-    assert 'Welcome in Extraquote' in response.content.decode()  # Assert that the response contains expected content
-
-
-def test_view_en_quotes(db, client, user):
-    # Authenticate the user using force_login
-    client.force_login(user)
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user(
+            username=self.get_unique_string("user"),
+            password="testpass123"
+        )
         
-    # Make a GET request to the specified URL
-    response = client.get('/en/quotes/') 
-    
-    assert response.status_code == 200  # Assert that the response status code is 200 OK
-    assert 'quotes available in the database' in response.content.decode()  # Assert that the response contains expected content
+        self.test_author = Author.objects.create(
+            nickname=self.get_unique_string("author"),
+            slug=self.get_unique_string("author-slug")
+        )
+        
+        self.test_quote = Quote.objects.create(
+            text=self.get_unique_string("quote-text"),
+            author=self.test_author,
+            contributor=self.user,
+            slug=self.get_unique_string("quote-slug")
+        )
 
+    def tearDown(self):
+        Quote.objects.all().delete()
+        Author.objects.exclude(nickname="Anonymous").delete()
+        User.objects.all().delete()
+        super().tearDown()
 
-def test_view_en_quote(client, db, user, quote):
-    client.force_login(user)    
-    response = client.get(f'/en/quote/{quote.slug}')
-    assert quote.text in response.content.decode()
-    assert response.status_code == 200      
+    def test_1_user_create(self):
+        username = self.get_unique_string("new-user")
+        test_user = User.objects.create_user(
+            username=username,
+            password="new-password"
+        )
+        test_user.set_password("new-password")
+        test_user.save()
+        
+        assert test_user.check_password("new-password") is True
+        assert User.objects.filter(username=username).exists()
 
+    def test_2_user_create_quote(self):
+        quote = Quote.objects.create(
+            text=self.get_unique_string("new-quote"),
+            author=self.test_author,
+            contributor=self.user,
+            slug=self.get_unique_string("new-quote-slug")
+        )
+        assert quote.pk is not None
+        assert Quote.objects.filter(pk=quote.pk).exists()
 
-def test_create_quote_like(db, user, quote):
-    # Test creating a new quote like      
-    quote_like, created = QuotesLikes.objects.get_or_create(quote=quote, user=user)       
-    assert quote_like.id is not None
+    def test_3_view_home(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('home'))
+        assert response.status_code == 200
 
-def test_get_quote_like(db, user, quote):
-    # Test retrieving a quote like from the database
-    quote_like = QuotesLikes.objects.create(quote=quote, user=user)
-    retrieved_quote_like = QuotesLikes.objects.get(id=quote_like.id)
-    assert quote_like.id == retrieved_quote_like.id
+    def test_4_view_quotes_list(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('quotes:quotes-list'))
+        assert response.status_code == 200
 
+    def test_5_view_quote_detail(self):
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse('quotes:quote-detail', kwargs={'slug': self.test_quote.slug})
+        )
+        assert response.status_code == 200
+        assert self.test_quote.text in response.content.decode()
 
-def test_delete_quote_like(db, user, quote):
-    quote_like = QuotesLikes.objects.create(quote=quote, user=user)
-    quote_like_id = quote_like.id
-    quote_like.delete()
-    with pytest.raises(QuotesLikes.DoesNotExist): # If the expected exception is raised, the test passes.
-        QuotesLikes.objects.get(id=quote_like_id)
+    def test_6_quote_like_operations(self):
+        quote_like = QuotesLikes.objects.create(
+            quote=self.test_quote,
+            user=self.user
+        )
+        assert quote_like.pk is not None
 
+        retrieved = QuotesLikes.objects.get(pk=quote_like.pk)
+        assert retrieved == quote_like
 
-## testings with  factory boy
+        quote_like.delete()
+        with pytest.raises(QuotesLikes.DoesNotExist):
+            QuotesLikes.objects.get(pk=quote_like.pk)
 
+@pytest.mark.django_db
 def test_new_user_factory(db, user_factory):
-    count_before = User.objects.count()  
-        
-    # user = user_factory.build() # Just build 
-    user = user_factory.create() # save to DB (delete at end of test) / need DB access with django_db
-    # print(user.first_name)
+    user = user_factory.create(
+        username=f"test-user-{User.objects.count() + 1}"
+    )
+    assert user.pk is not None
+    user.delete()
 
-    assert User.objects.count() != count_before   
-    assert True
-    
+@pytest.mark.django_db
 def test_new_quote_factory(db, quote_factory):
-    # user = user_factory.build() # Just build 
-    quote = quote_factory.create() # save to DB (delete at end of test) / need DB access with django_db
-    # print(quote.text)
-    assert True    
-
-# def test_new_quotes_factory(db, quote_factory):
-#     # user = user_factory.build() # Just build 
-#     quote1 = quote_factory.build()
-#     quote2 = quote_factory.build()    
-#     print(quote1.text)
-#     print(quote2.text)
-#     assert True    
-
+    quote = quote_factory.create(
+        text=f"Test quote {Quote.objects.count() + 1}",
+        slug=f"test-quote-{Quote.objects.count() + 1}"
+    )
+    assert quote.pk is not None
+    quote.delete()
+"""

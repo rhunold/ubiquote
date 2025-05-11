@@ -37,8 +37,29 @@ class Author(Person):
     avatar = models.ImageField(_('avatar'),upload_to='avatars/authors/', null=True, blank=True, default='avatars/default.png')
  
     
-    slug = AutoSlugField(populate_from='generate_fullname', unique=True, null=True, default=None)
+    slug = AutoSlugField(populate_from='generate_slug', unique=True, null=True, default=None)
   
+    
+    def get_name_components(self):
+        if self.nickname:
+            return [self.nickname]
+        if self.title:
+            return [self.title, self.last_name]
+        # Default fallback
+        return [
+            self.first_name or '',
+            self.middle_name or '',
+            self.particul or '',
+            self.last_name or ''
+        ]
+        
+    def generate_slug(self):
+        # Join parts without spaces for a slug-like format
+        return ''.join(self.get_name_components()).strip()
+
+    def generate_fullname(self):
+        # Join parts with spaces for readability
+        return ' '.join(self.get_name_components()).strip()
     
     # def generate_slug(self):
     #     # Customize this method to generate the slug from the desired field(s)
@@ -58,14 +79,15 @@ class Author(Person):
                 
         return f'{self.fullname or ""}'
     
-    def generate_fullname(self):
-        # Customize this method to generate the slug from the desired field(s)
-        if self.nickname:
-            return self.nickname
-        elif self.title:
-            return f'{self.title} {self.last_name}'       
-        else:
-            return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
+    # def generate_fullname(self):
+    #     # Customize this method to generate the slug from the desired field(s)
+    #     if self.nickname:
+    #         return self.nickname
+    #     elif self.title:
+    #         return f'{self.title} {self.last_name}'       
+    #     else:
+    #         return f'{self.first_name or ""} {self.middle_name or ""} {self.particul or ""} {self.last_name or ""}'        
+
 
         # components = [ self.last_name ,self.nickname, self.first_name, self.middle_name]
             
@@ -78,6 +100,9 @@ class Author(Person):
         #     return " ".join(non_empty_components)
         # else:
         #     return None
+        
+        
+  
             
     
     def save(self, *args, **kwargs):

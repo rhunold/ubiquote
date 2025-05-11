@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ author.nickname }} - Quotes
+{% endblock %}
+{% block meta_decription %}
+  All quotes by {{ author.nickname }}
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ author.nickname }}</h1>
+    
+    <div class="row">
+        {% for quote in quotes %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <blockquote class="blockquote mb-0">
+                        <p>{{ quote.text }}</p>
+                        <footer class="blockquote-footer">
+                            <a href="{% url 'quotes:get-quote' quote.slug %}" class="text-decoration-none">
+                                View quote
+                            </a>
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>No quotes found for this author.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %} 

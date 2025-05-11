@@ -25,6 +25,8 @@ from texts.quotes.services import RecommendationService
 
 from .serializers import QuoteSerializer, AuthorSerializer, UserSerializer, ShortAuthorSerializer, ShortUserSerializer,  ShortQuoteSerializer, ShortQuotesLikesSerializer, CategorySerializer, QuoteRecommandSerializer
 
+from texts.quotes.utils import clean_text
+
 # import . from serializers
 
 class CustomPagination(PageNumberPagination):
@@ -75,12 +77,12 @@ class QuotesAPIView(generics.ListAPIView):
         # Pass the request context to serializer to access request parameters
         return {'request': self.request}    
     
-class QuoteAPIView(generics.RetrieveAPIView):
-    # queryset = QuoteModel.Quote.objects.all()
-    queryset = QuoteModel.Quote.objects.all()
-    serializer_class = QuoteSerializer
-    lookup_field = "id"
-    permission_classes = [AllowAny]        
+# class QuoteAPIView(generics.RetrieveAPIView):
+#     # queryset = QuoteModel.Quote.objects.all()
+#     queryset = QuoteModel.Quote.objects.all()
+#     serializer_class = QuoteSerializer
+#     lookup_field = "id"
+#     permission_classes = [AllowAny]        
     
     
 class AuthorAPIView(generics.RetrieveAPIView):
@@ -513,3 +515,78 @@ class HomeQuotesAPIView(generics.ListAPIView):
         
 
     #     return super().get(request, *args, **kwargs)
+
+# CRUD operations for Quotes
+class QuoteCreateAPIView(generics.CreateAPIView):
+    """
+    API view to create a new quote.
+    """
+    queryset = QuoteModel.Quote.objects.all()
+    serializer_class = QuoteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Set the contributor as the current user
+        serializer.save(contributor=self.request.user)
+        
+        
+        text = self.request.data['text']
+        lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
+
+        # Run your clean_text function
+        cleaned_text = clean_text(text, lang)
+
+        serializer.save(text=cleaned_text)        
+
+class QuoteUpdateAPIView(generics.UpdateAPIView):
+    """
+    API view to update an existing quote.
+    """
+    queryset = QuoteModel.Quote.objects.all()
+    serializer_class = QuoteSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        # Users can only update quotes they contributed
+        return QuoteModel.Quote.objects.filter(contributor=self.request.user)
+
+class QuoteDeleteAPIView(generics.DestroyAPIView):
+    """
+    API view to delete a quote.
+    """
+    queryset = QuoteModel.Quote.objects.all()
+    serializer_class = QuoteSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        # Users can only delete quotes they contributed
+        return QuoteModel.Quote.objects.filter(contributor=self.request.user)
+
+# CRUD operations for Authors
+class AuthorCreateAPIView(generics.CreateAPIView):
+    """
+    API view to create a new author.
+    """
+    queryset = AuthorModel.Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [IsAuthenticated]
+
+class AuthorUpdateAPIView(generics.UpdateAPIView):
+    """
+    API view to update an existing author.
+    """
+    queryset = AuthorModel.Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "slug"
+
+class AuthorDeleteAPIView(generics.DestroyAPIView):
+    """
+    API view to delete an author.
+    """
+    queryset = AuthorModel.Author.objects.all()
+    serializer_class = AuthorSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "slug"

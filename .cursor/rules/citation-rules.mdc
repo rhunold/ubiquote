@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# PROJECT OVERVIEW # 
+- Website in django that is a collection of quotes that you can like, customise, search. 
+
+
+# STACK VIEW # 
+framework : dango with rosetta
+api : django drf
+interactivity : htmx and AlpineJS
+css : bootstrap
+database: postgresql
+
+# .env VARIABLES if there is a .cursorignore file # 
+
+
+# GITPUSH PUSH PROCESS # 
+
+
+# STYLE # 
+- prefer Class over simple function when it's suitable
+- apply pep rules for clean Python
+- use consistant and clear naming
+- put always comments in the code
+- the fewer lines of code, the better
+- proceed like a senior developper
+- Responsive designed
+
+
+<!-- 
+
+AMELIORATION DES PROMPTS 
+
+- DO NOT JUMP TO CONCLUSIONS
+- Before answering, imagine the 2 bests solutions. Tell me wich one is the better and why. Do not jump to conclusion
+-you should start the reasonning paragraph as you were a newby and  slowly gain confidence as you learn more about the item
+
+
+-->

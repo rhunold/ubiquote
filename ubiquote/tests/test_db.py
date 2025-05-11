@@ -1,50 +1,90 @@
 import pytest
-
-from persons.users.models import User
-from persons.authors.models import Author
-from texts.quotes.models import Quote, QuotesLikes
-
 from django.db import connection
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 
-# Test database 
-def test_user_notnull(db):
-    assert User.objects.count() != 0
+User = get_user_model()
 
+class TestDatabase(TestCase):
+    """Test database operations and constraints"""
+    
+    def setUp(self):
+        """Set up test data."""
+        # Create a test user
+        self.test_user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123',
+            first_name='Test',
+            last_name='User',
+            is_staff=False,
+            is_active=True,
+            is_superuser=False
+        )
+        self.superuser = User.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpass123',
+            first_name='Admin',
+            last_name='User',
+            is_staff=True,
+            is_active=True,
+            is_superuser=True
+        )
 
+    def test_database_connection(self):
+        """Test database connection is established"""
+        assert connection.connection is not None
 
-def test_database_connection():
-    from django.db import connection
-    assert connection.connection is not None
+    def test_user_notnull(self):
+        """Test that users exist in the database"""
+        assert User.objects.count() > 0
 
+    def test_database_read_operation(self):
+        """Test database read operations"""
+        result = User.objects.first()
+        assert result is not None
+        assert result.username == 'testuser'
 
-def test_database_read_operation(db):
-    # Perform a read operation
-    result = User.objects.first()
-    # Assert the result
-    assert result is not None
+    def test_users_user_table_exist(self):
+        """Test that the users_user table exists and has a superuser"""
+        with connection.cursor() as cursor:
+            cursor.execute('select id from users_user where is_superuser is True')
+            rs = cursor.fetchall()
+            assert len(rs) == 1
 
-
-def test_users_user_table_exist(db):
-    with connection.cursor() as cursor:
-        cursor.execute('select id from users_user where is_superuser is True')
-        rs = cursor.fetchall()
-        assert len(rs) == 1
+    def test_database_constraints(self):
+        """Test database constraints"""
+        from django.db.utils import IntegrityError
+        from django.db import transaction
         
+        # Test unique email constraint
+        with transaction.atomic():
+            with pytest.raises(IntegrityError):
+                User.objects.create(
+                    username='duplicate1',
+                    email='test@example.com',  # This email already exists
+                    password='testpass123',
+                    first_name='Test',
+                    last_name='User',
+                    is_staff=False,
+                    is_active=True,
+                    is_superuser=False
+                )
         
-def test_database_write_operation(db):
-    # Perform a write operation
-    obj = User.objects.create(username='Test')
-    # Retrieve the object to verify
-    result = User.objects.filter(username='Test').first()
-    # Assert the result
-    assert result is not None
-        
-        
-def test_database_constraints(db):
-    from django.db.utils import IntegrityError
-    # Attempt to create an object violating a constraint
-    with pytest.raises(IntegrityError):
-        User.objects.create(email='test@gmail.com')  # Assuming 'email' field has a unique constraint
+        # Test unique username constraint
+        with transaction.atomic():
+            with pytest.raises(IntegrityError):
+                User.objects.create(
+                    username='testuser', 
+                    email='test@example.com',  # This emmail already exists
+                    password='testpass123',
+                    first_name='Test',
+                    last_name='User',
+                    is_staff=False,
+                    is_active=True,
+                    is_superuser=False
+                )
 
 def test_database_transactions(db):
     from django.db import transaction

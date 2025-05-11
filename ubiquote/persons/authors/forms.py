@@ -39,6 +39,20 @@ class AuthorForm(forms.ModelForm):
          
             'lang': forms.Select(attrs={'class' : 'form-control'}),
         }
+        
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add the slug as a read-only field manually (only if instance exists)
+        if self.instance and self.instance.pk:
+            self.fields['slug'] = forms.CharField(
+                initial=self.instance.slug,
+                required=False,
+                disabled=True,
+                label='Slug',
+                widget=forms.TextInput(attrs={'class': 'form-control'})
+            )           
 
 
 class AuthorAutoCompleteForm(forms.ModelForm):

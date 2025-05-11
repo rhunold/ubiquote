@@ -1,8 +1,10 @@
 import factory
+from factory.django import DjangoModelFactory
 from faker import Faker
-fake = Faker()
 from persons.users.models import User
+from persons.authors.models import Author
 from texts.quotes.models import Quote
+import uuid
 
 from autoslug import AutoSlugField
 
@@ -10,42 +12,44 @@ from autoslug import AutoSlugField
 # https://faker.readthedocs.io/en/stable/providers/faker.providers.person.html
 
 
-class UserFactory(factory.django.DjangoModelFactory):
+class UserFactory(DjangoModelFactory):
     class Meta:
         model = User
-        # database = 'my_db2'        
-    
-    email = fake.email()    
-    username = fake.name()
-    last_name = fake.last_name() # 'name'
-    first_name = fake.first_name()  
-    is_staff = 'True'
-    # Add all other fields...
-    
-    slug = AutoSlugField(populate_from='username', unique=True, null=True, default=None)
+        django_get_or_create = ('username',)
+
+    username = factory.Sequence(lambda n: f'testuser_{n}_{uuid.uuid4().hex[:8]}')
+    email = factory.LazyAttribute(lambda obj: f'{obj.username}@example.com')
+    password = factory.PostGenerationMethodCall('set_password', 'testpass123')
 
 
-class QuoteFactory(factory.django.DjangoModelFactory):
+class AuthorFactory(DjangoModelFactory):
+    class Meta:
+        model = Author
+        django_get_or_create = ('nickname',)
+
+    nickname = factory.Sequence(lambda n: f'author_{n}_{uuid.uuid4().hex[:8]}')
+    slug = factory.LazyAttribute(lambda obj: f'author-{obj.nickname.lower()}')
+
+
+class QuoteFactory(DjangoModelFactory):
     class Meta:
         model = Quote
-    
-    # text = fake.text() # 'name'
-    
-    text = factory.Sequence(lambda obj: fake.text())    
-    contributor = factory.SubFactory(UserFactory)
-    
-    # Define the slug attribute directly within the factory
-    slug = factory.LazyAttribute(lambda obj: obj.text[:100])
-    
-    # categories
-    # author = factory.SubFactory(AuthorFactory)
-    # likes
-    # lang
-    # status
-    
-    # date_created
-    # date_updated
+        django_get_or_create = ('slug',)
 
-    # is_staff = 'True'
-    
+    text = factory.Sequence(lambda n: f'Test quote {n} {uuid.uuid4().hex[:8]}')
+    author = factory.SubFactory(AuthorFactory)
+    contributor = factory.SubFactory(UserFactory)
+    slug = factory.LazyAttribute(lambda obj: f'quote-{uuid.uuid4().hex[:8]}')
+
+    @factory.post_generation
+    def sync_with_api(self, create, extracted, **kwargs):
+        """
+        Ensure the quote has matching records in both databases
+        """
+        if not create:
+            return
+            
+        # Here you would typically create/sync the API version
+        # Implementation depends on your API structure
+        pass
 

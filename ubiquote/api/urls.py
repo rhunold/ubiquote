@@ -36,7 +36,16 @@ urlpatterns = [
     path('user/<str:slug>/quotes/', views.UserQuotesContributorAPIView.as_view(), name='user-quotes-contributor-api-view'), # Quote with contributor is user
     
     path('likes/<str:slug>/', views.UserQuotesLikesAPIView.as_view(), name='user-quotes-likes-api-view'),   
-        
+
+    # CRUD operations for quotes
+    path('quote/create/', views.QuoteCreateAPIView.as_view(), name='quote-create'),
+    path('quote/<int:id>/update/', views.QuoteUpdateAPIView.as_view(), name='quote-update'),
+    path('quote/<int:id>/delete/', views.QuoteDeleteAPIView.as_view(), name='quote-delete'),
+
+    # CRUD operations for authors
+    path('author/create/', views.AuthorCreateAPIView.as_view(), name='author-create'),
+    path('author/<str:slug>/update/', views.AuthorUpdateAPIView.as_view(), name='author-update'),
+    path('author/<str:slug>/delete/', views.AuthorDeleteAPIView.as_view(), name='author-delete'),
     
     # path('quote/like/<int:id>/', views.QuotesLikesAPIView.as_view(), name='like-quote'),    
     

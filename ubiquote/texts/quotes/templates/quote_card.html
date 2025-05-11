@@ -15,8 +15,30 @@
         <div class="row">
           <div class="col-sm">
       
+
+
+
             <blockquote class="blockquote mb-0">
-              <p><a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|highlight_search:search_query|safe }}</a></p>
+              <p>
+                {% comment %}
+                <a href="{% url 'quotes:get-quote' author_slug=quote.author.slug slug=quote.slug_with_id %}">
+                  {{ quote.text|highlight_search:search_query|safe }}
+                </a>  
+
+
+
+                <a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|highlight_search:search_query|safe }}</a>
+
+
+                                
+                {% endcomment %}
+
+                <a href="{% url 'quotes:get-quote' quote.slug  %}" class="">{{ quote.text|highlight_search:search_query|safe }}</a>
+
+                
+
+               
+              </p>
               {% if quote.author %}
                 <footer class="blockquote-footer">
 

@@ -128,10 +128,20 @@ class GetQuotesView(DataFetchingMixin, ListView):
         
 
 class GetQuoteView(DetailView):
+    model = Quote
     template_name = 'get_quote.html'
-    # context_object_name = 'quote'
+    context_object_name = 'quote'
     api_url = settings.API_URL
     
+    def get_object(self, queryset=None):
+        slug = self.kwargs.get('slug')
+        # Extract the ID from the slug (last part after the last hyphen)
+        quote_id = slug.split('-')[-1]
+        try:
+            # return Quote.objects.select_related('author').get(id=quote_id)
+            return Quote.objects.get(id=quote_id)
+        except Quote.DoesNotExist:
+            raise Http404("Quote not found")
 
     def get_api_data(self, quote_id):
         """Fetch individual quote data from the API with error handling."""
@@ -151,10 +161,20 @@ class GetQuoteView(DetailView):
         # Fetch quote from the local DB to get the ID
         quote = get_object_or_404(Quote, slug=slug)
         quote_id = quote.id  # Get the ID of the quote
-    
+        
+        
+        
+        # quote = get_object_or_404(Quote, id=quote_id)
+        # # Optional: verify author slug matches
+        # author_slug = self.kwargs.get('author_slug')
+        # if quote.author and quote.author.slug != author_slug:
+        #     raise Http404("Author slug mismatch")        
+        
+
         
         # Fetch the quote data from the API using the ID
-        data = self.get_api_data(quote_id)       
+        data = self.get_api_data(quote_id)  
+                     
 
         # Prepare context with the API data
         context = {
@@ -174,11 +194,11 @@ class GetQuoteView(DetailView):
   
   
 
-class AddQuoteView(LoginRequiredMixin, CreateView):
+class AddQuoteView(LoginRequiredMixin, DataFetchingMixin, CreateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'add_quote.html'
-    # fields = '__all__'
+    api_url = settings.API_URL
   
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -186,33 +206,106 @@ class AddQuoteView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy('quotes:get-quote', kwargs={'slug': self.object.slug})  
-    
+        
+        
     def form_valid(self, form):
-        form.instance.contributor = self.request.user
-        return super().form_valid(form) 
+        author = form.cleaned_data.get('author')
+        categories = form.cleaned_data.get('categories')
+
+        data = {
+            'text': form.cleaned_data['text'],
+            'lang': form.cleaned_data['lang'],
+            'author_id': author.id if author else None,  # matches serializer field
+            'category_ids': [cat.id for cat in categories] if categories else []  # matches serializer field
+        }
+
+        # print(data)
+        # Create quote through API
+        response_data = self.create_api_data('quote/create/', data)
+
+        if response_data and 'id' in response_data:
+            try:
+                self.object = Quote.objects.get(id=response_data['id'])
+                return HttpResponseRedirect(self.get_success_url())
+            except Quote.DoesNotExist:
+                messages.error(self.request, "Quote created but not found locally.")
+                return self.form_invalid(form)
+
+        messages.error(self.request, "Failed to create quote. Please try again.")
+        return self.form_invalid(form)
+    
+    
+    
+    # def form_valid(self, form):
+    #     # Prepare data for API
+    #     data = {
+    #         'text': form.cleaned_data['text'],
+    #         'author_id': form.cleaned_data['author'].id,
+    #         'lang': form.cleaned_data['lang'],
+    #         'category_ids': [cat.id for cat in form.cleaned_data['categories']]
+    #     }
+        
+    #     # Create quote through API
+    #     response_data = self.create_api_data('quote/create/', data)
+        
+    #     if response_data:
+    #         # Set the object for get_success_url
+    #         self.object = Quote.objects.get(id=response_data['id'])
+    #         return HttpResponseRedirect(self.get_success_url())
+        
+    #     # If API call failed, show error
+    #     messages.error(self.request, "Failed to create quote. Please try again.")
+    #     return self.form_invalid(form)
  
 # @login_required   
-class UpdateQuoteView(LoginRequiredMixin, UpdateView):
+class UpdateQuoteView(LoginRequiredMixin, DataFetchingMixin, UpdateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'update_quote.html'
+    api_url = settings.API_URL
     
-    # @method_decorator(login_required)
-    # def dispatch(self, *args, **kwargs):
-    #     return super().dispatch(*args, **kwargs)
-    
-    # fields = '__all__'  
     def get_success_url(self):
-        # Redirect to the detail page of the newly created author
         return reverse_lazy('quotes:get-quote', kwargs={'slug': self.object.slug})
+    
+    def form_valid(self, form):
+        # Prepare data for API
+        data = {
+            'text': form.cleaned_data['text'],
+            # 'author_id': form.cleaned_data['author'].id,
+            'lang': form.cleaned_data['lang'],
+            # 'category_ids': [cat.id for cat in form.cleaned_data['categories']]
+        }
+        
+        # Update quote through API
+        quote_id = self.object.id
+        response_data = self.update_api_data(f'quote/{quote_id}/update/', data)
+        
+        if response_data:
+            # Refresh the object from database
+            self.object.refresh_from_db()
+            return HttpResponseRedirect(self.get_success_url())
+        
+        # If API call failed, show error
+        messages.error(self.request, "Failed to update quote. Please try again.")
+        return self.form_invalid(form)
 
-# @method_decorator(login_required, name='dispatch')
-class DeleteQuoteView(LoginRequiredMixin, DeleteView):
+class DeleteQuoteView(LoginRequiredMixin, DataFetchingMixin, DeleteView):
     model = Quote
-    # form_class = QuoteForm
     template_name = 'delete_quote.html'
     success_url = reverse_lazy('quotes:get-quotes')
-    # fields = '__all__' 
+    api_url = settings.API_URL
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        
+        # Delete through API
+        if self.delete_api_data(f'quote/{self.object.id}/delete/'):
+            return HttpResponseRedirect(success_url)
+        
+        # If API call failed, show error
+        messages.error(self.request, "Failed to delete quote. Please try again.")
+        return self.render_to_response(self.get_context_data())
     
     
     # def get_object(self, queryset=None):
@@ -224,4 +317,21 @@ class DeleteQuoteView(LoginRequiredMixin, DeleteView):
     # @method_decorator(login_required)
     # def dispatch(self, *args, **kwargs):
     #     return super().dispatch(*args, **kwargs)
+    
+
+class GetAuthorQuotesView(ListView):
+    model = Quote
+    template_name = 'author_quotes.html'
+    context_object_name = 'quotes'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        author_slug = self.kwargs.get('slug')
+        return Quote.objects.filter(author__slug=author_slug).order_by('-date_created')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        author_slug = self.kwargs.get('slug')
+        context['author'] = get_object_or_404(Author, slug=author_slug)
+        return context
     
