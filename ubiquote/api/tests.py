@@ -117,6 +117,7 @@ class QuoteAPITestCase(TransactionTestCase):
         self.assertEqual(new_quote.contributor, self.normal_user)
         self.assertEqual(new_quote.lang, 'en')
 
+
     def test_update_quote_owner(self):
         """Test updating quote as the owner."""
         self.client.force_authenticate(user=self.normal_user)

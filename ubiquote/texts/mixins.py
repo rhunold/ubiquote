@@ -224,6 +224,8 @@ class DataFetchingMixin(TokenRefreshMixin):
 class CleaningMixin:
     def clean_fields(self):
         print("Cleaning process")
+        
+        
         # self.text = self.text.strip()
         # if not self.lang:
         #     try:
