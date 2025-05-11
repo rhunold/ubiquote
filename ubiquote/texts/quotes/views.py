@@ -278,7 +278,7 @@ class UpdateQuoteView(LoginRequiredMixin, DataFetchingMixin, UpdateView):
         
         # Update quote through API
         quote_id = self.object.id
-        response_data = self.update_api_data(f'quote/{quote_id}/update/', data)
+        response_data = self.update_api_data(f'quote/{quote_id}/update/', data, method='patch')
         
         if response_data:
             # Refresh the object from database

@@ -130,33 +130,46 @@ class DataFetchingMixin(TokenRefreshMixin):
             logger.error(f"Error creating data through API: {e}")
             return None
 
-    def update_api_data(self, endpoint, data):
-        """Update a resource through the API."""
-        api_url = f'{self.api_url}{endpoint}'
+
+    def update_api_data(self, endpoint, data, method='patch'):
+        """Update a resource through the API using JWT auth."""
+        url = f'{self.api_url}{endpoint}'
         headers = {
             'Content-Type': 'application/json'
         }
-        
-        # Add authorization header if user is authenticated
+
         access_token = self.request.session.get("access_token")
         if access_token:
             headers['Authorization'] = f'Bearer {access_token}'
-        
+
+        method_func = {
+            'patch': requests.patch,
+            'put': requests.put,
+        }.get(method.lower())
+
+        if not method_func:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+
         try:
-            response = requests.put(api_url, json=data, headers=headers)
-            
-            # Handle token refresh if authenticated and token is expired
+            response = method_func(url, json=data, headers=headers)
+
+            # Retry once if token expired
             if response.status_code == 401 and access_token:
-                new_access_token = self.refresh_access_token()
-                if new_access_token:
-                    headers['Authorization'] = f'Bearer {new_access_token}'
-                    response = requests.put(api_url, json=data, headers=headers)
-            
-            return response.json() if response.status_code == 200 else None
-            
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error updating data through API: {e}")
+                new_token = self.refresh_access_token()
+                if new_token:
+                    headers['Authorization'] = f'Bearer {new_token}'
+                    response = method_func(url, json=data, headers=headers)
+
+            if response.status_code in [200, 202]:
+                return response.json()
+
+            logger.warning(f"API update failed: {response.status_code} - {response.text}")
             return None
+
+        except requests.RequestException as e:
+            logger.error(f"RequestException while updating quote: {e}")
+            return None
+        
 
     def delete_api_data(self, endpoint):
         """Delete a resource through the API."""

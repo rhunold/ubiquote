@@ -30,7 +30,6 @@ class QuoteForm(forms.ModelForm):
     
     
     def clean_author(self):
-        
         author = self.cleaned_data.get('author')
         if not author:
             try:
@@ -45,9 +44,6 @@ class QuoteForm(forms.ModelForm):
         text = self.cleaned_data['text']
         return clean_text(text, self.data.get('lang', None))  # pass lang to your clean_text function
 
-    # def clean_text(self,text, lang):
-    #     text = self.cleaned_data(text, lang)
-    #     return clean_text(text)    
 
     class Meta:
         model = Quote

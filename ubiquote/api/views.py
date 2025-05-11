@@ -18,6 +18,8 @@ from texts.quotes import models as QuoteModel
 from persons.authors import models as AuthorModel
 from persons.users import models as UserModel
 
+# from texts.quotes.forms import QuoteForm
+
 from django.db.models import Count
 
 from texts.models import Category
@@ -521,9 +523,17 @@ class QuoteCreateAPIView(generics.CreateAPIView):
     """
     API view to create a new quote.
     """
-    queryset = QuoteModel.Quote.objects.all()
+    # queryset = QuoteModel.Quote.objects.all()
     serializer_class = QuoteSerializer
     permission_classes = [IsAuthenticated]
+    
+    
+    # def post(self, request):
+    #     form = QuoteForm(request.data)
+    #     if form.is_valid():
+    #         quote = form.save()
+    #         return Response({'message': 'Quote created successfully!'})
+    #     return Response({'error': 'Invalid data'}, status=400)    
 
     def perform_create(self, serializer):
         # Set the contributor as the current user
@@ -546,10 +556,25 @@ class QuoteUpdateAPIView(generics.UpdateAPIView):
     serializer_class = QuoteSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
+    http_method_names = ['put', 'patch']
 
     def get_queryset(self):
         # Users can only update quotes they contributed
         return QuoteModel.Quote.objects.filter(contributor=self.request.user)
+    
+    def perform_update(self, serializer):
+        # Optional logging
+        print("Updating quote:", serializer.validated_data)
+        serializer.save()    
+    
+    # def perform_update(self, serializer):
+    #     text = self.request.data['text']
+    #     lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
+
+    #     # Run your clean_text function
+    #     cleaned_text = clean_text(text, lang)
+
+    #     serializer.save(text=cleaned_text)          
 
 class QuoteDeleteAPIView(generics.DestroyAPIView):
     """
