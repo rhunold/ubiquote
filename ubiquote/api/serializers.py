@@ -80,12 +80,14 @@ class QuoteSerializer(serializers.ModelSerializer):
     contributor = ShortUserSerializer(read_only=True)
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     has_user_liked = serializers.SerializerMethodField()
+    
+    dimensions = serializers.JSONField(read_only=True)    
 
     class Meta:
         model = mquotes.Quote
         fields = ["id", "text", "author", "author_id", "categories", "category_ids", 
                  "lang", "likes", "contributor", "date_created", "likes_count", 
-                 "has_user_liked", "slug"]
+                 "has_user_liked", "slug", "dimensions"]
         read_only_fields = ["id", "likes"] # "slug", "date_created"
         
         
@@ -146,13 +148,15 @@ class ShortQuoteSerializer(serializers.ModelSerializer):
     author = ShortAuthorSerializer() 
     contributor = ShortUserSerializer()   
     categories = CategorySerializer(many=True, read_only=True)  # Nested categories data
+    
+    dimensions = serializers.JSONField(read_only=True)        
  
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     has_user_liked = serializers.SerializerMethodField() 
 
     class Meta:
         model = mquotes.Quote
-        fields = ["id", "text", "author", "categories", "lang", "likes", "contributor", "date_created", "likes_count", "has_user_liked", "slug" ]
+        fields = ["id", "text", "author", "categories", "lang", "likes", "contributor", "date_created", "likes_count", "has_user_liked", "slug" , "dimensions"]
 
         
     def get_has_user_liked(self, obj):

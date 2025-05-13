@@ -91,7 +91,8 @@
       <li class="list-group-item">
 
         {% comment %} 
-        {% endcomment %}         
+        {% endcomment %}       
+
         {% translate "categories" %} :
             {% for quote_category in quote.categories %}
             <a href="{% url 'texts:get-category' quote_category.slug  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ quote_category.title|highlight_search:search_query|safe }}</a> &nbsp;
@@ -99,6 +100,20 @@
 
 
       </li>
+      <li class="list-group-item">
+  
+
+        <p>Polarity: {{ quote.dimensions.polarity }}</p>
+        <p>Readability: {{ quote.dimensions.readability }}</p>
+        <p>Emotions: 
+
+          {% for emotion in quote.dimensions.emotions %}
+          {{ emotion }} 
+          {% endfor %}
+
+      </p>
+
+      </li>     
       <li class="list-group-item">      
         {% if user.is_authenticated and user.id == quote.contributor.id %}
         <div class="float-end">                  

@@ -116,7 +116,9 @@ class Text(models.Model):
         super().save(*args, **kwargs)  # First save to get the ID
         if not self.slug or self.slug.endswith('-none'):
             self.slug = self.generate_slug()
-            super().save(update_fields=["slug"])    
+            super().save(update_fields=["slug"])   
+             
+                        
     
     
     # slug = AutoSlugField(populate_from='generate_slug', unique=True, null=True, default=None)

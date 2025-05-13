@@ -1,8 +1,12 @@
 from django import forms
 from dal import autocomplete
+import json
 
 from .models import Quote, Author, QuoteRaw
+from texts.models import Category
 from .utils import clean_text
+
+from .utils import generate_response
 
 from django.utils.translation import gettext_lazy as _
 
@@ -21,6 +25,9 @@ class QuoteForm(forms.ModelForm):
             },
         )
     )
+    
+    
+    
 
     def clean_categories(self):
         categories = self.cleaned_data.get('categories')
@@ -43,11 +50,13 @@ class QuoteForm(forms.ModelForm):
     def clean_text(self):
         text = self.cleaned_data['text']
         return clean_text(text, self.data.get('lang', None))  # pass lang to your clean_text function
+    
+    
 
 
     class Meta:
         model = Quote
-        fields = ('text', 'author', 'lang', 'categories', 'status', 'contributor')
+        fields = ('text', 'author', 'lang', 'categories', 'status', 'contributor', 'dimensions')
         widgets = {
             'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': _("Put your quote here")}),
             'lang': forms.Select(attrs={'class': 'form-control'}),

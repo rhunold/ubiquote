@@ -13,6 +13,10 @@ from django.dispatch import receiver
 
 from texts.mixins import CleaningMixin
 
+from .utils import generate_response
+from django.db import transaction
+
+
 # from django_pgvector.fields import VectorField
 
 # from django_elasticsearch_dsl import Document
@@ -46,6 +50,9 @@ class Quote(Text):
         # related_name="quoteslikes"
         )   
 
+
+    dimensions = models.JSONField(null=True, blank=True)  # ou models.JSONField avec Django >= 3.1
+
     # for_you_algo_feature => generate a value to match with user.for_you value => give the user the content that is the most accurate to his preference/consomation/interests...    
     
     # def default_author(self):
@@ -67,12 +74,39 @@ class Quote(Text):
     def __str__(self):
         return f'"{self.text[:100]}" - Author : {self.author}'
     
-    # def get_absolute_url(self):
-    #     return reverse('quotes:get-quote') #, args=[self.slug]
     
+    def save(self, *args, enrich=True, **kwargs):
+        if enrich:
+            # is_new = self.pk is None
+            super().save(*args, **kwargs)  # First save to get the ID
+            
+            if not self.dimensions:
+                insights = generate_response(self.text)
+                # super().save(update_fields=["dimensions", ])   
+                
+                # Gestion des dimensions
+                self.dimensions = {
+                    k: v for k, v in insights.items() if k != "categories"
+                }                
+                # Sauvegarde des dimensions
+                super().save(update_fields=["dimensions"])
+        
+                # Gestion des catégories
+                categories = []
+                if "categories" in insights:
+                    for cat_name in insights["categories"]:
+                        cat, _ = Category.objects.get_or_create(
+                            title__iexact=cat_name.strip(),
+                            defaults={"title": cat_name.strip()}
+                        )
+                        categories.append(cat)
 
-    # def add_categories(self, category_instance):
-    #     QuoteCategory.objects.create(quote=self, category=category_instance)  
+
+
+                # Ajout des catégories après sauvegarde
+                if categories:
+                    self.categories.set(categories)
+                    
     
     class Meta:
         ordering = ['-date_created'] 

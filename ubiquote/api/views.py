@@ -28,6 +28,8 @@ from texts.quotes.services import RecommendationService
 from .serializers import QuoteSerializer, AuthorSerializer, UserSerializer, ShortAuthorSerializer, ShortUserSerializer,  ShortQuoteSerializer, ShortQuotesLikesSerializer, CategorySerializer, QuoteRecommandSerializer
 
 from texts.quotes.utils import clean_text
+from django.db import transaction
+from texts.quotes.utils import generate_response
 
 # import . from serializers
 
@@ -518,35 +520,73 @@ class HomeQuotesAPIView(generics.ListAPIView):
 
     #     return super().get(request, *args, **kwargs)
 
-# CRUD operations for Quotes
+# # CRUD operations for Quotes
+# class QuoteCreateAPIView(generics.CreateAPIView):
+#     """
+#     API view to create a new quote.
+#     """
+#     # queryset = QuoteModel.Quote.objects.all()
+#     serializer_class = QuoteSerializer
+#     permission_classes = [IsAuthenticated]
+    
+    
+#     # def post(self, request):
+#     #     form = QuoteForm(request.data)
+#     #     if form.is_valid():
+#     #         quote = form.save()
+#     #         return Response({'message': 'Quote created successfully!'})
+#     #     return Response({'error': 'Invalid data'}, status=400)    
+
+#     def perform_create(self, serializer):
+#         # Set the contributor as the current user
+#         serializer.save(contributor=self.request.user)
+        
+        
+#         text = self.request.data['text']
+#         lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
+
+#         # Run your clean_text function
+#         cleaned_text = clean_text(text, lang)
+
+#         serializer.save(text=cleaned_text)      
+
+
 class QuoteCreateAPIView(generics.CreateAPIView):
-    """
-    API view to create a new quote.
-    """
-    # queryset = QuoteModel.Quote.objects.all()
     serializer_class = QuoteSerializer
     permission_classes = [IsAuthenticated]
-    
-    
-    # def post(self, request):
-    #     form = QuoteForm(request.data)
-    #     if form.is_valid():
-    #         quote = form.save()
-    #         return Response({'message': 'Quote created successfully!'})
-    #     return Response({'error': 'Invalid data'}, status=400)    
 
     def perform_create(self, serializer):
-        # Set the contributor as the current user
-        serializer.save(contributor=self.request.user)
-        
-        
+        # Nettoyage
         text = self.request.data['text']
-        lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
-
-        # Run your clean_text function
+        lang = self.request.data.get('lang', None)
         cleaned_text = clean_text(text, lang)
 
-        serializer.save(text=cleaned_text)        
+        # Enrichissement
+        insights = generate_response(cleaned_text)
+
+        dimensions = {k: v for k, v in insights.items() if k != "categories"}
+        categories_data = insights.get("categories", [])
+
+        # Création de la quote
+        with transaction.atomic():
+            quote = serializer.save(
+                contributor=self.request.user,
+                text=cleaned_text,
+                dimensions=dimensions,
+                lang=lang,
+            )
+
+            # Associer les catégories
+            if categories_data:
+                cat_objs = []
+                for cat_name in categories_data:
+                    cat, _ = Category.objects.get_or_create(
+                        title__iexact=cat_name.strip(),
+                        defaults={"title": cat_name.strip()}
+                    )
+                    cat_objs.append(cat)
+
+                quote.categories.set(cat_objs)  
 
 class QuoteUpdateAPIView(generics.UpdateAPIView):
     """
