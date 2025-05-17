@@ -8,7 +8,7 @@
     <ul>
     {% for category in categories %}
     <li>
-      <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title|slice:":200"|safe }}</a>
+      <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title|slice:":200"|safe }} - ({{ category.quotes_count|default:"0" }} quotes)</a>
 
     </li>      
     {% endfor %}

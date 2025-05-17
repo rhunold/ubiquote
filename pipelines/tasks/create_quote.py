@@ -23,12 +23,13 @@ def create_final_quote(quoteraw_id, cleaned_text, dimensions, categories,author)
     
     # Do not rerun the methods to get dimensions and cat in the Quote.save custom 
     final.save(enrich=False)
+    # print(final)
     
     if categories:
         final.categories.set(categories)    
     
-    raw.processed = True
-    raw.save()
+    # raw.processed = True
+    # raw.save()
 
     return final.id
 

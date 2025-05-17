@@ -14,11 +14,15 @@ from django.dispatch import receiver
 from texts.mixins import CleaningMixin
 
 from .utils import generate_response
+from .utils import check_for_duplicate_quote
 from django.db import transaction
 
 
-# from django_pgvector.fields import VectorField
+from django.core.exceptions import ValidationError
+from .utils import QuoteDuplicateException
 
+
+# from django_pgvector.fields import VectorField
 # from django_elasticsearch_dsl import Document
 # from django_elasticsearch_dsl.registries import registry
 
@@ -76,38 +80,58 @@ class Quote(Text):
     
     
     def save(self, *args, enrich=True, **kwargs):
-        if enrich:
-            # is_new = self.pk is None
-            super().save(*args, **kwargs)  # First save to get the ID
-            
-            if not self.dimensions:
-                insights = generate_response(self.text)
-                # super().save(update_fields=["dimensions", ])   
-                
-                # Gestion des dimensions
-                self.dimensions = {
-                    k: v for k, v in insights.items() if k != "categories"
-                }                
-                # Sauvegarde des dimensions
-                super().save(update_fields=["dimensions"])
+        is_new = self.pk is None  # True if creating, False if updating
         
-                # Gestion des catégories
-                categories = []
-                if "categories" in insights:
-                    for cat_name in insights["categories"]:
-                        cat, _ = Category.objects.get_or_create(
-                            title__iexact=cat_name.strip(),
-                            defaults={"title": cat_name.strip()}
-                        )
-                        categories.append(cat)
+        if enrich and is_new:
+            result = check_for_duplicate_quote(self.text, self.author_id)
+            
+            status = result["status"]
+            
+            if status == "duplicate_quote":
+                raise QuoteDuplicateException(
+                    f"This quote already exists with author id {result['author_id']}.",
+                    quote_id=result["quote_id"]
+                )
 
+            elif status == "upgrade_author":
+                # Update the existing quote instead of saving a new one
+                quote_id = result["quote_id"]
+                existing_quote = Quote.objects.get(id=quote_id)
+                existing_quote.author_id = result["new_author_id"]
+                existing_quote.save(update_fields=["author"])
+                print(f"✔ Existing quote {quote_id} upgraded with new author.")
+                return  # Don't save this new one
 
+        # ✅ Save the quote if it's new or not a duplicate
+        super().save(*args, **kwargs)
 
-                # Ajout des catégories après sauvegarde
-                if categories:
-                    self.categories.set(categories)
-                    
+        
+        if not self.dimensions: # or not isinstance(self.dimensions, (type(None), dict)):
+            insights = generate_response(self.text)
+            
+            # Gestion des dimensions
+            self.dimensions = {
+                k: v for k, v in insights.items() if k != "categories"
+            }                
+            # Sauvegarde des dimensions
+            super().save(update_fields=["dimensions"])
     
+            # Gestion des catégories
+            categories = []
+            if "categories" in insights:
+                for cat_name in insights["categories"]:
+                    cat, _ = Category.objects.get_or_create(
+                        title__iexact=cat_name.strip(),
+                        defaults={"title": cat_name.strip()}
+                    )
+                    categories.append(cat)
+
+
+            # Ajout des catégories après sauvegarde
+            if categories:
+                self.categories.set(categories)
+                    
+
     class Meta:
         ordering = ['-date_created'] 
         # ordering =['-date_created'],
@@ -153,7 +177,7 @@ class QuoteRaw(Text, CleaningMixin):  # hérite de text, lang, date_created
 
 class QuotesCategories(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
+    quote = models.ForeignKey(Quote, on_delete=models.CASCADE) #null=True, blank=True
     
     class Meta:
         # ordering = ['category']    

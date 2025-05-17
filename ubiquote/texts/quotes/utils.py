@@ -5,8 +5,6 @@ from django.utils.timezone import now
 from django.contrib.postgres.search import TrigramSimilarity
 from rapidfuzz.fuzz import token_set_ratio
 
-
-
 from django.db import models
 import re
 
@@ -109,7 +107,7 @@ def clean_text(text, lang):
     text = re.sub(r'\.(?!(\.\.\.))(\S)', r'. \2', text)
     
     # If there is no dot at the end,
-    if not text.endswith('.'):
+    if not text.endswith(('.', '!', '?')):
         text += '.'
         
     # The first letter of word after a . is a uppercased
@@ -118,11 +116,6 @@ def clean_text(text, lang):
     # The first letter of word after a ? is a uppercased
     text = re.sub(r'\?(\s*)(\w)', lambda x: f'?{x.group(1)}{x.group(2).capitalize()}', text)
         
-    # print("new process going on")
-    
-    # return text 
-
-    # print("passe par utils.py")
 
 
     if lang == "fr":
@@ -136,7 +129,7 @@ def clean_text(text, lang):
 #--------------- detection of duplicate ------------------
 
 class QuoteDuplicateChecker:
-    def __init__(self, text, author_id, similarity_threshold=0.6, fuzz_threshold=90):
+    def __init__(self, text, author_id, similarity_threshold=0.7, fuzz_threshold=80):
         self.text = text.strip()
         self.author_id = author_id
         self.similarity_threshold = similarity_threshold
@@ -148,20 +141,70 @@ class QuoteDuplicateChecker:
         candidates = Quote.objects.annotate(
             similarity=TrigramSimilarity('text', self.text)
         ).filter(similarity__gt=self.similarity_threshold)
+        # print(candidates)
 
         # Étape 2 : raffinement avec fuzzy matching
         for quote in candidates:
             score = token_set_ratio(quote.text, self.text)
+            # print(score) # Très étrange mais ce print affiche mon module en front djdt... ???!!
             if score >= self.fuzz_threshold:
                 if quote.author_id != self.author_id or self.author_id != 75:
                     return True, quote  # Doublon trouvé
         return False, None
 
+def check_for_duplicate_quote(text: str, author_id: int) -> dict:
+    from texts.quotes.models import Quote
+    """
+    Checks whether a quote with the same text already exists.
+
+    Rules:
+    - If no existing quote with the same text: return "not_duplicate"
+    - If exists and existing author is UNKNOWN (75) and new one is different: return "upgrade_author"
+    - If exists and author is already valid (≠ 75): return "duplicate_quote"
+
+    Returns:
+        dict: with keys: 'status', and sometimes 'quote_id', 'new_author_id'
+    """
+
+    try:
+        existing_quote = Quote.objects.get(text__iexact=text)
+    except Quote.DoesNotExist:
+        return {"status": "not_duplicate"}
+
+    # Case 1: Existing quote has UNKNOWN author and we have a better one
+    if existing_quote.author_id == 75 and author_id != 75:
+        return {
+            "status": "upgraded_quote_author",
+            "quote_id": existing_quote.id,
+            "new_author_id": author_id
+        }
+
+    # Case 2: Existing quote has a valid author
+    return {
+        "status": "duplicate_quote",
+        "quote_id": existing_quote.id,
+        "author_id": existing_quote.author_id
+    }
+
+
+class QuoteDuplicateException(Exception):
+    def __init__(self, message, quote_id=None):
+        self.quote_id = quote_id
+        super().__init__(message)
+
 #--------------- generation of dimensions and categories ------------------
 
-ALLOWED_EMOTIONS = ["love", "joy", "surprise", "anger", "sadness", "fear", "trust", "anticipation", "disgust", "relief", "pride", "serenity"]
 
-ALLOWED_CATEGORIES = ["love", "relationships", "happiness", "well-being", "success", "motivation", "time", "space", "wisdom", "philosophy", "society", "politics", "faith", "spirituality", "education", "learning", "life",  "nature", "art", "culture", "physical_activity", "sports"]
+# ALLOWED_EMOTIONS = ["love", "joy", "surprise", "anger", "sadness", "fear", "trust", "anticipation", "disgust", "relief", "pride", "serenity"]
+ALLOWED_EMOTIONS = ["admiration", "amusement", "anger", "annoyance", "approval", "caring", "confusion", "curiosity", "desire", "disappointment",
+                    "disapproval", "disgust", "embarrassment", "excitement", "fear", "gratitude", "grief", "joy", "love",
+                    "nervousness", "optimism", "pride", "realization", "relief", "remorse", "sadness", "surprise"]
+
+
+
+ALLOWED_CATEGORIES = ["love", "relationships", "happiness", "well-being", "success", "motivation", "time", "space", "wisdom", "philosophy",
+                      "society", "politics", "faith", "spirituality", "education", "learning", "life",  "nature", "art", "culture",
+                      "physical_activity", "sports"]
 
 
 
@@ -229,8 +272,6 @@ def generate_response(quote):
     
     # print(f"{quote} \n=> {repr(data)}\n")
         
-
-
 
     
     return dict(data)

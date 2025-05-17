@@ -52,17 +52,20 @@ class GetCategoriesView(ListView):
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
         
+        
         api_url = f'{self.api_url}?page={page_number}&q={search_query}'
         response = requests.get(api_url)
 
         if response.status_code == 200:
             data = response.json()  
             categories = data.get('results', [])
-            count = data.get('count')               
+            count = data.get('count')   
+            # count = data.get('count', 0)            
             next_page_url = data.get('next')
             
         else:
             categories = []
+            count = 0            
             # next_page_url = None
 
         context = {

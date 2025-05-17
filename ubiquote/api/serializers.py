@@ -4,6 +4,8 @@ from persons.authors import models as mauthors
 from persons.users import models as musers
 from texts import models as tmodels
 
+from texts.quotes.utils import QuoteDuplicateException
+
 class ShortUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = musers.User
@@ -56,10 +58,19 @@ class AuthorSerializer(TranslatedNameMixin, serializers.ModelSerializer):
 
 # Nested Category Serializer
 class CategorySerializer(serializers.ModelSerializer):
+    # quotes_count = serializers.SerializerMethodField()    
+    quotes_count = serializers.IntegerField(read_only=True)    
     class Meta:
         model = tmodels.Category
-        fields = "__all__"        
-        # fields = ["id", "title"]  # Adjust the fields as needed        
+        fields = "__all__"     
+ 
+ 
+        # fields = ["id", "title"]  # Adjust the fields as needed  
+    # def get_quotes_count(self, obj):
+    #     return obj.quotes.count()       
+    
+    # def get_quotes_count(self, obj):
+    #     return mquotes.Quote.objects.filter(author=obj).count()           
 
 
 class QuoteSerializer(serializers.ModelSerializer):
@@ -77,6 +88,8 @@ class QuoteSerializer(serializers.ModelSerializer):
         many=True,
         required=False
     )
+    
+    
     contributor = ShortUserSerializer(read_only=True)
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     has_user_liked = serializers.SerializerMethodField()
@@ -88,7 +101,7 @@ class QuoteSerializer(serializers.ModelSerializer):
         fields = ["id", "text", "author", "author_id", "categories", "category_ids", 
                  "lang", "likes", "contributor", "date_created", "likes_count", 
                  "has_user_liked", "slug", "dimensions"]
-        read_only_fields = ["id", "likes"] # "slug", "date_created"
+        read_only_fields = ["id", "likes", "has_user_liked"] # "slug", "date_created"
         
         
 
@@ -100,6 +113,45 @@ class QuoteSerializer(serializers.ModelSerializer):
 
     def get_likes_count(self, obj):
         return obj.likes.count()
+    
+    def create(self, validated_data):
+        try:
+            return super().create(validated_data)
+        except QuoteDuplicateException as e:
+            raise serializers.ValidationError({
+                "non_field_errors": [str(e)]
+            })
+                
+    def update(self, instance, validated_data):
+        print("initial_data:", self.initial_data)
+        print("validated_data:", validated_data)
+
+        categories = validated_data.pop('categories', None)
+        # dimensions = validated_data.pop('dimensions', None)
+           
+        print("Categories to update:", categories)
+        
+        # Update other fields normally
+        instance = super().update(instance, validated_data)
+        
+        if categories is not None:
+            instance.categories.set(categories)  # replaces old ones
+            # OR use clear/add if you have extra logic in your through model
+
+        # if dimensions:
+        #     instance.dimensions.set(dimensions) 
+        #     print(dimensions)
+            
+        return instance            
+
+
+    # def update(self, validated_data):
+    #     try:
+    #         return super().update(validated_data)
+    #     except QuoteDuplicateException as e:
+    #         raise serializers.ValidationError({
+    #             "non_field_errors": [str(e)]
+    #         })                
 
 
 class QuoteRecommandSerializer(serializers.ModelSerializer):

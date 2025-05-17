@@ -9,6 +9,8 @@ from .forms import QuoteForm, QuoteRawForm
 from .models import Quote, QuotesCategories, QuotesLikes, UserQuoteRecommendation, QuoteRaw
 from persons.authors.models import Author
 
+from .utils import QuoteDuplicateException
+
 from django import forms
 
 from datetime import datetime, timedelta
@@ -29,12 +31,25 @@ from texts.quotes.utils import create_quote_raw_from_row
 # end_date = datetime(2023, 10, 10)
 
 from django.utils.timezone import make_aware
+from django.forms.models import BaseInlineFormSet
 
 start_date = make_aware(datetime(2020, 1, 1))
 end_date = make_aware(datetime(2025, 1, 1))
 
+
+class QuotesCategoriesInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        for form in self.forms:
+            if not form.cleaned_data.get('category') and not form.cleaned_data.get('DELETE'):
+                raise forms.ValidationError("Empty category selected. Either delete the row or choose a category.")
+    
+
 class QuotesCategoriesInline(admin.TabularInline):
     model = QuotesCategories
+    formset = QuotesCategoriesInlineFormSet    
+    extra = 0
+    
     
     
 class CsvImportForm(forms.Form):
@@ -66,6 +81,13 @@ class QuoteAdmin(admin.ModelAdmin):
     #     news_urls = [path('upload-quotes-csv/', self.upload_quotes_csv)]
     #     return  news_urls + urls
     
+    def save_model(self, request, obj, form, change):
+        try:
+            obj.save()
+        except QuoteDuplicateException as e:
+            from django.contrib import messages
+            self.message_user(request, f"Duplicate Quote: {str(e)}", level=messages.ERROR)    
+    
     
      
 
@@ -82,7 +104,7 @@ class QuoteRawAdmin(admin.ModelAdmin):
     list_display = ('text', 'author', 'processed')  # 'contributor', 'get_categories', 'slug'
     ordering = ('-date_updated',)
     # inlines = [QuotesCategoriesInline]      
-    # list_filter = ('categories', )
+    list_filter = ('processed', )
     search_fields = ['text', 'author__fullname__icontains',]
     
     actions = ['ingest_quote']    

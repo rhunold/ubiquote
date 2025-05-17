@@ -19,6 +19,8 @@ from persons.authors import models as AuthorModel
 from persons.users import models as UserModel
 
 # from texts.quotes.forms import QuoteForm
+from texts.quotes.utils import QuoteDuplicateException
+from rest_framework.exceptions import ValidationError
 
 from django.db.models import Count
 
@@ -38,6 +40,8 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     
     
+    
+    
     # def get_paginated_response(self, data):
     #     return Response({
     #         'links': {
@@ -48,6 +52,9 @@ class CustomPagination(PageNumberPagination):
     #         'results': data
     #     })
     
+class CustomCategoriesPagination(PageNumberPagination):
+    page_size = 20  # Number of quotes per page
+    page_size_query_param = 'page_size'
 
 class QuotesAPIView(generics.ListAPIView):
     # queryset = QuoteModel.Quote.objects.all()
@@ -340,11 +347,16 @@ class QuoteAPIView(generics.RetrieveAPIView):
 class CategoriesAPIView(generics.ListAPIView):
     # queryset = QuoteModel.Quote.objects.all()
     serializer_class = CategorySerializer
-    pagination_class = CustomPagination  
     permission_classes = [AllowAny]          
+
+    pagination_class = CustomCategoriesPagination  
+    
     
     def get_queryset(self):
-        queryset = Category.objects.all()
+        queryset = Category.objects.annotate(quotes_count=Count('quote'))
+        
+        # for cat in queryset.all():
+        #     print(cat.title, cat.slug)   
         
         # Get the search query from the request
         search_query = self.request.query_params.get('q', None)
@@ -357,13 +369,13 @@ class CategoriesAPIView(generics.ListAPIView):
             )
         
         # print(queryset)
-        return queryset 
+        return queryset.order_by('title') # for alphabetical sort
         
-    # queryset = models.Quote.objects.all().order_by('-date_created') 
+    # # queryset = models.Quote.objects.all().order_by('-date_created') 
     
-    def get_serializer_context(self):
-        # Pass the request context to serializer to access request parameters
-        return {'request': self.request}    
+    # def get_serializer_context(self):
+    #     # Pass the request context to serializer to access request parameters
+    #     return {'request': self.request}    
 
 
 class CategoryQuotesAPIView(generics.ListAPIView):
@@ -560,33 +572,44 @@ class QuoteCreateAPIView(generics.CreateAPIView):
         text = self.request.data['text']
         lang = self.request.data.get('lang', None)
         cleaned_text = clean_text(text, lang)
+        # author = self.request.data['author']        
 
         # Enrichissement
         insights = generate_response(cleaned_text)
 
         dimensions = {k: v for k, v in insights.items() if k != "categories"}
-        categories_data = insights.get("categories", [])
+        categories = insights.get("categories", [])
 
-        # Création de la quote
-        with transaction.atomic():
-            quote = serializer.save(
-                contributor=self.request.user,
-                text=cleaned_text,
-                dimensions=dimensions,
-                lang=lang,
-            )
+        try:
+            # Création de la quote
+            with transaction.atomic():
+                quote = serializer.save(
+                    contributor=self.request.user,
+                    text=cleaned_text,
+                    dimensions=dimensions,
+                  
+                    lang=lang,
+                    # author=author
+                )
 
-            # Associer les catégories
-            if categories_data:
-                cat_objs = []
-                for cat_name in categories_data:
-                    cat, _ = Category.objects.get_or_create(
-                        title__iexact=cat_name.strip(),
-                        defaults={"title": cat_name.strip()}
-                    )
-                    cat_objs.append(cat)
+                # Associer les catégories
+                if categories:
+                    cat_objs = []
+                    for cat_name in categories:
+                        cat, _ = Category.objects.get_or_create(
+                            title__iexact=cat_name.strip(),
+                            defaults={"title": cat_name.strip()}
+                        )
+                        cat_objs.append(cat)
 
-                quote.categories.set(cat_objs)  
+                    quote.categories.set(cat_objs)
+
+        except QuoteDuplicateException as e:
+            raise ValidationError({
+                "detail": str(e),
+                "existing_quote_id": e.quote_id,
+                # "existing_author_id": e.author_id
+            })
 
 class QuoteUpdateAPIView(generics.UpdateAPIView):
     """
@@ -602,19 +625,30 @@ class QuoteUpdateAPIView(generics.UpdateAPIView):
         # Users can only update quotes they contributed
         return QuoteModel.Quote.objects.filter(contributor=self.request.user)
     
-    def perform_update(self, serializer):
-        # Optional logging
-        print("Updating quote:", serializer.validated_data)
-        serializer.save()    
+    # def perform_update(self, serializer):
+    #     # Optional logging
+    #     # print("Updating quote:", serializer.validated_data)
+    #     serializer.save()    
+        
+    # def update(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     serializer = self.get_serializer(instance, data=request.data, partial=True)
+
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         # return Response({"message": "mobile number updated successfully"})
+
+    #     else:
+    #         return Response({"message": "failed", "details": serializer.errors})        
     
     # def perform_update(self, serializer):
-    #     text = self.request.data['text']
-    #     lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
+    #     # text = self.request.data['text']
+    #     # lang = self.request.data.get('lang', None)  # default to None if 'lang' is not provided
+    #     # categories = self.request.data.get('categories', None) 
+    #     # # Run your clean_text function
+    #     # cleaned_text = clean_text(text, lang)
 
-    #     # Run your clean_text function
-    #     cleaned_text = clean_text(text, lang)
-
-    #     serializer.save(text=cleaned_text)          
+    #     serializer.save()          
 
 class QuoteDeleteAPIView(generics.DestroyAPIView):
     """

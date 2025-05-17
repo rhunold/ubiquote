@@ -3,6 +3,7 @@ from .models import Category
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'text', 'slug' )
+
 
 admin.site.register(Category, CategoryAdmin)

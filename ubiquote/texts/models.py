@@ -230,9 +230,18 @@ class Category(models.Model):
     def count_categories():
         count = Category.objects.count()
         return count           
-    
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)  
+        
+          
     class Meta:
         verbose_name_plural = "Categories"     
         ordering = ['title']        
         
-     
+
+# # Save all instance to generate the new slug
+# for obj in Category.objects.all():
+#     obj.save()

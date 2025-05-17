@@ -162,7 +162,7 @@ class GetQuoteView(DetailView):
         quote = get_object_or_404(Quote, slug=slug)
         quote_id = quote.id  # Get the ID of the quote
         
-        
+     
         
         # quote = get_object_or_404(Quote, id=quote_id)
         # # Optional: verify author slug matches
@@ -220,19 +220,43 @@ class AddQuoteView(LoginRequiredMixin, DataFetchingMixin, CreateView):
         }
 
         # print(data)
-        # Create quote through API
-        response_data = self.create_api_data('quote/create/', data)
+        
 
-        if response_data and 'id' in response_data:
+        # API request
+        response = self.create_api_data('quote/create/', data)
+
+        if isinstance(response, dict) and 'id' in response:
             try:
-                self.object = Quote.objects.get(id=response_data['id'])
+                self.object = Quote.objects.get(id=response['id'])
                 return HttpResponseRedirect(self.get_success_url())
             except Quote.DoesNotExist:
-                messages.error(self.request, "Quote created but not found locally.")
+                form.add_error(None, "Quote created via API but not found locally.")
                 return self.form_invalid(form)
 
-        messages.error(self.request, "Failed to create quote. Please try again.")
+        # Handle errors (e.g., duplicate)
+        if isinstance(response, dict) and 'non_field_errors' in response:
+            for error in response['non_field_errors']:
+                form.add_error(None, error)
+            return self.form_invalid(form)
+
+        # Fallback error
+        form.add_error(None, "Failed to create quote : duplicate content, too short or too long. Please try again.")
         return self.form_invalid(form)
+        
+        
+        # # Create quote through API
+        # response_data = self.create_api_data('quote/create/', data)
+
+        # if response_data and 'id' in response_data:
+        #     try:
+        #         self.object = Quote.objects.get(id=response_data['id'])
+        #         return HttpResponseRedirect(self.get_success_url())
+        #     except Quote.DoesNotExist:
+        #         messages.error(self.request, "Quote created but not found locally.")
+        #         return self.form_invalid(form)
+
+        # messages.error(self.request, "Failed to create quote. Please try again.")
+        # return self.form_invalid(form)
     
     
     
@@ -271,10 +295,13 @@ class UpdateQuoteView(LoginRequiredMixin, DataFetchingMixin, UpdateView):
         # Prepare data for API
         data = {
             'text': form.cleaned_data['text'],
-            # 'author_id': form.cleaned_data['author'].id,
+            'author_id': form.cleaned_data['author'].id,
             'lang': form.cleaned_data['lang'],
-            # 'category_ids': [cat.id for cat in form.cleaned_data['categories']]
+            'dimensions': form.cleaned_data['dimensions'],
+            'category_ids': [cat.id for cat in form.cleaned_data['categories']]
         }
+        
+        # print(data)
         
         # Update quote through API
         quote_id = self.object.id

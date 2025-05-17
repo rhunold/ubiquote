@@ -21,27 +21,3 @@ def enrich_quote_and_assign_categories(cleaned_text: str):
     }
 
     return dimensions, categories
-
-# @task
-# def enrich_quote_and_assign_categories(quote_id: int):
-#     quote = Quote.objects.get(id=quote_id)
-#     insights = generate_response(quote.text)
-#     print(insights)
-
-#     if not insights:
-#         return None
-
-#     # Ajoute dans JSON
-#     quote.dimensions = {**(quote.dimensions or {}), **{
-#         k: v for k, v in insights.items() if k != "categories"
-#     }}
-#     quote.save(update_fields=["dimensions"])
-
-#     # Gestion des catégories (ManyToMany)
-#     if "categories" in insights:
-#         for cat_name in insights["categories"]:
-#             cat, _ = Category.objects.get_or_create(title__iexact=cat_name.strip(), defaults={"title": cat_name})
-#             quote.categories.add(cat)
-
-#     print(f"✅ Quote {quote_id} enrichie avec catégories.")
-#     return quote.id
