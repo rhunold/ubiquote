@@ -94,14 +94,14 @@
 
 
     /* To ensure the search bar and button don't overflow on smaller screens */
-    @media (max-width: 768px) {
+    /* @media (max-width: 768px) {
         .search_bar .col-12 {
             margin-bottom: 10px;
         }
         .search_bar .btn {
             width: 100%;
         }
-    }
+    } */
 
 
     /* Sticky navigation for desktop (sticky at the top) */
@@ -118,6 +118,18 @@
 
     /* Sticky navigation for mobile (sticky at the bottom) */
     @media (max-width: 767px) {
+
+        body {
+            padding-bottom: 3.5rem;
+        }
+
+        .search_bar .col-12 {
+            margin-bottom: 10px;
+        }
+        .search_bar .btn {
+            width: 100%;
+        }
+
         #nav_search_sticky {
             position: fixed;
             bottom: 0;
@@ -261,6 +273,8 @@ document.addEventListener('DOMContentLoaded', function () {
     {% block body %}
     {% endblock %}
     </div>    
+
+    {% include "footer.html" %}    
 
 
     <script>

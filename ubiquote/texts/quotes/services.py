@@ -75,7 +75,8 @@ class RecommendationService:
         # (Optional) Save the recommendations in the database for future use
         # user = User.objects.get(id=user_id)
         for quote in recommended_quotes:
-            UserQuoteRecommendation.objects.create(user=user, quote=quote)
+            obj, created = UserQuoteRecommendation.objects.get_or_create(user=user, quote=quote)
+
 
         return recommended_quotes    
     

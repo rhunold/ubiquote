@@ -231,13 +231,13 @@ class UserQuoteRecommendation(models.Model):
         return f"Recommendation for {self.user.username} (Quote ID: {self.quote.id})"
     
     
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             name="%(app_label)s_%(class)s_unique_relationships",
-    #             fields=["quote", "user"],
-    #         ),    
-    #     ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="%(app_label)s_%(class)s_unique_relationships",
+                fields=["quote", "user"],
+            ),    
+        ]
     #     indexes = [
     #             # models.Index(fields=['user',]),           
     #             models.Index(fields=['user', 'quote']),
