@@ -202,11 +202,12 @@ ALLOWED_EMOTIONS = ["admiration", "amusement", "anger", "annoyance", "approval",
 
 
 
-ALLOWED_CATEGORIES = ["love", "relationships", "happiness", "well-being", "success", "motivation", "time", "space", "wisdom", "philosophy",
-                      "society", "politics", "faith", "spirituality", "education", "learning", "life",  "nature", "art", "culture",
-                      "physical_activity", "sports"]
+# ALLOWED_CATEGORIES = ["love", "relationships", "happiness", "well-being", "success", "motivation", "time", "space", "wisdom", "philosophy",
+#                       "society", "politics", "faith", "spirituality", "education", "learning", "life",  "nature", "art", "culture",
+#                       "physical_activity", "sports"]
 
-
+ALLOWED_CATEGORIES = ["love", "relationships", "happiness", "friendships", "success", "motivation", "time", "space", "wisdom",
+                      "society", "politics", "spirituality", "learning", "life",  "nature", "art", "culture", "sports", "humor"]
 
 
 class Dimensions(BaseModel):

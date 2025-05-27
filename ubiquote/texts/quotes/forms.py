@@ -81,11 +81,12 @@ class QuoteRawForm(forms.ModelForm):
 
     class Meta:
         model = QuoteRaw
-        fields = ('text', 'author', 'lang', 'contributor')
+        fields = ('text', 'author', 'lang', 'contributor', 'processed')
         widgets = {
             'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': _("Put your quote here")}),
             'lang': forms.Select(attrs={'class': 'form-control'}),
             'contributor': forms.HiddenInput(),
+            'processed': forms.CheckboxInput(attrs={'class': 'flag'})      
         }        
 
 

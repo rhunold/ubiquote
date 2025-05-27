@@ -26,6 +26,6 @@ urlpatterns = [
       
     # path('recommendations/<int:user_id>/', views.recommend_quotes, name='recommend-quotes'),
     
-    path('author/<str:slug>/', views.GetAuthorQuotesView.as_view(), name='author-quotes'),
+    # path('author/<str:slug>/', views.GetAuthorView.as_view(), name='author-quotes'),
 
 ]

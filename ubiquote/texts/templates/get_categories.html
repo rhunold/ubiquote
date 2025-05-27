@@ -1,4 +1,10 @@
+
+
 {% extends 'base.html' %}
+
+{% load category_tags %}
+
+
 {% block title %}Categorys{% endblock %}
 {% block meta_decription %}The best quote listing{% endblock %}
 
@@ -8,7 +14,8 @@
     <ul>
     {% for category in categories %}
     <li>
-      <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">{{ category.title|slice:":200"|safe }} - ({{ category.quotes_count|default:"0" }} quotes)</a>
+      <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">
+        {{ category|get_translated_title|slice:":200"|safe }} - ({{ category.quotes_count|default:"0" }} quotes)</a>
 
     </li>      
     {% endfor %}

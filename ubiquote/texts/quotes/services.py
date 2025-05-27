@@ -22,6 +22,9 @@ class RecommendationService:
     vectorizer = None  # Static variable to hold the vectorizer instance
     cached_num_liked_quotes = None
     
+    
+    
+    
     # Optimization on TF-IDF computation / avoid redundant fit-transform operations
     @staticmethod
     def get_vectorizer():
@@ -74,7 +77,7 @@ class RecommendationService:
         for quote in recommended_quotes:
             UserQuoteRecommendation.objects.create(user=user, quote=quote)
 
-        # return recommended_quotes    
+        return recommended_quotes    
     
     
     

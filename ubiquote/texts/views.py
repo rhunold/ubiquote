@@ -23,7 +23,7 @@ from texts.mixins import DataFetchingMixin, TokenRefreshMixin
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# LANGUAGES = settings.LANGUAGES
 from django.utils.translation import get_language
 
 import requests
@@ -51,9 +51,9 @@ class GetCategoriesView(ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
+        lang = get_language()
         
-        
-        api_url = f'{self.api_url}?page={page_number}&q={search_query}'
+        api_url = f'{self.api_url}?page={page_number}&q={search_query}&lang={lang}'
         response = requests.get(api_url)
 
         if response.status_code == 200:
@@ -72,6 +72,8 @@ class GetCategoriesView(ListView):
             'categories': categories,
             'count': count,            
         }
+        
+        # print("Fetching from:", api_url)
 
         return render(request, self.template_name, context)
         

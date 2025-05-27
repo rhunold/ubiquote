@@ -1,10 +1,10 @@
 
 {% load i18n %}
-
+<div class="mt-2 mb-2 search-bar" id="search-bar" >
 
     <form class="search_bar form-inline row g-3" method="GET" >
 
-        <div class="col">
+        <div class="col ">
 
             <!-- HTMX target for the list -->
             <input 
@@ -15,7 +15,7 @@
             value="{% if search_query %}{{ search_query }}{% else %}{% endif %}"
             type="search" 
             name="q"
-            hx-get="{% url 'quotes:get-quotes' %}?page=1#top"
+            hx-get="{% url 'quotes:get-quotes' %}?page=1"
             hx-trigger="keyup changed delay:500ms"
             hx-target="#results" 
             hx-swap="innerHTML"      
@@ -44,3 +44,5 @@
 
 
 
+
+</div>

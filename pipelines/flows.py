@@ -12,7 +12,7 @@ import time
 from django.core.exceptions import ValidationError
 
 @flow(name="quote_ingestion_flow")
-def quote_ingestion_flow(limit: int = 100):
+def quote_ingestion_flow(limit: int = 10):
     quotes_to_process = QuoteRaw.objects.filter(processed=False).order_by('-date_created')[:limit]
     futures = []
 

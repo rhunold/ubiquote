@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import get_language
 from texts.quotes import models as mquotes
 from persons.authors import models as mauthors
 from persons.users import models as musers
@@ -26,6 +27,17 @@ class TranslatedNameMixin:
         # Create a dictionary of language codes to translated names
         return {translation.language_code: translation.translated_name for translation in translations}
 
+
+# class TranslatedCategoryMixin:
+#     def get_translated_data(self, obj):
+#         translations = tmodels.CategoryTranslation.objects.filter(category=obj)
+#         return {
+#             translation.language_code: {
+#                 "title": translation.translated_title,
+#                 "text": translation.translated_text
+#             }
+#             for translation in translations
+#         }
 
 class ShortAuthorSerializer(TranslatedNameMixin, serializers.ModelSerializer):
     translated_name = serializers.SerializerMethodField()
@@ -57,6 +69,21 @@ class AuthorSerializer(TranslatedNameMixin, serializers.ModelSerializer):
 
 
 # Nested Category Serializer
+
+# class CategorySerializer(TranslatedCategoryMixin, serializers.ModelSerializer):
+#     translated_title = serializers.SerializerMethodField()
+#     quotes_count = serializers.IntegerField(read_only=True)
+
+#     class Meta:
+#         model = tmodels.Category
+#         fields = ['id', 'slug', 'translated_title', 'quotes_count']  # or add others like 'text' if needed
+
+#     def get_translated_title(self, obj):
+#         lang = get_language()
+#         translation = obj.translations.filter(lang=lang).first()
+#         return translation.title if translation else obj.title
+
+
 class CategorySerializer(serializers.ModelSerializer):
     # quotes_count = serializers.SerializerMethodField()    
     quotes_count = serializers.IntegerField(read_only=True)    
@@ -94,7 +121,7 @@ class QuoteSerializer(serializers.ModelSerializer):
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     has_user_liked = serializers.SerializerMethodField()
     
-    dimensions = serializers.JSONField(read_only=True)    
+    dimensions = serializers.JSONField(read_only=True)  
 
     class Meta:
         model = mquotes.Quote
@@ -111,8 +138,8 @@ class QuoteSerializer(serializers.ModelSerializer):
             return mquotes.QuotesLikes.objects.filter(user=user, quote=obj).exists()
         return False
 
-    def get_likes_count(self, obj):
-        return obj.likes.count()
+    # def get_likes_count(self, obj):
+    #     return obj.likes.count()
     
     def create(self, validated_data):
         try:
@@ -217,6 +244,8 @@ class ShortQuoteSerializer(serializers.ModelSerializer):
             return mquotes.QuotesLikes.objects.filter(user=user, quote=obj).exists()
         return False
 
+    def get_likes_count(self, obj):
+        return obj.likes.count()
     
 
 class ShortQuotesLikesSerializer(serializers.ModelSerializer):

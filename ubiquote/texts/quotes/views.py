@@ -34,7 +34,7 @@ from django.shortcuts import render
 # from elasticsearch import Elasticsearch
 
 from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# LANGUAGES = settings.LANGUAGES
 from django.utils.translation import get_language
 
 
@@ -78,8 +78,9 @@ def like_quote(request, id):
         # Recommand quotes based on the quote liked
         RecommendationService.recommend_quotes_for_liked_quote(quote=quote, user=user)
 
-        
-
+    # # Refresh the quote from DB to get updated likes
+    # quote.refresh_from_db()
+    
     # Render the updated like area using the partial template
     context = {
         'quote': quote,
@@ -346,19 +347,19 @@ class DeleteQuoteView(LoginRequiredMixin, DataFetchingMixin, DeleteView):
     #     return super().dispatch(*args, **kwargs)
     
 
-class GetAuthorQuotesView(ListView):
-    model = Quote
-    template_name = 'author_quotes.html'
-    context_object_name = 'quotes'
-    paginate_by = 10
+# class GetAuthorQuotesView(ListView):
+#     model = Quote
+#     template_name = 'author_quotes.html'
+#     context_object_name = 'quotes'
+#     paginate_by = 10
     
-    def get_queryset(self):
-        author_slug = self.kwargs.get('slug')
-        return Quote.objects.filter(author__slug=author_slug).order_by('-date_created')
+#     def get_queryset(self):
+#         author_slug = self.kwargs.get('slug')
+#         return Quote.objects.filter(author__slug=author_slug).order_by('-date_created')
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        author_slug = self.kwargs.get('slug')
-        context['author'] = get_object_or_404(Author, slug=author_slug)
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         author_slug = self.kwargs.get('slug')
+#         context['author'] = get_object_or_404(Author, slug=author_slug)
+#         return context
     

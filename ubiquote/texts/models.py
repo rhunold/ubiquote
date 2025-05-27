@@ -8,7 +8,7 @@ from persons.users.models import User
 import os
 
 from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# LANGUAGES = settings.LANGUAGES
 
 from django.db.models.functions import Substr
 
@@ -69,7 +69,7 @@ class Text(models.Model):
     # text_cleaned = models.TextField(_('Text cleaned'), max_length=1000)    # vide au debut=> ajouter methode pour le generer (detetection de lang puis formatage...)
     
     text = models.TextField(_('Text'), max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
-    lang = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="fr")
+    lang = models.CharField(_('Langs'), max_length=2, choices=settings.LANGUAGES, default="en")
     
     
     date_created = models.DateTimeField(auto_now_add=True)
@@ -229,7 +229,16 @@ class Category(models.Model):
 
     def count_categories():
         count = Category.objects.count()
-        return count           
+        return count      
+    
+    # def get_translated_title(self, lang_code):
+    #     translation = self.translations.filter(lang=lang_code).first()
+    #     return translation.title if translation else self.title
+
+    # def get_translated_text(self, lang_code):
+    #     translation = self.translations.filter(lang=lang_code).first()
+    #     return translation.text if translation else self.text         
+    
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -239,9 +248,22 @@ class Category(models.Model):
           
     class Meta:
         verbose_name_plural = "Categories"     
-        ordering = ['title']        
+        # ordering = ['title']        
         
 
 # # Save all instance to generate the new slug
 # for obj in Category.objects.all():
 #     obj.save()
+
+
+# class CategoryTranslation(models.Model):
+#     category = models.ForeignKey(Category, related_name="translations", on_delete=models.CASCADE)
+#     lang = models.CharField(max_length=10, choices=settings.LANGUAGES, default="en")
+#     title = models.CharField(max_length=100)
+#     text = models.TextField(verbose_name=" Text :")
+
+#     class Meta:
+#         unique_together = ("category", "lang")
+
+#     def __str__(self):
+#         return f"{self.lang.upper()} – {self.title}"

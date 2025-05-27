@@ -57,10 +57,10 @@ services:
     # container_name: pgadmin4_container
     restart: always
     ports:
-      - "8888:80"
+      - ${PGADMIN_PORT}
     environment:
-      PGADMIN_DEFAULT_EMAIL: raphael.hunold@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: Pos1977sop
+      PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 

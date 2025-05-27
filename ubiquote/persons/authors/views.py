@@ -35,7 +35,7 @@ from django.contrib.postgres.lookups import Unaccent
 
 from flexidate import parse
 from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# LANGUAGES = settings.LANGUAGES
 from django.utils.translation import get_language
 
 from operator import itemgetter

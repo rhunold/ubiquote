@@ -9,8 +9,8 @@ from .constants import SEX_CHOICES, NATIONALITIES_CHOICES
 
 from django.utils.translation import gettext_lazy as _
 
-from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# from django.conf import settings
+# LANGUAGES = settings.LANGUAGES
 
 from flexidate import parse
 

@@ -218,7 +218,7 @@ class DataFetchingMixin(TokenRefreshMixin):
         except Exception as e:
             logger.error(f"Template rendering error: {str(e)}")
             messages.error(request, "An error occurred while rendering the page.")
-            return redirect('get-home')
+            return redirect('texts:get-home')
 
     def render_htmx_or_full_authors(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
@@ -229,7 +229,7 @@ class DataFetchingMixin(TokenRefreshMixin):
         except Exception as e:
             logger.error(f"Template rendering error: {str(e)}")
             messages.error(request, "An error occurred while rendering the page.")
-            return redirect('get-home')
+            return redirect('texts:get-home')
     
 
     

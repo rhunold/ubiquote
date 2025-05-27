@@ -33,6 +33,8 @@ from texts.quotes.utils import clean_text
 from django.db import transaction
 from texts.quotes.utils import generate_response
 
+from django.utils.translation import get_language
+
 # import . from serializers
 
 class CustomPagination(PageNumberPagination):
@@ -137,7 +139,7 @@ class AuthorQuotesAPIView(generics.ListAPIView):
     API view to retrieve quotes for a specific author using the author's slug.
     """
     
-    serializer_class = ShortQuoteSerializer
+    serializer_class = QuoteSerializer
     pagination_class = CustomPagination  
     permission_classes = [AllowAny]        
 
@@ -200,7 +202,7 @@ class UserQuotesContributorAPIView(generics.ListAPIView):
     API view to retrieve quotes for a specific contributor with the user's slug.
     """
     
-    serializer_class = ShortQuoteSerializer
+    serializer_class = QuoteSerializer
     pagination_class = CustomPagination  
     permission_classes = [AllowAny]        
     # contributor = ShortUserSerializer   
@@ -224,7 +226,7 @@ class UserQuotesLikesAPIView(generics.ListAPIView):
     """
     API view to list quotes that a user has liked.
     """    
-    serializer_class = ShortQuoteSerializer  # Use the quote serializer
+    serializer_class = QuoteSerializer  # Use the quote serializer
     pagination_class = CustomPagination  # Optional: Pagination class to control how many quotes per page
     permission_classes = [AllowAny]    
 
@@ -353,6 +355,7 @@ class CategoriesAPIView(generics.ListAPIView):
     
     
     def get_queryset(self):
+
         queryset = Category.objects.annotate(quotes_count=Count('quote'))
         
         # for cat in queryset.all():
@@ -369,7 +372,13 @@ class CategoriesAPIView(generics.ListAPIView):
             )
         
         # print(queryset)
-        return queryset.order_by('title') # for alphabetical sort
+        
+        lang = self.request.GET.get("lang") or get_language()
+        order_field = f"title_{lang}" if lang != "en" else "title"  
+        
+        # print("Language in API view:", get_language())      
+        
+        return queryset.order_by(order_field) # for alphabetical sort
         
     # # queryset = models.Quote.objects.all().order_by('-date_created') 
     
@@ -379,7 +388,7 @@ class CategoriesAPIView(generics.ListAPIView):
 
 
 class CategoryQuotesAPIView(generics.ListAPIView):
-    serializer_class = ShortQuoteSerializer  # Use the quote serializer
+    serializer_class = QuoteSerializer  # Use the quote serializer
     pagination_class = CustomPagination  # Optional: Pagination class to control how many quotes per page
     permission_classes = [AllowAny]    
     

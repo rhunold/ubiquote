@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% load category_tags %}
+
 {% block title %}{{ category.title  }}{% endblock %}
 
 {% block meta_decription %} {{ category.title  }}- {{ category.text  }}{% endblock %}
 
 {% block body %}
 
-    <h1>{{ category.title  }}</h1>
-    <h4>{{ category.text|safe  }}</h4>    
+    <h1>{{ category|get_translated_title  }}</h1>
+    <h4>{{ category|get_translated_text|safe  }}</h4>    
  
 
     <p>{{ count }} quotes in   {{  category.title }}</p>  

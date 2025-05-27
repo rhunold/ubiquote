@@ -1,6 +1,9 @@
    
     <div id="results" class="no-js" >
 
+
+    
+
     <div id="search_count" hx-swap-oob="true">
         {% if search_query %}
         <p class="p-2 m-0 pb-0 pt-3">
@@ -31,7 +34,9 @@
             {% elif '/likes/' in request.path %}
                 hx-get="{% url 'users:get-user-likes' profil.slug %}?page={{ page_number|add:1 }}" 
             {% elif '/user/' in request.path %}
-                hx-get="{% url 'users:get-user' user.slug %}?page={{ page_number|add:1 }}"                                  
+                hx-get="{% url 'users:get-user' user.slug %}?page={{ page_number|add:1 }}"   
+            {% elif '/category/' in request.path %}
+                hx-get="{% url 'texts:get-category' category.slug %}?page={{ page_number|add:1 }}"
             {% else %}            
                 hx-get="{% url 'texts:get-home' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
             {% endif %}

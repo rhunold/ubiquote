@@ -58,18 +58,11 @@ class Quote(Text):
     dimensions = models.JSONField(null=True, blank=True)  # ou models.JSONField avec Django >= 3.1
 
     # for_you_algo_feature => generate a value to match with user.for_you value => give the user the content that is the most accurate to his preference/consomation/interests...    
+     
     
-    # def default_author(self):
-    #     return Author.objects.get(id=1)
-    
-    # def count_likes(self):
-    #     return self.likes.all().count()
-    
-    # def get_total_likes(self):
-    #     return self.likes.count()
-
-    # def has_user_liked(self, user):
-    #     return self.likes.filter(user=user).exists()
+    @property
+    def likes_count(self):
+        return self.likes.count()    
     
 
     def get_categories(self):

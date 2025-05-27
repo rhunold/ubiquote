@@ -24,7 +24,7 @@
 
 
 
-<nav class="container-fluid">
+<nav>
 
 
   <ul class="nav nav-tabs">
@@ -133,63 +133,11 @@
 
 
 
-  <!-- <button hx-post="/clicked" hx-swap="outerHTML">
-    Click Me
-  </button> -->
-
-  <!-- <ul>
-    {{ trans }}
-
-    {% for lang in languages %}
-      <li>
-        <a href="/{{ lang.code }}/">
-          {{ lang.name_local|lower }}
-        </a>
-    </li>
-    {% endfor %}
-</ul> -->
-
-
-<!-- <p>{% translate "hello" %}</p> -->
 
 
 </nav>
 
-<div class="container-fluid">
-{% if request.path == quotes %}
-  {% include "partials/search_quotes.html" %}
-{% endif %}
 
-{% if request.path == authors %}
-  {% include "partials/search_authors.html" %}
-{% endif %}
-
-{% if request.path == home %}
-<h5>{{ count }} recommandations for you !</h5>
-{% endif %}
-
-
-{% if request.path == categories %}
-{% endif %}
-
-{% if request.path == author_url %}
-  {% include "partials/author_card.html" %}
-{% endif %}
-
-
-{% if request.path == get_likes %}
-  <h1>{% translate "Likes of" %} {{ profil.username }}</h1>
-  <p>{{ count }} quotes liked by {{ profil.username }}</p>  
-{% endif %}
-
-{% if request.path == user_connected %}
-
-{% endif %}
-
-</div>
 
 
 </div>
-
-
-

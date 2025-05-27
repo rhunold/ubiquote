@@ -21,6 +21,12 @@
     border-color: transparent !important;
     } */
 
+    .list-group-item form  {
+        display:inline !important;  
+    }  
+    .nav {
+        --bs-nav-link-padding-x: 1rem 0 !important;    
+    }  
     .nav-tabs {
         border-bottom: transparent !important;
     }        
@@ -30,16 +36,16 @@
     }        
 
     #nav_search_sticky {
-        padding-top:1rem;        
-        /* padding: 10px 20px; */
+        padding:1rem 0;        
         background-color:white;
-        /* height: 100px;          */
 
         width: 100%;
         z-index: 1000;
     }
 
-    
+    svg.generate_img:hover, svg.like:hover  {
+        fill: red;
+    }
 
     #nav_search_sticky div.container-fluid   { 
     padding:1rem;
@@ -67,6 +73,26 @@
     }    
 
 
+    .card-body {
+        padding: var(--bs-card-spacer-y) 0 !important;
+    }    
+
+    .search-bar {
+    position: sticky;
+    left: 0;
+    right: 0;
+    background: white;
+    /* padding: 0 0 0.5rem 0; */
+    padding-bottom:1rem;
+    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
+    z-index: 100;
+    transition: transform 0.3s ease-in-out;
+    }
+
+
+
+
+
     /* To ensure the search bar and button don't overflow on smaller screens */
     @media (max-width: 768px) {
         .search_bar .col-12 {
@@ -84,7 +110,11 @@
             position: sticky;
             top: 0;
         }
+        .search-bar {
+        top: 3rem;
+        }           
     }
+ 
 
     /* Sticky navigation for mobile (sticky at the bottom) */
     @media (max-width: 767px) {
@@ -108,7 +138,17 @@
         .nav-item .nav-link span {
             display: none;
         }
+        .search-bar {
+        top: 0;
+        }     
+        .search-bar.hidden {
+        transform: translateY(-100%);
+        }               
     }
+
+
+
+
 
 
     /* https://codepen.io/argyleink/pen/yLovWjz */
@@ -177,6 +217,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.8"></script>
 
 
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
 
@@ -185,6 +226,29 @@
   
 
     {% block custom_static %}
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const searchBar = document.getElementById('search-bar');
+  if (!searchBar) return;  // gracefully exit if the element is missing
+
+  let lastScrollTop = 0;
+
+  window.addEventListener('scroll', function () {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (currentScroll > lastScrollTop) {
+      searchBar.classList.add('hidden');
+    } else {
+      searchBar.classList.remove('hidden');
+    }
+
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+  });
+});
+</script>    
     {% endblock %}
 
   </head>

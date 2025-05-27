@@ -10,7 +10,7 @@ from django.db.models import Q
 
 
 from django.conf import settings
-LANGUAGES = settings.LANGUAGES
+# LANGUAGES = settings.LANGUAGES
 from django.utils.translation import get_language
 
 
@@ -130,7 +130,7 @@ class Author(Person):
 
 class AuthorTranslation(models.Model):
     author = models.ForeignKey('Author', on_delete=models.CASCADE)
-    language_code = models.CharField(_('Langs'), max_length=2, choices=LANGUAGES, default="en") # first lang to be translated : en . Because I'm fr
+    language_code = models.CharField(_('Langs'), max_length=2, choices=settings.LANGUAGES, default="en") # first lang to be translated : en . Because I'm fr
     translated_name = models.CharField(max_length=255)
     
     def __str__(self):      

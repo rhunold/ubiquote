@@ -1,0 +1,13 @@
+{% load get_item %} 
+{% load highlight %}
+                    
+                    
+{% if quote.lang != "en" and quote.author.translated_name %}
+    {% if quote.lang in quote.author.translated_name %}
+        {{ quote.author.translated_name|get_item:quote.lang|default:quote.author.fullname|highlight_search:search_query|safe }}
+    {% else %}
+        {{ quote.author.fullname|default_if_none:""|highlight_search:search_query|safe }}
+    {% endif %}
+{% else %}
+    {{ quote.author.fullname|default_if_none:""|highlight_search:search_query|safe }}
+{% endif %}

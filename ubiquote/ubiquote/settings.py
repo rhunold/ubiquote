@@ -41,10 +41,13 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',        
     'dal', # override the jquery.init.js script provided by the admin
     'dal_select2',
     # 'ubiquote.management',
-    # 'autocomplete_light',    
+    # 'autocomplete_light',  
+   
+   
     
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,7 +59,11 @@ INSTALLED_APPS = [
     # 'django_elasticsearch_dsl',
     'django.contrib.postgres',    
     
-    'texts',
+  
+    
+    # 'texts.apps.TextsConfig',
+    # 'texts.quotes.apps.TextsConfig',    
+    'texts',    
     'texts.quotes',    
     'persons',
     'persons.users',
@@ -75,14 +82,19 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    
+    # 'modeltranslation.middleware.TranslationMiddleware',     
+   
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+
     
     'debug_toolbar.middleware.DebugToolbarMiddleware',    
     'django_htmx.middleware.HtmxMiddleware'
@@ -101,6 +113,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n', 
             ],
         },
     },
@@ -205,8 +218,11 @@ DEFAULT_PAGINATION = 10  # Define your default pagination value here
 LANGUAGES = (
     ('en', _('English')),
     ('fr', _('French')),
-    ('es', _('Spanish')),    
+    # ('es', _('Spanish')),    
 )
+
+MODELTRANSLATION_LANGUAGES = ('en', 'fr',)
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale/'),  

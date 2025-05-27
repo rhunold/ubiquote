@@ -3,19 +3,25 @@
 {% load translated_author %}
 {% load highlight %}
 
-{% comment %}
-  {% load get_item %}
-  {% load static %}
-  {% load i18n %}
-{% endcomment %} 
+
+    <div id="search_count" hx-swap-oob="true">
+        {% if search_query %}
+        <p class="p-2 m-0 pb-0 pt-3">
+         {{ count }} results for <b>"{{ search_query|safe }}"</b>...
+        </p>
+        {% endif %}
+    </div>
 
 
-
-    {% if search_query and page_number == 1 %}
+    {% comment %}
+    {% if search_query  %}
       <li>{{ count }} results for "{{ search_query }}"</li>
       {% else %}
     {% endif %}
+    {% endcomment %}    
 
+
+    
     {% for author in authors %}
 
       <!-- Trigger pagination/infinite scroll -->        
@@ -45,3 +51,4 @@
 {% endif %}
 
 {% include 'pagination.html' %}
+
