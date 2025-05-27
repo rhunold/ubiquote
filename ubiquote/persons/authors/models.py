@@ -13,12 +13,22 @@ from django.conf import settings
 # LANGUAGES = settings.LANGUAGES
 from django.utils.translation import get_language
 
+import unicodedata
+import re
+
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 # from flexidate import FlexiDate
+
+
+def slugify(value):
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower())  # keep only letters, numbers, underscores, hyphens
+    value = re.sub(r'[-\s]+', '-', value).strip('-')  # collapse dashes and spaces into one dash
+    return value
 
 # import autocomplete_light
 
@@ -53,13 +63,22 @@ class Author(Person):
             self.last_name or ''
         ]
         
+
     def generate_slug(self):
-        # Join parts without spaces for a slug-like format
-        return ''.join(self.get_name_components()).strip()
+        parts = [p.strip() for p in self.get_name_components() if p]
+        return slugify('-'.join(parts))
 
     def generate_fullname(self):
-        # Join parts with spaces for readability
-        return ' '.join(self.get_name_components()).strip()
+        parts = [p.strip() for p in self.get_name_components() if p]
+        return ' '.join(parts)        
+        
+    # def generate_slug(self):
+    #     # Join parts without spaces for a slug-like format
+    #     return ''.join(self.get_name_components()).strip()
+
+    # def generate_fullname(self):
+    #     # Join parts with spaces for readability
+    #     return ' '.join(self.get_name_components()).strip()
     
     # def generate_slug(self):
     #     # Customize this method to generate the slug from the desired field(s)
@@ -107,7 +126,7 @@ class Author(Person):
     
     def save(self, *args, **kwargs):
         self.fullname = self.generate_fullname()
-        # self.slug = self.generate_slug()        
+        self.slug = self.generate_slug()        
         # print(f"Saving author with fullname: {self.fullname}")
         super().save(*args, **kwargs)       
         
