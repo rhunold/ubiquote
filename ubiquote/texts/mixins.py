@@ -5,6 +5,8 @@ import logging
 from django.core.cache import cache
 from django.contrib.auth import logout
 from django.contrib import messages
+from django.utils.translation import get_language
+
 
 
 # Set up logger for error handling
@@ -56,12 +58,15 @@ class TokenRefreshMixin:
     
 class DataFetchingMixin(TokenRefreshMixin):
     # api_url = None  # Set in the child class
+    
+    
         
     def get_api_data(self, page_number, endpoint='quotes/', search_query='', disable_cache=False): 
         """Fetch quotes from the API with error handling and caching."""
         if not self.api_url:
             logger.error("API URL not set in the view")
             return {'results': [], 'count': 0, 'detail': 'Configuration error'}
+        
 
         api_url = f'{self.api_url}{endpoint}?page={page_number}&q={search_query}'
         headers = {}
@@ -218,7 +223,7 @@ class DataFetchingMixin(TokenRefreshMixin):
         except Exception as e:
             logger.error(f"Template rendering error: {str(e)}")
             messages.error(request, "An error occurred while rendering the page.")
-            return redirect('texts:get-home')
+            return redirect('quotes:get-quotes')
 
     def render_htmx_or_full_authors(self, request, context):
         """Render partial or full template based on the request type (HTMX or not)."""
@@ -229,7 +234,7 @@ class DataFetchingMixin(TokenRefreshMixin):
         except Exception as e:
             logger.error(f"Template rendering error: {str(e)}")
             messages.error(request, "An error occurred while rendering the page.")
-            return redirect('texts:get-home')
+            return redirect('authors:get-authors')
     
 
     

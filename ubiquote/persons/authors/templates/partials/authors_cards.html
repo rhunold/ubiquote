@@ -1,5 +1,3 @@
-
-
 {% load translated_author %}
 {% load highlight %}
 
@@ -12,20 +10,12 @@
         {% endif %}
     </div>
 
-
-    {% comment %}
-    {% if search_query  %}
-      <li>{{ count }} results for "{{ search_query }}"</li>
-      {% else %}
-    {% endif %}
-    {% endcomment %}    
-
-
     
     {% for author in authors %}
 
       <!-- Trigger pagination/infinite scroll -->        
       {% if forloop.last and next_page_url %}
+   
 
           <li class="list-group-item"
             hx-get="{% url 'authors:get-authors' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 

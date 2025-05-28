@@ -1,4 +1,5 @@
-   
+
+
     <div id="results" class="no-js" >
 
 
@@ -13,7 +14,6 @@
     </div>
 
 
-
     {% for quote in quotes %}
 
       <!-- Trigger pagination/infinite scroll -->     
@@ -24,7 +24,11 @@
       <div id="last-page-indicator"></div>
       {% endif %}           
 
-        {% if forloop.last and next_page_url %}
+        {% comment %}{% if forloop.last and next_page_url %}{% endcomment %}
+        {% comment %} Trigger infinite scroll 3 items before the end {% endcomment %}
+        {% if forloop.revcounter == 3 and next_page_url %}
+
+        
         <!-- {{next_page_url}} -->
             <div class="card mt-3"
             {% if '/quotes/' in request.path %}

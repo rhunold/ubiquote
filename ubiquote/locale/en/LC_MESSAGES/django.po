@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-08 10:03+0000\n"
+"POT-Creation-Date: 2025-05-27 22:24+0000\n"
 "PO-Revision-Date: 2023-11-09 13:01+0000\n"
 "Last-Translator:   <raphael.hunold@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,814 +19,1052 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.9.9\n"
 
-#: persons/constants.py:5
+#: persons/authors/forms.py:33
+msgid "Put your bio here"
+msgstr ""
+
+#: persons/authors/models.py:36
+msgid "nickname"
+msgstr ""
+
+#: persons/authors/models.py:37
+msgid "fullname"
+msgstr ""
+
+#: persons/authors/models.py:47
+msgid "avatar"
+msgstr ""
+
+#: persons/authors/models.py:152 texts/models.py:72
+msgid "Langs"
+msgstr ""
+
+#: persons/authors/templates/add_author.html:4
+#: persons/authors/templates/add_author.html:5
+#: persons/authors/templates/add_author.html:9
+#, fuzzy
+#| msgid "Add a quote"
+msgid "Add an author"
+msgstr "Add a quote"
+
+#: persons/authors/templates/add_author.html:17
+#: texts/quotes/templates/add_quote.html:30
+msgid "Post"
+msgstr ""
+
+#: persons/authors/templates/get_authors.html:30
+#, fuzzy
+#| msgid "Add a quote"
+msgid "Add author"
+msgstr "Add a quote"
+
+#: persons/authors/templates/partials/search_authors.html:11
+#, python-format
+msgid "Search %(count)s authors"
+msgstr ""
+
+#: persons/constants.py:8
 msgid "Female"
 msgstr "Femme"
 
-#: persons/constants.py:6
+#: persons/constants.py:9
 msgid "Male"
 msgstr "Homme"
 
-#: persons/constants.py:7
+#: persons/constants.py:10
 msgid "Unsure"
 msgstr "Incertain"
 
-#: persons/constants.py:12
+#: persons/constants.py:15
 msgid "Afghan"
 msgstr ""
 
-#: persons/constants.py:13
+#: persons/constants.py:16
 msgid "Albanian"
 msgstr ""
 
-#: persons/constants.py:14
+#: persons/constants.py:17
 msgid "Algerian"
 msgstr ""
 
-#: persons/constants.py:15
+#: persons/constants.py:18
 msgid "American"
 msgstr ""
 
-#: persons/constants.py:16
+#: persons/constants.py:19
 msgid "Andorran"
 msgstr ""
 
-#: persons/constants.py:17
+#: persons/constants.py:20
 msgid "Angolan"
 msgstr ""
 
-#: persons/constants.py:18
+#: persons/constants.py:21
 msgid "Antiguans"
 msgstr ""
 
-#: persons/constants.py:19
+#: persons/constants.py:22
 msgid "Argentinean"
 msgstr ""
 
-#: persons/constants.py:20
+#: persons/constants.py:23
 msgid "Armenian"
 msgstr ""
 
-#: persons/constants.py:21
+#: persons/constants.py:24
 msgid "Australian"
 msgstr ""
 
-#: persons/constants.py:22
+#: persons/constants.py:25
 msgid "Austrian"
 msgstr ""
 
-#: persons/constants.py:23
+#: persons/constants.py:26
 msgid "Azerbaijani"
 msgstr ""
 
-#: persons/constants.py:24
+#: persons/constants.py:27
 msgid "Bahamian"
 msgstr ""
 
-#: persons/constants.py:25
+#: persons/constants.py:28
 msgid "Bahraini"
 msgstr ""
 
-#: persons/constants.py:26
+#: persons/constants.py:29
 msgid "Bangladeshi"
 msgstr ""
 
-#: persons/constants.py:27
+#: persons/constants.py:30
 msgid "Barbadian"
 msgstr ""
 
-#: persons/constants.py:28
+#: persons/constants.py:31
 msgid "Barbudans"
 msgstr ""
 
-#: persons/constants.py:29
+#: persons/constants.py:32
 msgid "Batswana"
 msgstr ""
 
-#: persons/constants.py:30
+#: persons/constants.py:33
 msgid "Belarusian"
 msgstr ""
 
-#: persons/constants.py:31
+#: persons/constants.py:34
 msgid "Belgian"
 msgstr ""
 
-#: persons/constants.py:32
+#: persons/constants.py:35
 msgid "Belizean"
 msgstr ""
 
-#: persons/constants.py:33
+#: persons/constants.py:36
 msgid "Beninese"
 msgstr ""
 
-#: persons/constants.py:34
+#: persons/constants.py:37
 msgid "Bhutanese"
 msgstr ""
 
-#: persons/constants.py:35
+#: persons/constants.py:38
 msgid "Bolivian"
 msgstr ""
 
-#: persons/constants.py:36
+#: persons/constants.py:39
 msgid "Bosnian"
 msgstr ""
 
-#: persons/constants.py:37
+#: persons/constants.py:40
 msgid "Brazilian"
 msgstr ""
 
-#: persons/constants.py:38
+#: persons/constants.py:41
 msgid "British"
 msgstr ""
 
-#: persons/constants.py:39
+#: persons/constants.py:42
 msgid "Bruneian"
 msgstr ""
 
-#: persons/constants.py:40
+#: persons/constants.py:43
 msgid "Bulgarian"
 msgstr ""
 
-#: persons/constants.py:41
+#: persons/constants.py:44
 msgid "Burkinabe"
 msgstr ""
 
-#: persons/constants.py:42
+#: persons/constants.py:45
 msgid "Burmese"
 msgstr ""
 
-#: persons/constants.py:43
+#: persons/constants.py:46
 msgid "Burundian"
 msgstr ""
 
-#: persons/constants.py:44
+#: persons/constants.py:47
 msgid "Cambodian"
 msgstr ""
 
-#: persons/constants.py:45
+#: persons/constants.py:48
 msgid "Cameroonian"
 msgstr ""
 
-#: persons/constants.py:46
+#: persons/constants.py:49
 msgid "Canadian"
 msgstr ""
 
-#: persons/constants.py:47
+#: persons/constants.py:50
 msgid "Cape Verdean"
 msgstr ""
 
-#: persons/constants.py:48
+#: persons/constants.py:51
 msgid "Central African"
 msgstr ""
 
-#: persons/constants.py:49
+#: persons/constants.py:52
 msgid "Chadian"
 msgstr ""
 
-#: persons/constants.py:50
+#: persons/constants.py:53
 msgid "Chilean"
 msgstr ""
 
-#: persons/constants.py:51
+#: persons/constants.py:54
 msgid "Chinese"
 msgstr ""
 
-#: persons/constants.py:52
+#: persons/constants.py:55
 msgid "Colombian"
 msgstr ""
 
-#: persons/constants.py:53
+#: persons/constants.py:56
 msgid "Comoran"
 msgstr ""
 
-#: persons/constants.py:54
+#: persons/constants.py:57
 msgid "Congolese"
 msgstr ""
 
-#: persons/constants.py:55
+#: persons/constants.py:58
 msgid "Costa Rican"
 msgstr ""
 
-#: persons/constants.py:56
+#: persons/constants.py:59
 msgid "Croatian"
 msgstr ""
 
-#: persons/constants.py:57
+#: persons/constants.py:60
 msgid "Cuban"
 msgstr ""
 
-#: persons/constants.py:58
+#: persons/constants.py:61
 msgid "Cypriot"
 msgstr ""
 
-#: persons/constants.py:59
+#: persons/constants.py:62
 msgid "Czech"
 msgstr ""
 
-#: persons/constants.py:60
+#: persons/constants.py:63
 msgid "Danish"
 msgstr ""
 
-#: persons/constants.py:61
+#: persons/constants.py:64
 msgid "Djibouti"
 msgstr ""
 
-#: persons/constants.py:62
+#: persons/constants.py:65
 msgid "Dominican"
 msgstr ""
 
-#: persons/constants.py:63
+#: persons/constants.py:66
 msgid "Dutch"
 msgstr ""
 
-#: persons/constants.py:64
+#: persons/constants.py:67
 msgid "Dutchman"
 msgstr ""
 
-#: persons/constants.py:65
+#: persons/constants.py:68
 msgid "Dutchwoman"
 msgstr ""
 
-#: persons/constants.py:66
+#: persons/constants.py:69
 msgid "East Timorese"
 msgstr ""
 
-#: persons/constants.py:67
+#: persons/constants.py:70
 msgid "Ecuadorean"
 msgstr ""
 
-#: persons/constants.py:68
+#: persons/constants.py:71
 msgid "Egyptian"
 msgstr ""
 
-#: persons/constants.py:69
+#: persons/constants.py:72
 msgid "Emirian"
 msgstr ""
 
-#: persons/constants.py:70
+#: persons/constants.py:73
 msgid "Equatorial Guinean"
 msgstr ""
 
-#: persons/constants.py:71
+#: persons/constants.py:74
 msgid "Eritrean"
 msgstr ""
 
-#: persons/constants.py:72
+#: persons/constants.py:75
 msgid "Estonian"
 msgstr ""
 
-#: persons/constants.py:73
+#: persons/constants.py:76
 msgid "Ethiopian"
 msgstr ""
 
-#: persons/constants.py:74
+#: persons/constants.py:77
 msgid "Fijian"
 msgstr ""
 
-#: persons/constants.py:75
+#: persons/constants.py:78
 msgid "Filipino"
 msgstr ""
 
-#: persons/constants.py:76
+#: persons/constants.py:79
 msgid "Finnish"
 msgstr ""
 
-#: persons/constants.py:77 ubiquote/settings.py:154
+#: persons/constants.py:80 ubiquote/settings.py:220
 msgid "French"
 msgstr "French"
 
-#: persons/constants.py:78
+#: persons/constants.py:81
 msgid "Gabonese"
 msgstr ""
 
-#: persons/constants.py:79
+#: persons/constants.py:82
 msgid "Gambian"
 msgstr ""
 
-#: persons/constants.py:80
+#: persons/constants.py:83
 msgid "Georgian"
 msgstr ""
 
-#: persons/constants.py:81
+#: persons/constants.py:84
 msgid "German"
 msgstr ""
 
-#: persons/constants.py:82
+#: persons/constants.py:85
 msgid "Ghanaian"
 msgstr ""
 
-#: persons/constants.py:83
+#: persons/constants.py:86
 msgid "Greek"
 msgstr ""
 
-#: persons/constants.py:84
+#: persons/constants.py:87
 msgid "Grenadian"
 msgstr ""
 
-#: persons/constants.py:85
+#: persons/constants.py:88
 msgid "Guatemalan"
 msgstr ""
 
-#: persons/constants.py:86
+#: persons/constants.py:89
 msgid "Guinea-Bissauan"
 msgstr ""
 
-#: persons/constants.py:87
+#: persons/constants.py:90
 msgid "Guinean"
 msgstr ""
 
-#: persons/constants.py:88
+#: persons/constants.py:91
 msgid "Guyanese"
 msgstr ""
 
-#: persons/constants.py:89
+#: persons/constants.py:92
 msgid "Haitian"
 msgstr ""
 
-#: persons/constants.py:90
+#: persons/constants.py:93
 msgid "Herzegovinian"
 msgstr ""
 
-#: persons/constants.py:91
+#: persons/constants.py:94
 msgid "Honduran"
 msgstr ""
 
-#: persons/constants.py:92
+#: persons/constants.py:95
 msgid "Hungarian"
 msgstr ""
 
-#: persons/constants.py:93
+#: persons/constants.py:96
 msgid "I-Kiribati"
 msgstr ""
 
-#: persons/constants.py:94
+#: persons/constants.py:97
 msgid "Icelander"
 msgstr ""
 
-#: persons/constants.py:95
+#: persons/constants.py:98
 msgid "Indian"
 msgstr ""
 
-#: persons/constants.py:96
+#: persons/constants.py:99
 msgid "Indonesian"
 msgstr ""
 
-#: persons/constants.py:97
+#: persons/constants.py:100
 msgid "Iranian"
 msgstr ""
 
-#: persons/constants.py:98
+#: persons/constants.py:101
 msgid "Iraqi"
 msgstr ""
 
-#: persons/constants.py:99
+#: persons/constants.py:102
 msgid "Irish"
 msgstr ""
 
-#: persons/constants.py:100
+#: persons/constants.py:103
 msgid "Israeli"
 msgstr ""
 
-#: persons/constants.py:101
+#: persons/constants.py:104
 msgid "Italian"
 msgstr ""
 
-#: persons/constants.py:102
+#: persons/constants.py:105
 msgid "Ivorian"
 msgstr ""
 
-#: persons/constants.py:103
+#: persons/constants.py:106
 msgid "Jamaican"
 msgstr ""
 
-#: persons/constants.py:104
+#: persons/constants.py:107
 msgid "Japanese"
 msgstr ""
 
-#: persons/constants.py:105
+#: persons/constants.py:108
 msgid "Jordanian"
 msgstr ""
 
-#: persons/constants.py:106
+#: persons/constants.py:109
 msgid "Kazakhstani"
 msgstr ""
 
-#: persons/constants.py:107
+#: persons/constants.py:110
 msgid "Kenyan"
 msgstr ""
 
-#: persons/constants.py:108
+#: persons/constants.py:111
 msgid "Kittian and Nevisian"
 msgstr ""
 
-#: persons/constants.py:109
+#: persons/constants.py:112
 msgid "Kuwaiti"
 msgstr ""
 
-#: persons/constants.py:110
+#: persons/constants.py:113
 msgid "Kyrgyz"
 msgstr ""
 
-#: persons/constants.py:111
+#: persons/constants.py:114
 msgid "Laotian"
 msgstr ""
 
-#: persons/constants.py:112
+#: persons/constants.py:115
 msgid "Latvian"
 msgstr ""
 
-#: persons/constants.py:113
+#: persons/constants.py:116
 msgid "Lebanese"
 msgstr ""
 
-#: persons/constants.py:114
+#: persons/constants.py:117
 msgid "Liberian"
 msgstr ""
 
-#: persons/constants.py:115
+#: persons/constants.py:118
 msgid "Libyan"
 msgstr ""
 
-#: persons/constants.py:116
+#: persons/constants.py:119
 msgid "Liechtensteiner"
 msgstr ""
 
-#: persons/constants.py:117
+#: persons/constants.py:120
 msgid "Lithuanian"
 msgstr ""
 
-#: persons/constants.py:118
+#: persons/constants.py:121
 msgid "Luxembourger"
 msgstr ""
 
-#: persons/constants.py:119
+#: persons/constants.py:122
 msgid "Macedonian"
 msgstr ""
 
-#: persons/constants.py:120
+#: persons/constants.py:123
 msgid "Malagasy"
 msgstr ""
 
-#: persons/constants.py:121
+#: persons/constants.py:124
 msgid "Malawian"
 msgstr ""
 
-#: persons/constants.py:122
+#: persons/constants.py:125
 msgid "Malaysian"
 msgstr ""
 
-#: persons/constants.py:123
+#: persons/constants.py:126
 msgid "Maldivan"
 msgstr ""
 
-#: persons/constants.py:124
+#: persons/constants.py:127
 msgid "Malian"
 msgstr ""
 
-#: persons/constants.py:125
+#: persons/constants.py:128
 msgid "Maltese"
 msgstr ""
 
-#: persons/constants.py:126
+#: persons/constants.py:129
 msgid "Marshallese"
 msgstr ""
 
-#: persons/constants.py:127
+#: persons/constants.py:130
 msgid "Mauritanian"
 msgstr ""
 
-#: persons/constants.py:128
+#: persons/constants.py:131
 msgid "Mauritian"
 msgstr ""
 
-#: persons/constants.py:129
+#: persons/constants.py:132
 msgid "Mexican"
 msgstr ""
 
-#: persons/constants.py:130
+#: persons/constants.py:133
 msgid "Micronesian"
 msgstr ""
 
-#: persons/constants.py:131
+#: persons/constants.py:134
 msgid "Moldovan"
 msgstr ""
 
-#: persons/constants.py:132
+#: persons/constants.py:135
 msgid "Monacan"
 msgstr ""
 
-#: persons/constants.py:133
+#: persons/constants.py:136
 msgid "Mongolian"
 msgstr ""
 
-#: persons/constants.py:134
+#: persons/constants.py:137
 msgid "Moroccan"
 msgstr ""
 
-#: persons/constants.py:135
+#: persons/constants.py:138
 msgid "Mosotho"
 msgstr ""
 
-#: persons/constants.py:136
+#: persons/constants.py:139
 msgid "Motswana"
 msgstr ""
 
-#: persons/constants.py:137
+#: persons/constants.py:140
 msgid "Mozambican"
 msgstr ""
 
-#: persons/constants.py:138
+#: persons/constants.py:141
 msgid "Namibian"
 msgstr ""
 
-#: persons/constants.py:139
+#: persons/constants.py:142
 msgid "Nauruan"
 msgstr ""
 
-#: persons/constants.py:140
+#: persons/constants.py:143
 msgid "Nepalese"
 msgstr ""
 
-#: persons/constants.py:141
+#: persons/constants.py:144
 msgid "Netherlander"
 msgstr ""
 
-#: persons/constants.py:142
+#: persons/constants.py:145
 msgid "New Zealander"
 msgstr ""
 
-#: persons/constants.py:143
+#: persons/constants.py:146
 msgid "Ni-Vanuatu"
 msgstr ""
 
-#: persons/constants.py:144
+#: persons/constants.py:147
 msgid "Nicaraguan"
 msgstr ""
 
-#: persons/constants.py:145
+#: persons/constants.py:148
 msgid "Nigerian"
 msgstr ""
 
-#: persons/constants.py:146
+#: persons/constants.py:149
 msgid "Nigerien"
 msgstr ""
 
-#: persons/constants.py:147
+#: persons/constants.py:150
 msgid "North Korean"
 msgstr ""
 
-#: persons/constants.py:148
+#: persons/constants.py:151
 msgid "Northern Irish"
 msgstr ""
 
-#: persons/constants.py:149
+#: persons/constants.py:152
 msgid "Norwegian"
 msgstr ""
 
-#: persons/constants.py:150
+#: persons/constants.py:153
 msgid "Omani"
 msgstr ""
 
-#: persons/constants.py:151
-msgid "Pakistani"
-msgstr ""
-
-#: persons/constants.py:152
-msgid "Palauan"
-msgstr ""
-
-#: persons/constants.py:153
-msgid "Panamanian"
-msgstr ""
-
 #: persons/constants.py:154
-msgid "Papua New Guinean"
+msgid "Other"
 msgstr ""
 
 #: persons/constants.py:155
-msgid "Paraguayan"
+msgid "Pakistani"
 msgstr ""
 
 #: persons/constants.py:156
-msgid "Peruvian"
+msgid "Palauan"
 msgstr ""
 
 #: persons/constants.py:157
-msgid "Polish"
+msgid "Panamanian"
 msgstr ""
 
 #: persons/constants.py:158
-msgid "Portuguese"
+msgid "Papua New Guinean"
 msgstr ""
 
 #: persons/constants.py:159
-msgid "Qatari"
+msgid "Paraguayan"
 msgstr ""
 
 #: persons/constants.py:160
-msgid "Romanian"
+msgid "Peruvian"
 msgstr ""
 
 #: persons/constants.py:161
-msgid "Russian"
+msgid "Polish"
 msgstr ""
 
 #: persons/constants.py:162
-msgid "Rwandan"
+msgid "Portuguese"
 msgstr ""
 
 #: persons/constants.py:163
-msgid "Saint Lucian"
+msgid "Qatari"
 msgstr ""
 
 #: persons/constants.py:164
-msgid "Salvadoran"
+msgid "Romanian"
 msgstr ""
 
 #: persons/constants.py:165
-msgid "Samoan"
+msgid "Russian"
 msgstr ""
 
 #: persons/constants.py:166
-msgid "San Marinese"
+msgid "Rwandan"
 msgstr ""
 
 #: persons/constants.py:167
-msgid "Sao Tomean"
+msgid "Saint Lucian"
 msgstr ""
 
 #: persons/constants.py:168
-msgid "Saudi"
+msgid "Salvadoran"
 msgstr ""
 
 #: persons/constants.py:169
-msgid "Scottish"
+msgid "Samoan"
 msgstr ""
 
 #: persons/constants.py:170
-msgid "Senegalese"
+msgid "San Marinese"
 msgstr ""
 
 #: persons/constants.py:171
-msgid "Serbian"
+msgid "Sao Tomean"
 msgstr ""
 
 #: persons/constants.py:172
-msgid "Seychellois"
+msgid "Saudi"
 msgstr ""
 
 #: persons/constants.py:173
-msgid "Sierra Leonean"
+msgid "Scottish"
 msgstr ""
 
 #: persons/constants.py:174
-msgid "Singaporean"
+msgid "Senegalese"
 msgstr ""
 
 #: persons/constants.py:175
-msgid "Slovakian"
+msgid "Serbian"
 msgstr ""
 
 #: persons/constants.py:176
-msgid "Slovenian"
+msgid "Seychellois"
 msgstr ""
 
 #: persons/constants.py:177
-msgid "Solomon Islander"
+msgid "Sierra Leonean"
 msgstr ""
 
 #: persons/constants.py:178
-msgid "Somali"
+msgid "Singaporean"
 msgstr ""
 
 #: persons/constants.py:179
-msgid "South African"
+msgid "Slovakian"
 msgstr ""
 
 #: persons/constants.py:180
-msgid "South Korean"
+msgid "Slovenian"
 msgstr ""
 
 #: persons/constants.py:181
-msgid "Spanish"
+msgid "Solomon Islander"
 msgstr ""
 
 #: persons/constants.py:182
-msgid "Sri Lankan"
+msgid "Somali"
 msgstr ""
 
 #: persons/constants.py:183
-msgid "Sudanese"
+msgid "South African"
 msgstr ""
 
 #: persons/constants.py:184
-msgid "Surinamer"
+msgid "South Korean"
 msgstr ""
 
 #: persons/constants.py:185
-msgid "Swazi"
+msgid "Spanish"
 msgstr ""
 
 #: persons/constants.py:186
-msgid "Swedish"
+msgid "Sri Lankan"
 msgstr ""
 
 #: persons/constants.py:187
-msgid "Swiss"
+msgid "Sudanese"
 msgstr ""
 
 #: persons/constants.py:188
-msgid "Syrian"
+msgid "Surinamer"
 msgstr ""
 
 #: persons/constants.py:189
-msgid "Taiwanese"
+msgid "Swazi"
 msgstr ""
 
 #: persons/constants.py:190
-msgid "Tajik"
+msgid "Swedish"
 msgstr ""
 
 #: persons/constants.py:191
-msgid "Tanzanian"
+msgid "Swiss"
 msgstr ""
 
 #: persons/constants.py:192
-msgid "Thai"
+msgid "Syrian"
 msgstr ""
 
 #: persons/constants.py:193
-msgid "Togolese"
+msgid "Taiwanese"
 msgstr ""
 
 #: persons/constants.py:194
-msgid "Tongan"
+msgid "Tajik"
 msgstr ""
 
 #: persons/constants.py:195
-msgid "Trinidadian or Tobagonian"
+msgid "Tanzanian"
 msgstr ""
 
 #: persons/constants.py:196
-msgid "Tunisian"
+msgid "Thai"
 msgstr ""
 
 #: persons/constants.py:197
-msgid "Turkish"
+msgid "Togolese"
 msgstr ""
 
 #: persons/constants.py:198
-msgid "Tuvaluan"
+msgid "Tongan"
 msgstr ""
 
 #: persons/constants.py:199
-msgid "Ugandan"
+msgid "Trinidadian or Tobagonian"
 msgstr ""
 
 #: persons/constants.py:200
-msgid "Ukrainian"
+msgid "Tunisian"
 msgstr ""
 
 #: persons/constants.py:201
-msgid "Uruguayan"
+msgid "Turkish"
 msgstr ""
 
 #: persons/constants.py:202
-msgid "Uzbekistani"
+msgid "Tuvaluan"
 msgstr ""
 
 #: persons/constants.py:203
-msgid "Venezuelan"
+msgid "Ugandan"
 msgstr ""
 
 #: persons/constants.py:204
-msgid "Vietnamese"
+msgid "Ukrainian"
 msgstr ""
 
 #: persons/constants.py:205
-msgid "Welsh"
+msgid "Uruguayan"
 msgstr ""
 
 #: persons/constants.py:206
-msgid "Yemenite"
+msgid "Uzbekistani"
 msgstr ""
 
 #: persons/constants.py:207
-msgid "Zambian"
+msgid "Venezuelan"
 msgstr ""
 
 #: persons/constants.py:208
+msgid "Vietnamese"
+msgstr ""
+
+#: persons/constants.py:209
+msgid "Welsh"
+msgstr ""
+
+#: persons/constants.py:210
+msgid "Yemenite"
+msgstr ""
+
+#: persons/constants.py:211
+msgid "Zambian"
+msgstr ""
+
+#: persons/constants.py:212
 msgid "Zimbabwean"
 msgstr ""
 
-#: texts/templates/_nav.html:19 texts/templates/base.html:74 texts/views.py:18
-msgid "hello"
-msgstr "bonjour"
+#: persons/models.py:21
+msgid "first name"
+msgstr ""
 
-#: texts/templates/add_quote.html:21
+#: persons/models.py:22
+msgid "middle name"
+msgstr ""
+
+#: persons/models.py:23
+msgid "last name"
+msgstr ""
+
+#: persons/models.py:24
+msgid "particul"
+msgstr ""
+
+#: persons/models.py:25
+msgid "title"
+msgstr ""
+
+#: persons/models.py:28
+msgid "birthday_datefield"
+msgstr ""
+
+#: persons/models.py:30
+msgid "birthday"
+msgstr ""
+
+#: persons/models.py:36 persons/models.py:53
+msgid ""
+"Enter a valid date in the format 'YYYY-MM-DD' or '-YYYY-MM-DD'. Year must be "
+"numeric. Month must be 01 to 12. Day must be 01 to 31."
+msgstr ""
+
+#: persons/models.py:45
+msgid "death_datefield"
+msgstr ""
+
+#: persons/models.py:47
+msgid "death"
+msgstr ""
+
+#: persons/models.py:61
+msgid "sex"
+msgstr ""
+
+#: persons/models.py:62
+msgid "nationality"
+msgstr ""
+
+#: persons/models.py:64
+msgid "date created"
+msgstr ""
+
+#: persons/models.py:65
+msgid "date updated"
+msgstr ""
+
+#: persons/models.py:68
+msgid "biography"
+msgstr ""
+
+#: persons/users/templates/add_user.html:4
+#: persons/users/templates/add_user.html:9
+#, fuzzy
+#| msgid "Add a quote"
+msgid "Add a user"
+msgstr "Add a quote"
+
+#: persons/users/templates/add_user.html:5
+#: texts/quotes/templates/add_quote.html:5
+#: texts/quotes/templates/add_quote.html:6
+#: texts/quotes/templates/add_quote.html:10
 msgid "Add a quote"
 msgstr "Add a quote"
 
-#: ubiquote/settings.py:153
+#: persons/users/templates/add_user.html:17
+#, fuzzy
+#| msgid "Add a quote"
+msgid "Add user"
+msgstr "Add a quote"
+
+#: persons/users/templates/get_user_likes.html:9
+msgid "Likes of"
+msgstr ""
+
+#: persons/users/templates/registration/register.html:9
+#: persons/users/templates/registration/register.html:17
+#: texts/templates/nav.html:87
+msgid "Register"
+msgstr ""
+
+#: texts/models.py:60
+msgid "draft"
+msgstr ""
+
+#: texts/models.py:61 texts/quotes/templates/_get_img_quote.html:374
+msgid "published"
+msgstr ""
+
+#: texts/models.py:71
+msgid "Text"
+msgstr ""
+
+#: texts/models.py:177
+msgid "status"
+msgstr ""
+
+#: texts/quotes/forms.py:58 texts/quotes/forms.py:86
+msgid "Put your quote here"
+msgstr ""
+
+#: texts/quotes/templates/_get_img_quote.html:37
+#: texts/quotes/templates/quote_card.html:10
+msgid "Quote"
+msgstr ""
+
+#: texts/quotes/templates/_get_img_quote.html:359
+msgid "categories"
+msgstr ""
+
+#: texts/quotes/templates/_get_img_quote.html:367
+msgid "update"
+msgstr ""
+
+#: texts/quotes/templates/_get_img_quote.html:368
+msgid "delete"
+msgstr ""
+
+#: texts/quotes/templates/_get_img_quote.html:374
+msgid "by"
+msgstr ""
+
+#: texts/quotes/templates/partials/search_quotes.html:14
+msgid "Search"
+msgstr ""
+
+#: texts/quotes/templates/partials/search_quotes.html:14
+msgid "quotes"
+msgstr ""
+
+#: texts/quotes/templates/recommended_quotes.html:11
+msgid "Welcome in Extraquote"
+msgstr ""
+
+#: texts/templates/nav.html:33
+msgid "Home"
+msgstr ""
+
+#: texts/templates/nav.html:36
+msgid "Quotes"
+msgstr ""
+
+#: texts/templates/nav.html:39
+msgid "Authors"
+msgstr ""
+
+#: texts/templates/nav.html:42
+msgid "Categories"
+msgstr ""
+
+#: texts/templates/nav.html:45
+msgid "Users"
+msgstr ""
+
+#: texts/templates/nav.html:54 texts/templates/nav.html:70
+#, fuzzy
+#| msgid "Add a quote"
+msgid "Add Quote"
+msgstr "Add a quote"
+
+#: texts/templates/nav.html:73
+msgid "Likes"
+msgstr ""
+
+#: texts/templates/nav.html:80
+msgid "Logout"
+msgstr ""
+
+#: texts/templates/nav.html:84
+msgid "Login"
+msgstr ""
+
+#: texts/templates/nav.html:96
+msgid "Languages"
+msgstr ""
+
+#: ubiquote/settings.py:219
 msgid "English"
 msgstr "English"
+
+#: ubiquote/urls.py:24
+msgid "admin/"
+msgstr ""
+
+#: ubiquote/urls.py:26
+msgid "api/"
+msgstr ""
+
+#~ msgid "hello"
+#~ msgstr "bonjour"

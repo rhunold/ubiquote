@@ -74,8 +74,8 @@ class QuotesAPIView(generics.ListAPIView):
         if search_query:
             # Filter the quotes based on the search query
             queryset = queryset.filter(
-                Q(text__icontains=search_query) |
-                Q(author__fullname__icontains=search_query) 
+                Q(text__icontains=search_query) 
+                # | Q(author__fullname__icontains=search_query) 
             )
         
         # print(queryset)

@@ -53,13 +53,13 @@ import requests
 import logging
 
 from django.core.cache import cache
-
+from django.http import HttpResponse
 
 
 # Set up logger for error handling
 logger = logging.getLogger(__name__)
 
-    
+
 @login_required
 def like_quote(request, id):
     quote = get_object_or_404(Quote, id=id)
@@ -70,6 +70,10 @@ def like_quote(request, id):
         # Unlike the quote
         QuotesLikes.objects.filter(user=user, quote=quote).delete()
         liked = False
+        
+        # # 🧠 If request is from HTMX and quote is unliked, just return 204 (quote will disappear)
+        # if request.headers.get('HX-Request') == 'true':
+        #     return HttpResponse(status=204)        
     else:
         # Like the quote
         QuotesLikes.objects.create(user=user, quote=quote)
@@ -106,10 +110,17 @@ class GetQuotesView(DataFetchingMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')     
+        search_query = request.GET.get('q', '')
+        # lang = request.GET.get('lang', 'en')
+        print(search_query)  
 
         # Fetch data for the home view (e.g., recommendations)
-        data = self.get_api_data(page_number, endpoint='quotes/', search_query=search_query)  # Custom endpoint for HomeView
+        data = self.get_api_data(
+            page_number, 
+            endpoint='quotes/', 
+            search_query=search_query,
+            # extra_params={'lang': lang} 
+            )  # Custom endpoint for HomeView
 
         # Handle pagination and results
         quotes = data.get('results', [])

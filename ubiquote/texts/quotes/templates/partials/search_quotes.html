@@ -2,44 +2,48 @@
 {% load i18n %}
 <div class="mt-2 mb-2 search-bar" id="search-bar" >
 
-    <form class="search_bar form-inline row g-3" method="GET" >
+    <form class="search_bar form-inline row g-3" >
 
-        <div class="col ">
+        <div class="col">
 
             <!-- HTMX target for the list -->
             <input 
-            id="search-quotes"                 
+       
             class="form-control me-2"               
-            arial-label="Search"
-            placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %}"
-            value="{% if search_query %}{{ search_query }}{% else %}{% endif %}"
-            type="search" 
+ 
+            placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %} "
+            value="{{ search_query }}"
+            type="text" 
             name="q"
-            hx-get="{% url 'quotes:get-quotes' %}?page=1"
+            hx-get="{% url 'quotes:get-quotes' %}"
             hx-trigger="keyup changed delay:500ms"
             hx-target="#results" 
-            hx-swap="innerHTML"      
-
+            hx-swap="innerHTML"  
+            autofocus>
+        </div>   
+        
 {% comment %}
+    arial-label="Search"
+    id="search-quotes"   
+        
     hx-select="#results"   
     hx-select-oob="#search_count"   
     hx-get="{% url 'quotes:get-quotes' %}"
     hx-select="#results"   
     hx-swap="afterbegin"  
-    hx-headers='{"HX-Request": "true"}'               
-{% endcomment %}
-
-            autofocus>
-        </div>    
+    hx-headers='{"HX-Request": "true"}'  
+    hx-select-oob="#search_count"               
+{% endcomment %}        
 
         <div class="col-auto">
-            <button class="btn btn-primary w-100" type="submit">Search</button>
+            <button class="btn btn-primary w-100" type="submit">{% translate "Search" %}</button>
         </div>  
     </form>
 
     
 
     <div id="search_count" hx-swap-oob="true"></div>
+
 
 
 
