@@ -23,7 +23,7 @@
 
               </p>
               {% if quote.author %}
-                <footer class="blockquote-footer">
+                <p class="blockquote-footer">
 
                   <a href="{% url 'authors:get-author' quote.author.slug  %}" class="">
 
@@ -32,7 +32,7 @@
                   </a>
 
                   <!-- in <cite title="Source Title">Source Title</cite> -->
-                </footer>
+                </p>
       
               {% endif %}            
             </blockquote>

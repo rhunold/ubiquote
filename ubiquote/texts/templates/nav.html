@@ -20,11 +20,8 @@
 
 
 
-<div id="nav_search_sticky">
 
-
-
-<nav>
+<nav id="nav_search_sticky">
 
 
   <ul class="nav nav-tabs">
@@ -41,21 +38,48 @@
       <li class="nav-item">
         <a class="nav-link {% if request.path == categories %}active{% endif %}" href="{% url 'texts:get-categories' %}"><i class="fa fa-fw fa-tags"></i><span>{% translate "Categories" %}</span></a>
       </li>
+
+
+      {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}"><i class="fa fa-fw fa-heart"></i><span>{% translate "Likes" %}</span></a>
+        </li>
+        
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'users:logout' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Logout" %}</span></a>
+      </li>      
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}"><i class="fa fa-fw fa-sign-in"></i><span>{% translate "Login" %}</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Register" %}</span></a>
+      </li>      
+      {% endif %}        
+
+      {% comment %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
+      </li>
+
       <li class="nav-item">
         <a class="nav-link {% if request.path == users %}active{% endif %}" href="{% url 'users:get-users' %}"><i class="fa fa-fw fa-users"></i><span>{% translate "Users" %}</span></a>
       </li>
-       
+
+      {% if user.is_authenticated %} 
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == get_likes %}active{% endif %}" href="{% url 'users:get-user-likes' user.slug  %}"><i class="fa fa-fw fa-heart"></i><span>{% translate "Likes" %}</span></a>
+      </li>      
+      {% else %}
+
+      {% endif %}
+
       <!-- <li class="nav-item">
         <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
       </li> -->
 
-      {% if user.is_authenticated %}
-      <li class="nav-item">
-        <a class="nav-link {% if request.path == add_quote %}active{% endif %}" href="{% url 'quotes:add-quote' %}"><i class="fa fa-fw fa-pencil-square-o"></i><span>{% translate "Add Quote" %}</span></a>
-      </li>
-      {% else %}
-
-      {% endif %}         
+       
 
 
       <li class="nav-item dropdown">
@@ -113,7 +137,8 @@
               <li><a class="dropdown-item" href="#">Something else here</a></li> -->
             </ul>
           </li>
-    
+
+      {% endcomment %}                
 
 
         </ul>
@@ -139,5 +164,3 @@
 
 
 
-
-</div>
