@@ -28,18 +28,33 @@
   document.documentElement.classList.add('js');
 </script>
 
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
 {% endblock %}
 
 
 
 {% block body %}
 
-    <!-- Previous Page -->
-  <a href="#" onclick="history.go(-1);return false;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-left-circle mt-2 mb-2" viewBox="0 0 16 16">
-    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"/>
-  </svg>
-  </a>
+  {% include "snippets/previous_page.html" %}   
+
+
 
   {% comment %}  
   <div class="float-end">
@@ -53,7 +68,7 @@
     
     <!-- Quote Column -->
     <div class="col-lg-10 mb-4 mb-lg-0 d-flex justify-content-center">
-      <div class="quote-block h-100 target">
+      <div class="quote-block h-100 target" id="quoteContainer">
         <p class="quote-text">
           {{ quote.text|safe }}
         </p>
@@ -194,9 +209,11 @@
       <label for="download-image" class="btn btn-primary">Download</label>
       <input type="radio" id="download-image" name="action" value="download-image" class="cta_button">
 
-    
-      <label for="download-image" class="btn btn-primary">Share</label>
-      <input type="radio" id="share-image" name="action" value="share-image" class="cta_button">      
+
+      <label for="share-image" class="btn btn-primary" id="open-share-modal">Share</label>
+      <input type="radio" id="share-image" name="action" value="share-image" class="cta_button">   
+      <input type="hidden" id="quote-id" value="{{ quote.id }}"> 
+
 
       
     </div>          
@@ -212,6 +229,57 @@
   </div>
 </div>
 
+
+<!-- Modal Overlay -->
+<div id="share-modal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <h2>Share this Quote</h2>
+    <div class="share-buttons">
+      <a id="share-facebook" target="_blank">Facebook</a>
+      <a id="share-twitter" target="_blank">Twitter</a>
+      <a id="share-whatsapp" target="_blank">WhatsApp</a>
+      <a id="share-messenger" target="_blank">Messenger</a>
+      <a id="share-pinterest" target="_blank">Pinterest</a>
+      <a id="share-email">Email</a>
+      <a id="share-sms">SMS</a>
+    </div>
+    <button id="close-share-modal" class="btn">Close</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById("open-share-modal").addEventListener("click", () => {
+    document.getElementById("share-modal").classList.remove("hidden");
+  });
+
+  document.getElementById("close-share-modal").addEventListener("click", () => {
+    document.getElementById("share-modal").classList.add("hidden");
+  });
+
+  // Optional: Close modal on ESC or background click
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.getElementById("share-modal").classList.add("hidden");
+    }
+  });
+
+  document.getElementById("share-modal").addEventListener("click", (e) => {
+    if (e.target.id === "share-modal") {
+      document.getElementById("share-modal").classList.add("hidden");
+    }
+  });
+</script>
+
+<script>
+
+function getCookie(name) {
+  const cookieValue = document.cookie
+    .split("; ")
+    .find(row => row.startsWith(name + "="))
+    ?.split("=")[1];
+  return decodeURIComponent(cookieValue);
+}
+</script>
 
 
 

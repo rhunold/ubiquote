@@ -35,6 +35,10 @@ from texts.quotes.utils import generate_response
 
 from django.utils.translation import get_language
 
+import base64, os, time, threading
+from uuid import uuid4
+from django.conf import settings
+
 # import . from serializers
 
 class CustomPagination(PageNumberPagination):
@@ -337,13 +341,48 @@ class UserQuotesLikesAPIView(generics.ListAPIView):
         
 #         return render(request, 'like_quote.html', context)
     
-    
+
 class QuoteAPIView(generics.RetrieveAPIView):
     # queryset = QuoteModel.Quote.objects.all()
     queryset = QuoteModel.Quote.objects.all()
     serializer_class = QuoteSerializer
     lookup_field = "id"    
-    permission_classes = [AllowAny]        
+    permission_classes = [AllowAny]     
+    
+
+    def post(self, request, id):
+        image_data = request.data.get("image")
+        # print("Incoming POST:", request.data)
+        
+        if not image_data:
+            return Response({"error": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            format, imgstr = image_data.split(';base64,')
+            ext = format.split('/')[-1]
+            filename = f"{uuid4().hex}.{ext}"
+            save_dir = os.path.join(settings.MEDIA_ROOT, 'generated')
+            os.makedirs(save_dir, exist_ok=True)
+
+            file_path = os.path.join(save_dir, filename)
+            with open(file_path, "wb") as f:
+                f.write(base64.b64decode(imgstr))
+
+            # Auto-delete after 5 min
+            def delete_later(path, delay=300):
+                time.sleep(delay)
+                if os.path.exists(path):
+                    os.remove(path)
+            threading.Thread(target=delete_later, args=(file_path,)).start()
+
+            image_url = request.build_absolute_uri(f"{settings.MEDIA_URL}generated/{filename}")
+            return Response({"image_url": image_url}, status=status.HTTP_201_CREATED)
+        
+            # return Response({"image_url": request.build_absolute_uri(url)})        
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
     
 
 class CategoriesAPIView(generics.ListAPIView):
@@ -698,3 +737,37 @@ class AuthorDeleteAPIView(generics.DestroyAPIView):
     serializer_class = AuthorSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "slug"
+    
+    
+    
+
+
+# class TemporaryImageUploadView(APIView):
+#     def post(self, request):
+#         image_data = request.data.get("image")
+#         if not image_data:
+#             return Response({"error": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             format, imgstr = image_data.split(';base64,')
+#             ext = format.split('/')[-1]
+#             filename = f"{uuid4().hex}.{ext}"
+#             save_dir = os.path.join(settings.MEDIA_ROOT, 'generated')
+#             os.makedirs(save_dir, exist_ok=True)
+
+#             file_path = os.path.join(save_dir, filename)
+#             with open(file_path, "wb") as f:
+#                 f.write(base64.b64decode(imgstr))
+
+#             # Auto-delete after 5 min
+#             def delete_later(path, delay=300):
+#                 time.sleep(delay)
+#                 if os.path.exists(path):
+#                     os.remove(path)
+#             threading.Thread(target=delete_later, args=(file_path,)).start()
+
+#             image_url = request.build_absolute_uri(f"{settings.MEDIA_URL}generated/{filename}")
+#             return Response({"image_url": image_url}, status=status.HTTP_201_CREATED)
+
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

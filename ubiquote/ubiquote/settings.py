@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     'persons.users',
     'persons.authors',
     
+    
+    'corsheaders',    
     'api',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -82,10 +84,11 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',    
     'django.middleware.security.SecurityMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    
+
     # 'modeltranslation.middleware.TranslationMiddleware',     
    
     'django.middleware.common.CommonMiddleware',
@@ -245,7 +248,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # DATA_UPLOAD_MAX_NUMBER_FIELDS = 2500
 
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    # others
+]
 
 
 REST_FRAMEWORK = {

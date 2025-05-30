@@ -4,6 +4,8 @@
 *DS_Store
 /specs
 /env
+/_env
+_requirements.txt
 # .git
 # .env
 migrations/
