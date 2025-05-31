@@ -47,7 +47,12 @@
         
 
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:logout' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Logout" %}</span></a>
+        <form method="post" action="{% url 'users:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="nav-link" ><i class="fa fa-fw fa-sign-out"></i><span></span>{% translate "Logout" %}</span></button>
+        </form>
+
+
       </li>      
       {% else %}
       <li class="nav-item">
