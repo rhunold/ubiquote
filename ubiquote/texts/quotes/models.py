@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from texts.mixins import CleaningMixin
+# from api.mixins import CleaningMixin
 
 from .utils import generate_response
 from .utils import check_for_duplicate_quote
@@ -151,7 +151,7 @@ class Quote(Text):
 #     quote.save()
 
 
-class QuoteRaw(Text, CleaningMixin):  # hérite de text, lang, date_created
+class QuoteRaw(Text):  # hérite de text, lang, date_created, CleaningMixin
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.CASCADE, related_name='raw_author') #, default=1)
 
 

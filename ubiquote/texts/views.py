@@ -18,7 +18,7 @@ from .models import Category
 from texts.quotes.models import Quote, QuotesLikes, UserQuoteRecommendation
 
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
-from texts.mixins import DataFetchingMixin, TokenRefreshMixin 
+from api.mixins import DataFetchingMixin, TokenRefreshMixin 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 

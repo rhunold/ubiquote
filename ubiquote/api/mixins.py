@@ -7,38 +7,75 @@ from django.contrib.auth import logout
 from django.contrib import messages
 from django.utils.translation import get_language
 
+from django.http import JsonResponse
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 # Set up logger for error handling
 logger = logging.getLogger(__name__)
 
+
+class RefreshTokenView(TokenRefreshView):
+    """
+    A view to refresh access tokens using the refresh token stored in session.
+    """
+    def post(self, request, *args, **kwargs):
+        refresh = request.session.get('refresh_token')
+        if not refresh:
+            return JsonResponse({'detail': 'No refresh token found in session'}, status=401)
+
+        request.data._mutable = True  # Only needed for QueryDict
+        request.data['refresh'] = refresh
+        request.data._mutable = False
+
+        response = super().post(request, *args, **kwargs)
+
+        # Optional: update session tokens here
+        if response.status_code == 200:
+            data = response.data
+            request.session['access_token'] = data.get('access')
+            if 'refresh' in data:
+                request.session['refresh_token'] = data.get('refresh')
+
+        return response
+
 class TokenRefreshMixin:
     """Mixin to handle access token refresh and user logout on token expiry."""
 
     def refresh_access_token(self):
-        refresh_token = self.request.session.get('refresh_token')
-        if refresh_token:
-            try:
-                response = requests.post(
-                    f'{settings.API_URL}token/refresh/',
-                    json={'refresh': refresh_token},
-                    headers={'Content-Type': 'application/json'},
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    new_access_token = data.get('access')
-                    new_refresh_token = data.get('refresh', refresh_token)  # Update if token rotation
-                    self.request.session['access_token'] = new_access_token
-                    self.request.session['refresh_token'] = new_refresh_token
-                    return new_access_token
-                else:
-                    # If token refresh fails, handle token expiry
-                    return self.handle_token_expiry()
-            except requests.RequestException as e:
-                # Log the exception
-                logger.error(f"Exception when refreshing token: {e}")
+        try:
+            response = self.request.post(f'{settings.API_URL}/token/refresh-session/')
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('access')
+            else:
                 return self.handle_token_expiry()
-        return self.handle_token_expiry()
+        except requests.RequestException as e:
+            logger.error(f"Exception refreshing token via session: {e}")
+            return self.handle_token_expiry()        
+        # refresh_token = self.request.session.get('refresh_token')
+        # if refresh_token:
+        #     try:
+        #         response = requests.post(
+        #             f'{settings.API_URL}token/refresh/',
+        #             json={'refresh': refresh_token},
+        #             headers={'Content-Type': 'application/json'},
+        #         )
+        #         if response.status_code == 200:
+        #             data = response.json()
+        #             new_access_token = data.get('access')
+        #             new_refresh_token = data.get('refresh', refresh_token)  # Update if token rotation
+        #             self.request.session['access_token'] = new_access_token
+        #             self.request.session['refresh_token'] = new_refresh_token
+        #             return new_access_token
+        #         else:
+        #             # If token refresh fails, handle token expiry
+        #             return self.handle_token_expiry()
+        #     except requests.RequestException as e:
+        #         # Log the exception
+        #         logger.error(f"Exception when refreshing token: {e}")
+        #         return self.handle_token_expiry()
+        # return self.handle_token_expiry()
 
     def handle_token_expiry(self):
         """Handle token expiry by logging out the user and redirecting."""
@@ -239,9 +276,9 @@ class DataFetchingMixin(TokenRefreshMixin):
 
     
 
-class CleaningMixin:
-    def clean_fields(self):
-        print("Cleaning process")
+# class CleaningMixin:
+#     def clean_fields(self):
+#         print("Cleaning process")
         
         
         # self.text = self.text.strip()

@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'persons.users',
     'persons.authors',
     
+    'rest_framework_simplejwt.token_blacklist',    
     
     'corsheaders',    
     'api',
@@ -270,8 +271,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Set a duration for access tokens
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # days=1 / Set a duration for refresh tokens
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Set a duration for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=3),  # days=1 / Set a duration for refresh tokens
     'ROTATE_REFRESH_TOKENS': True,  # Optional: rotate refresh tokens on usage
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklist old tokens after rotation
 }

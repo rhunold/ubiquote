@@ -24,7 +24,7 @@ from texts.quotes.models import Quote, QuotesLikes
 from texts.quotes.forms import QuoteForm
 # from texts.quotes.views import LanguageFilterMixin
 
-from texts.mixins import DataFetchingMixin, TokenRefreshMixin # DatasFetchingMixin
+from api.mixins import DataFetchingMixin, TokenRefreshMixin # DatasFetchingMixin
 
 # from texts.quotes.views import get_user_quotes_likes
 
