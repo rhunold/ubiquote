@@ -127,9 +127,11 @@ class HomeView(DataFetchingMixin, ListView):
     template_name = 'home.html'
     api_url = settings.API_URL
     
-    
 
     def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.render_landing_page(request)        
+        
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
         user = request.user
@@ -215,6 +217,10 @@ class HomeView(DataFetchingMixin, ListView):
             'search_query' : search_query,
         }
         return self.render_htmx_or_full_quotes(request, context)
+    
+    def render_landing_page(self, request):
+        """Renders a public landing page for non-authenticated users."""
+        return render(request, 'landing_page.html', {})  # Create `landing.html`    
 
 
 # def translate(language):

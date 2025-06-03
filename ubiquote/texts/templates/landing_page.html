@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}
+    Ubiquote : the best quote provider
+{% endblock %}
+{% block meta_decription %}
+  Discover, save, and share inspiring quotes with a powerful AI-powered quote engine. Join free to start your journey.
+{% endblock %}
+
+  <meta property="og:title" content="YourQuoteApp - Discover Quotes That Move You">
+  <meta property="og:description" content="Join our community of inspiration seekers. Save, recommend, and generate stunning quote content.">
+  <meta property="og:image" content="/static/images/preview.jpg">
+
+
+{% block body %}
+  <!-- HERO SECTION -->
+  <section class="py-5 text-center bg-light">
+    <div class="container">
+      <h1 class="display-4 fw-bold">Quotes that inspire.<br>Recommendations that resonate.</h1>
+      <p class="lead">Explore 20,000+ quotes from thousands of authors. Like, save, and generate personalized content.</p>
+      <a href="/register/" class="btn btn-primary btn-lg mt-3">Join for Free</a>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row g-4 text-center">
+        <div class="col-md-4">
+          <i class="bi bi-chat-quote fs-1 text-primary"></i>
+          <h4 class="mt-3"> 💬 20,000+ Curated Quotes</h4>
+          <p>From timeless wisdom to modern thought, our quotes span genres, cultures, and centuries.</p>
+        </div>
+        <div class="col-md-4">
+          <i class="bi bi-heart fs-1 text-danger"></i>
+          <h4 class="mt-3">📌 Save & Like</h4>
+          <p>Create a personal library of favorites and come back to what moves you.</p>
+        </div>
+        <div class="col-md-4">
+          <i class="bi bi-stars fs-1 text-warning"></i>
+          <h4 class="mt-3">🧠 Smart Recommendations</h4>
+          <p>Get quotes tailored to your interests, mood, or recent activity using our recommendation engine.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEDIA GENERATION SECTION -->
+  <section class="py-5 bg-light">
+    <div class="container text-center">
+      <h2>🎨 Create Stunning Content</h2>
+      <p class="mb-4">Easily generate images or videos for Instagram, TikTok, or print — all with your favorite quotes.</p>
+      <img src="/static/images/quote-visual-preview.png" class="img-fluid rounded shadow" alt="Generated quote content">
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL SECTION -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2>Why users love us</h2>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <blockquote class="blockquote text-center">
+            <p class="mb-0">“It’s like having a personal mentor in my pocket. The quote recommendations feel so on point, and I love creating images for my socials.”</p>
+            <footer class="blockquote-footer mt-3">Amina, early user</footer>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION -->
+  <section class="py-5 bg-primary text-white text-center">
+    <div class="container">
+      <h2 class="mb-3">Ready to get inspired?</h2>
+      <a href="/register/" class="btn btn-light btn-lg">Create your account</a>
+    </div>
+  </section>
+
+<!-- <footer>
+  <nav>
+    <a href="/quotes/">Quotes</a>
+    <a href="/authors/">Authors</a>
+    <a href="/categories/">Categories</a>    
+    <a href="/about/">About</a>
+  </nav>
+</footer> -->
+
+{% endblock %} 
