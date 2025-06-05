@@ -1,4 +1,6 @@
-{% extends 'base.html' %}
+
+{% extends "layout_one_column.html" %}
+
 {% block title %}
     Ubiquote : the best quote provider
 {% endblock %}
@@ -6,12 +8,8 @@
   Discover, save, and share inspiring quotes with a powerful AI-powered quote engine. Join free to start your journey.
 {% endblock %}
 
-  <meta property="og:title" content="YourQuoteApp - Discover Quotes That Move You">
-  <meta property="og:description" content="Join our community of inspiration seekers. Save, recommend, and generate stunning quote content.">
-  <meta property="og:image" content="/static/images/preview.jpg">
 
-
-{% block body %}
+{% block content %}
   <!-- HERO SECTION -->
   <section class="py-5 text-center bg-light">
     <div class="container">
