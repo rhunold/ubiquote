@@ -112,7 +112,15 @@ class GetQuotesView(DataFetchingMixin, ListView):
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
         # lang = request.GET.get('lang', 'en')
-        print(search_query)  
+        # print(search_query)  
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0        
 
         # Fetch data for the home view (e.g., recommendations)
         data = self.get_api_data(
@@ -126,10 +134,15 @@ class GetQuotesView(DataFetchingMixin, ListView):
         quotes = data.get('results', [])
         next_page_url, previous_page_url = self.process_pagination(data, request)
         count = data.get('count', 0)
+        
+        # quotes_per_page = len(data.get('results', []))  # In case it's dynamic
+        # # Global index offset = (pages already shown) * quotes per page
+        # start_index = (int(page_number) - 1) * quotes_per_page        
 
         context = {
             'quotes': quotes,  # Keep this as 'quotes' if your template expects it
             'count': count,
+            'start_index': start_index,
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
