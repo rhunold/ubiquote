@@ -1,11 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'layout_three_column.html' %}
 {% load category_tags %}
 
 {% block title %}{{ category.title  }}{% endblock %}
 
 {% block meta_decription %} {{ category.title  }}- {{ category.text  }}{% endblock %}
 
-{% block body %}
+{% block content %}
 
     <h1>{{ category|get_translated_title  }}</h1>
     <h4>{{ category|get_translated_text|safe  }}</h4>    

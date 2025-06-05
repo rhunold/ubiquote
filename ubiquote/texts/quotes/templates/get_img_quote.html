@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "layout_one_column.html" %}
 {% load i18n %}
 {% load get_item %} 
 {% load static %}
@@ -12,17 +12,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+{% if user.is_authenticated %}
 <link crossorigin="anonymous" href='https://fonts.googleapis.com/css?family=Helvetica|Arimo|Ubuntu|Outfit|Instrument+Serif|Space+Mono|Hedvig+Letters+Serif|Hedvig+Letters+Sans|Courgette|Grandstander|Noto+Sans|Open+Sans|Roboto|WindSong|Euphoria+Script' rel='stylesheet' type='text/css'>
+{% else %}
+<link crossorigin="anonymous" href='https://fonts.googleapis.com/css?family=Helvetica|Arimo|Ubuntu' rel='stylesheet' type='text/css'>
+{% endif %}
 
-<script src="{% static 'txt_to_img_generator_control.js' %}"></script>
-<script src="{% static 'txt_to_img_generator_fontsizing.js' %}"></script>
+<!-- <link crossorigin="anonymous" href='https://fonts.googleapis.com/css?family=Helvetica|Arimo|Ubuntu|Outfit|Instrument+Serif|Space+Mono|Hedvig+Letters+Serif|Hedvig+Letters+Sans|Courgette|Grandstander|Noto+Sans|Open+Sans|Roboto|WindSong|Euphoria+Script' rel='stylesheet' type='text/css'> -->
+
+<script src="{% static 'img_generator/txt_to_img_generator_control.js' %}"></script>
+<script src="{% static 'img_generator/txt_to_img_generator_fontsizing.js' %}"></script>
 <!-- <script src="{% static 'txt_to_img_generator_onload.js' %}"></script> -->
 
 
-<link href="{% static 'txt_to_img_generator.css' %}" rel="stylesheet" />
+<link href="{% static 'img_generator/txt_to_img_generator.css' %}" rel="stylesheet" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="{% static 'html2canvas_settings.js' %}"></script>
+<script src="{% static 'img_generator/html2canvas_settings.js' %}"></script>
 
 <script>
   document.documentElement.classList.add('js');
@@ -50,7 +56,7 @@ function getCookie(name) {
 
 
 
-{% block body %}
+{% block content %}
 
   {% include "snippets/previous_page.html" %}   
 
@@ -98,7 +104,9 @@ function getCookie(name) {
 
 
         <div class="dropdown">
+          <p>Typo</p>
           <div class="dropbtn" id="font-dropdown-btn">
+            
             <p id="selected-font">Selected Font</p>
             <div class="triangle">&#9660;</div>
           </div>
@@ -109,6 +117,7 @@ function getCookie(name) {
         </div>
     
         <div class="dropdown">
+          <p>Design</p>
           <div class="dropbtn" id="template-dropdown-btn">
             <p id="selected-template">Design</p>
             <div class="triangle">&#9660;</div>
@@ -131,6 +140,7 @@ function getCookie(name) {
         </div>
     
         <div class="dropdown">
+          <p>Format</p>          
           <div class="dropbtn" id="size-dropdown-btn">
             <p id="selected-size">Format</p>
             <div class="triangle">&#9660;</div>
@@ -141,7 +151,7 @@ function getCookie(name) {
             <label for="size-1.91/1">
                 <div class="icon ratio-191-1">
                 </div>             
-                Normal
+                Facebook
             </label>
         
             <input type="radio" id="size-1/1" name="size" value="size-1/1">
@@ -149,7 +159,7 @@ function getCookie(name) {
             <label for="size-1/1">
                 <div class="icon ratio-1-1">
                 </div>      
-                Square
+                Carré
             </label>
     
             <input type="radio" id="size-4/3" name="size" value="size-4/3">
@@ -171,7 +181,7 @@ function getCookie(name) {
             <label for="size-16/9">
                 <div class="icon ratio-16-9">
                 </div>
-                  Cinema</label>  
+                  PC / Cinema</label>  
             
             <input type="radio" id="size-4/5" name="size" value="size-4/5">
                   
@@ -189,7 +199,12 @@ function getCookie(name) {
                 Pinterest
             </label>             
     
-    
+            <!-- A4 -->
+
+            <!-- cadre photo -->
+
+            <!-- votre écran / dynamique -->                    
+
             <!-- <hr>
             <input type="radio" id="size-custom" name="size" value="custom">
             <label for="size-custom">Custom</label> -->

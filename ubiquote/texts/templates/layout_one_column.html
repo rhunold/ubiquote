@@ -1,0 +1,23 @@
+<!-- templates/layout_one_column.html -->
+{% extends "base.html" %}
+
+{% block layout %}
+
+
+    <!-- Main Content -->
+    <main class="mx-auto">
+        {% block content %}{% endblock %}
+
+        {% comment %}
+        <!-- Optional demi-page ad -->
+        {% block demi_ad %}
+        <div class="my-4">
+            {% include "ads/demi-page.html" %}
+        </div>
+        {% endblock %}
+        {% endcomment %}
+    </main>
+
+
+
+{% endblock %}

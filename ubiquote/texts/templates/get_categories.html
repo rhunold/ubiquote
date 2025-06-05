@@ -1,6 +1,4 @@
-
-
-{% extends 'base.html' %}
+{% extends 'layout_three_column.html' %}
 
 {% load category_tags %}
 
@@ -8,7 +6,7 @@
 {% block title %}Categorys{% endblock %}
 {% block meta_decription %}The best quote listing{% endblock %}
 
-{% block body %}
+{% block content %}
     <h1>Categories</h1>
     <p>{{ count }} categories available in the database</p>
     <ul>

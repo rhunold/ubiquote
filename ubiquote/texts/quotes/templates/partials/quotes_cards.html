@@ -13,59 +13,53 @@
         {% endif %}
     </div>
 
-
-    {% for quote in quotes %}
-
-      <!-- Trigger pagination/infinite scroll -->     
-      {% if forloop.first %}<div id="top"></div>{% endif %}
-
-      {% if forloop.last and not next_page_url %}
-      <!-- Add an invisible indicator for the last page -->
-      <div id="last-page-indicator"></div>
-      {% endif %}           
-
-        {% comment %}{% if forloop.last and next_page_url %}{% endcomment %}
-        {% comment %} Trigger infinite scroll 3 items before the end {% endcomment %}
-        {% if forloop.revcounter == 3 and next_page_url %}
-
-        
-        <!-- {{next_page_url}} -->
-            <div class="card mt-3"
-            {% if '/quotes/' in request.path %}
-                hx-get="{% url 'quotes:get-quotes' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}"       
-            {% elif '/author/' in request.path %}
-                hx-get="{% url 'authors:get-author' author.slug %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
-            {% elif '/likes/' in request.path %}
-                hx-get="{% url 'users:get-user-likes' profil.slug %}?page={{ page_number|add:1 }}" 
-            {% elif '/user/' in request.path %}
-                hx-get="{% url 'users:get-user' user.slug %}?page={{ page_number|add:1 }}"   
-            {% elif '/category/' in request.path %}
-                hx-get="{% url 'texts:get-category' category.slug %}?page={{ page_number|add:1 }}"
-            {% else %}            
-                hx-get="{% url 'texts:get-home' %}?page={{ page_number|add:1 }}{% if search_query %}&q={{ search_query }}{% endif %}" 
-            {% endif %}
-
-            hx-trigger="revealed" 
-            hx-swap="afterend" 
-            hx-target="this">           
-
-        {% else %}
-            <div class="card mt-3">
-            
+{% for quote in quotes %}
+    {% with absolute_index=start_index|add:forloop.counter0 %}
+    
+        {% if absolute_index != 0 and absolute_index|divisibleby:5 %}
+            <!-- Include the banner -->
+            {% include "ads/banner.html" %}
         {% endif %}
 
-            {% include "quote_card.html" %}  
-            </div> 
+        <!-- Trigger pagination/infinite scroll -->     
+        {% if forloop.first %}<div id="top"></div>{% endif %}
 
+        {% if forloop.last and not next_page_url %}
+            <!-- Add an invisible indicator for the last page -->
+            <div id="last-page-indicator"></div>
+        {% endif %}
 
-   
+        {% if forloop.revcounter == 3 and next_page_url %}
+            <!-- {{ next_page_url }} -->
+            <div class="card mt-3"
+                {% if '/quotes/' in request.path %}
+                    hx-get="{% url 'quotes:get-quotes' %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}{% if search_query %}&q={{ search_query }}{% endif %}"       
+                {% elif '/author/' in request.path %}
+                    hx-get="{% url 'authors:get-author' author.slug %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                {% elif '/likes/' in request.path %}
+                    hx-get="{% url 'users:get-user-likes' profil.slug %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}" 
+                {% elif '/user/' in request.path %}
+                    hx-get="{% url 'users:get-user' user.slug %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}"   
+                {% elif '/category/' in request.path %}
+                    hx-get="{% url 'texts:get-category' category.slug %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}"
+                {% else %}            
+                    hx-get="{% url 'texts:get-home' %}?page={{ page_number|add:1 }}&start_index={{ start_index|add:forloop.counter }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                {% endif %}
+                hx-trigger="revealed" 
+                hx-swap="afterend" 
+                hx-target="this">
+        {% else %}
+            <div class="card mt-3">
+        {% endif %}
+            
+            {% include "quote_card.html" %} 
 
+        </div> 
+    {% endwith %}
+{% empty %}
+    <p>There is no quotes here.</p>
+{% endfor %}
 
-    {% empty %}
-        <!-- If empty -->
-        <p>There is no quotes here.</p>
-        
-    {% endfor %}
 
     {% include 'pagination.html' %}
 

@@ -6,296 +6,45 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- <meta name="csrf-token" content="{{ csrf_token }}"> -->
-    <title>{% block title %} Ubiquote{% endblock %} </title>
 
+    <title>{% block title %} Ubiquote{% endblock %}</title>
     <meta name="description" content="{% block meta_decription %}The best quote listing{% endblock %}">
-    
+
+    <meta property="og:title" content="{% block og_title %}Ubiquote{% endblock %}">
+    <meta property="og:description" content="{% block og_description%}Join our community of inspiration seekers. Save, recommend, and generate stunning quote content.{% endblock %}">
+    <meta property="og:image" content="{% block og_image%}/static/images/preview.jpg{% endblock %}">    
+
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <!-- <link href="{% static 'css/test.css' %}" rel="stylesheet"> -->
-    <link href="{% static 'admin/css/vendor/select2/select2.css' %}" rel="stylesheet">    
-
+    
     <!-- Load an icon library for nav icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">        
-    
-    <style>
-
-    /* CSS for the main navigation bar */
-
-
-    :root {
-    /* --almost-black: #141414; */
-    --bs-nav-link-color:#141414 ;
-    /* --bs-nav-tabs-link-active-color:red;
-    --bs-nav-link-hover-color: red;     */
-    }    
-
-    a {
-        color: var(--bs-nav-link-color-black); 
-        text-decoration:none;
-    } 
-
-    /* .nav-item a.active {
-        border-bottom: 0.2rem solid #141414 !important;
-    }      */
-
-    /* .active, a:hover {
-        color: var(--bs-nav-link-hover-color); 
-    }  */
-
-    /* body {
-        background-color: var(--almost-black) ; 
-    }   */
-
-
-    /* .nav-tabs .nav-link.active {
-    border-color: transparent !important;
-    } */
-
-    .list-group-item form  {
-        display:inline !important;  
-    } 
-
-    .list-group-item a {
-        text-transform: capitalize;
-    }      
-
-    .nav {
-        --bs-nav-link-padding-x: 1rem 0 !important;    
-    }  
-    .nav-tabs {
-        border-bottom: transparent !important;
-    }        
-
-    .nav-tabs .nav-link {
-        border: 0 !important;
-    }        
-
-    #nav_search_sticky {
-        padding:1rem 0;        
-        background-color:white;
-
-        width: 100%;
-        z-index: 1000;
-    }
-
-    svg.generate_img:hover, svg.like:hover  {
-        fill: red;
-    }
-
-    #nav_search_sticky div.container-fluid   { 
-    padding:1rem;
-    }
-
-    .nav .dropdown-menu li {
-      position: relative;
-    }    
-
-
-    .nav .dropdown-menu .dropdown-submenu {
-      display: none;
-      position: absolute;
-      left: 100%;
-      top: -7px;
-    }
-    
-    .nav .dropdown-menu .dropdown-submenu-left {
-      right: 100%;
-      left: auto;
-    }
-    
-    .nav .dropdown-menu>li:hover>.dropdown-submenu {
-      display: block;
-    }    
-
-
-    .card-body {
-        padding: var(--bs-card-spacer-y) 0 !important;
-    }    
-
-    .search-bar {
-    position: sticky;
-    left: 0;
-    right: 0;
-    background: white;
-    /* padding: 0 0 0.5rem 0; */
-    padding-bottom:1rem;
-    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
-    z-index: 100;
-    transition: transform 0.3s ease-in-out;
-    }
-
-
-    /* Hide text in navigation links on mobile */
-    .nav-item .nav-link {
-        display: flex;
-        align-items: center;
-    }
-    .search-bar.hidden {
-    transform: translateY(-100%);
-    }   
-    
-
-
-
-    /* To ensure the search bar and button don't overflow on smaller screens */
-    /* @media (max-width: 768px) {
-        .search_bar .col-12 {
-            margin-bottom: 10px;
-        }
-        .search_bar .btn {
-            width: 100%;
-        }
-    } */
-
-
-    /* Sticky navigation for desktop (sticky at the top) */
-    @media (min-width: 768px) {
-        #nav_search_sticky {
-            position: sticky;
-            top: 0;
-        }
-        .search-bar {
-        top: 3rem;
-        }           
-    }
- 
-
-    /* Sticky navigation for mobile (sticky at the bottom) */
-    @media (max-width: 767px) {
-
-        body {
-            padding-bottom: 3.5rem;
-        }
-
-        .search_bar .col-12 {
-            margin-bottom: 1rem;
-        }
-        .search_bar .btn {
-            width: 100%;
-        }
-
-        #nav_search_sticky {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-        }
-
-
-        .nav-item .nav-link i {
-            margin-right: 0;
-        }
-
-        .nav-item .nav-link span {
-            display: none;
-        }        
-
         
-        .search-bar {
-        top: 0;
-        }             
-    }
-
-
-
-
-
-
-    /* https://codepen.io/argyleink/pen/yLovWjz */
-
-    /* html, body, .card {
-    block-size: 100%;
-    }
-
-
-    #results {
-    scroll-snap-type: y mandatory;
-    }  */
+    
+    <link href="{% static 'base/base.css' %}" rel="stylesheet">
     
 
-    </style>
-
-<!-- 
-    <style>
-
-
-
-
-    .card {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    /* scroll-margin-top: calc(3vw + 85px); Adjust based on your sticky nav height     */
-    /* Smooth transition for blur */    
-    transition: filter 0.25s ease-in-out; 
-    }
-
-    /* Initially, all cards will have no blur when JS is disabled (because of the `no-js` class) */
-
-
-    /* Initially blur all cards */
-    .card:not(.active) {
-    filter: blur(5px);
-    /* filter: opacity(0%); */
-    }    
-
-
-
-    /* Unblur the card that is active (snapped to top), the last card and every card if no js */
-    .card.active, .card.last-card  {
-    filter: none;
-    }   
-
     
-    </style> -->
-
-    
-    <noscript>
+    <!-- <noscript>
         <style>
         .no-js .card   {
             filter: none;
             }    
         </style>
-    </noscript>
+    </noscript> -->
 
 
-  
-    
-    <!-- <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>    -->
     <script src="https://unpkg.com/htmx.org@1.9.8"></script>
 
+    <!-- For Author selector in add/update mode -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script> -->
+    <!-- <link href="{% static 'admin/css/vendor/select2/select2.css' %}" rel="stylesheet">    -->
 
+    <script src="{% static 'base/base.js' %}"></script> 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    {% block custom_static %}
 
-
-  
-
-
-{% block custom_static %}
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const searchBar = document.getElementById('search-bar');
-  if (!searchBar) return;  // gracefully exit if the element is missing
-
-  let lastScrollTop = 0;
-
-  window.addEventListener('scroll', function () {
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-
-    if (currentScroll > lastScrollTop) {
-      searchBar.classList.add('hidden');
-    } else {
-      searchBar.classList.remove('hidden');
-    }
-
-    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-  });
-});
-</script>    
-{% endblock %}
+    {% endblock %}
 
   </head>
   <body>
@@ -303,9 +52,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     {% include "nav.html" %}
 
-    <div class="container-fluid">    
-    {% block body %}
-    {% endblock %}
+    <div class="container-fluid">
+
+
+    
+    {% block layout %}{% endblock %}
+
+
+
     </div>    
 
     {% include "footer.html" %}    

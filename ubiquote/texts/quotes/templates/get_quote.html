@@ -1,4 +1,5 @@
-{% extends 'base.html' %}
+{% extends 'layout_three_column.html' %}
+
 {% block title %}
   {{ quote.text }}
 {% endblock %}
@@ -6,7 +7,7 @@
   {{ quote.text }} 
 {% endblock %}
 
-{% block body %}
+{% block content %}
 
 
   {% include "snippets/previous_page.html" %}   
