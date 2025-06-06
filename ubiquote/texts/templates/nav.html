@@ -56,10 +56,25 @@
       </li>      
       {% else %}
       <li class="nav-item">
-        <a class="nav-link {% if request.path == login %}active{% endif %}" href="{% url 'users:login' %}"><i class="fa fa-fw fa-sign-in"></i><span>{% translate "Login" %}</span></a>
+
+<!-- <form method="post"> -->
+
+          <button
+    class="nav-link"
+    hx-get="{% url 'users:login' %}?next={{ request.get_full_path}}"
+    hx-target="#modal-container"
+    hx-swap="innerHTML"
+          >
+          <i class="fa fa-fw fa-sign-in"></i><span>{% translate "Login" %}</span>
+
+          
+          </button>
+<!-- </form>           -->
+
+
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:user-register' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Register" %}</span></a>
+        <a class="nav-link {% if request.path == register %}active{% endif %}" href="{% url 'users:register' %}"><i class="fa fa-fw fa-sign-out"></i><span>{% translate "Register" %}</span></a>
       </li>      
       {% endif %}        
 

@@ -21,7 +21,7 @@ from .forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from texts.quotes.models import Quote, QuotesLikes
-from texts.mixins import DataFetchingMixin, TokenRefreshMixin 
+from api.mixins import DataFetchingMixin, TokenRefreshMixin 
 
 
 from .models import User
@@ -32,8 +32,11 @@ from django.conf import settings
 
 from django.contrib.auth import views as auth_views
 from django.utils.translation import get_language
+import re
 
 import requests
+
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 
@@ -57,6 +60,14 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
         profil_slug = self.kwargs['slug']
         search_query = request.GET.get('q', '')           
         user = request.user
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0          
                 
 
         # Adjust API URL to pass pagination and search query
@@ -102,6 +113,7 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
             'profil': profil, 
             'quotes': quotes,
             'count': count,
+            'start_index': start_index,            
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
@@ -120,36 +132,63 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
 class UserRegisterView(generic.CreateView):
     form_class = UserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('users:login')
+    # success_url = reverse_lazy('users:login')
+    success_url = reverse_lazy('texts:get-home')
     
     
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = form.save()
+        login(self.request, user)  # Automatically logs the user in
+        return redirect(self.success_url) # Redirects to the home page    
+    
+
 class LoginView(auth_views.LoginView):
     form_class = AuthenticationForm
     template_name = 'registration/login.html'
-    success_url = reverse_lazy('texts:get-home')  # Redirect to home after login
+    success_url = reverse_lazy('texts:get-home')  # Fallback
+    EXCEPTION_PATHS =  [
+        r'^(/..)?/register/?$',  # optional 2-letter lang prefix
+    ]
 
     def form_valid(self, form):
-        # Log the user in
+        request = self.request
         user = form.get_user()
-        login(self.request, user)
+        login(request, user)
 
-        # Generate JWT token
+        # JWT tokens
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
 
-        # Store tokens in the session (or return them in a response)
-        self.request.session['access_token'] = access_token
-        self.request.session['refresh_token'] = refresh_token
+        # Extract "next" from POST or GET
+        next_url = request.POST.get('next') or request.GET.get('next')
         
-        # You can return a JSON response with tokens or redirect
-        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({
+         # Validate and sanitize next_url
+        if not next_url:
+            next_url = None
+        else:
+            for pattern in self.EXCEPTION_PATHS:
+                if re.match(pattern, next_url):
+                    next_url = str(self.success_url)
+                    break
+
+        # HTMX support: use HX-Redirect
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            response = JsonResponse({
                 'access_token': access_token,
                 'refresh_token': refresh_token,
             })
+            response['HX-Redirect'] = next_url or str(self.success_url)
+            return response
 
-        return redirect(self.success_url)    
+        # Classic POST fallback
+        return redirect(next_url or self.success_url)
+    
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['next_like'] = self.request.GET.get('next_like')
+    #     return context      
 
     # def form_valid(self, form):
     #     # Call the parent form_valid method
@@ -197,7 +236,15 @@ class GetUserView(DataFetchingMixin, ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         profil_slug = self.kwargs['slug']
-        search_query = request.GET.get('q', '')   
+        search_query = request.GET.get('q', '')  
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0            
 
         profil = User.objects.get(slug=profil_slug)        
 
@@ -225,6 +272,7 @@ class GetUserView(DataFetchingMixin, ListView):
             'profil': profil_data,
             'quotes': quotes,
             'count': count,
+            'start_index': start_index,             
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
