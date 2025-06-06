@@ -58,7 +58,7 @@ class QuoteForm(forms.ModelForm):
             'text': forms.Textarea(attrs={'class': 'form-control', 'placeholder': _("Put your quote here")}),
             'lang': forms.Select(attrs={'class': 'form-control'}),
             'categories': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'status': forms.HiddenInput(),
+            'status': forms.Select(attrs={'class': 'form-control'}),
             'contributor': forms.HiddenInput(),
         }
         
