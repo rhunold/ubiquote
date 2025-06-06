@@ -104,9 +104,12 @@ def clean_text(text, lang):
     re.sub(r'^\s+|\s+(?=\.)|\s+$', '', text)
     
     # After a dot, put a space 
-    text = re.sub(r'\.(?!(\.\.\.))(\S)', r'. \2', text)
+    # text = re.sub(r'\.(?!(\.\.\.))(\S)', r'. \2', text)
     
-    # If there is no dot at the end,
+    # Apply space after a dot, except when it's part of an ellipsis or multiple dots
+    text = re.sub(r'\.(?!\.|\s)(?!\S*\.{3})', r'. ', text)
+    
+    # If there is no punctiona at the end,
     if not text.endswith(('.', '!', '?')):
         text += '.'
         
