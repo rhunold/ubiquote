@@ -22,6 +22,9 @@
         
     
     <link href="{% static 'base/base.css' %}" rel="stylesheet">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     
 
     
@@ -46,229 +49,28 @@
 
     {% endblock %}
 
+
+
   </head>
   <body>
 
+    
 
     {% include "nav.html" %}
 
     <div class="container-fluid">
 
-
-    
     {% block layout %}{% endblock %}
-
-
 
     </div>    
 
     {% include "footer.html" %}    
 
-
-    <script>
-      document.body.addEventListener('htmx:configRequest', (e) => {
-        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        })
-    </script>
-
-
-    <script>
-    function refreshToken() {
-        fetch('/token/refresh-session/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.access) {
-                console.log("New access token received.");
-            } else {
-                console.error("Token refresh failed");
-            }
-        });
+    <!-- HTMX will inject the modal here -->
+    <div id="modal-container"></div>
 
 
 
-        // fetch('/refresh-token/')
-        // .then(response => response.json())
-        // .then(data => {
-        //     if (data.success) {
-        //         console.log("Token refreshed in session");
-        //     } else {
-        //         console.error("Token refresh failed");
-        //     }
-        // });
-    }
-
-
-    // function refreshToken() {
-    //     const refreshToken = localStorage.getItem('refresh_token');
-        
-    //     fetch('http://127.0.0.1:8000/api/token/refresh/', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({ refresh: refreshToken }),
-            
-    //     })
-
-    //     console.log("Fetched")
-        
-    //     .then(response => response.json())
-    //     .then(data => {
-    //         if (data.access) {
-    //             // Store the new access token
-    //             localStorage.setItem('access_token', data.access);
-    //             console.error("New access token stored");
-    //         } else {
-    //             console.error("Token refresh failed");
-    //         }
-    //     });
-    // }
-    </script>    
-
-
-
-<!-- 
-<script>
-    function updateScrollMargin() {
-        // Get the sticky nav element and its height
-        const stickyNav = document.querySelector('#nav_search_sticky');
-        const stickyNavHeight = stickyNav ? stickyNav.offsetHeight : 0;
-
-        // Set the scroll-margin-top dynamically for all cards
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.style.scrollMarginTop = `${stickyNavHeight}px`;
-        });
-    }
-
-    // Function to check if media query matches desktop and run the scroll margin update if needed
-    function checkMediaQueryAndRun() {
-        const mediaQuery = window.matchMedia('(min-width: 768px)');
-        if (mediaQuery.matches) {
-            // Media query matches, run the script
-            updateScrollMargin();
-
-            // Run the function whenever the window is resized or content changes
-            window.addEventListener('resize', updateScrollMargin);
-
-            // Recalculate height after HTMX updates
-            document.body.addEventListener('htmx:afterSettle', updateScrollMargin);
-
-            // Optional: MutationObserver to detect when the search bar or sticky content changes
-            const observer = new MutationObserver(updateScrollMargin);
-            observer.observe(document.querySelector('#nav_search_sticky'), { childList: true, subtree: true });
-        }
-    }
-
-    // Run the function on page load and check the media query
-    window.addEventListener('load', checkMediaQueryAndRun);
-
-    // Also run the check when resizing
-    window.addEventListener('resize', checkMediaQueryAndRun);
-</script>
-
-
-<script>
-
-
-let lastPageReached = false;
-
-function setActiveCard() {
-    const cards = document.querySelectorAll('.card');
-    let topCard = null;
-
-
-    // Loop through all cards and find the one snapped to the top
-    for (const card of cards) {
-        const rect = card.getBoundingClientRect();
-        if (rect.top >= 0 && rect.top <= window.innerHeight * 0.45) { 
-            // Check if the card is at the top of the viewport (within the first 45% of the viewport height)
-            topCard = card;
-            break;
-        }
-    }
-
-    // Apply the active class to the top snapped card, remove it from others
-    cards.forEach(card => {
-        if (card === topCard) {
-            card.classList.add('active'); // Unblur the card snapped to the top
-        } else {
-            card.classList.remove('active'); // Blur all others
-        }
-    });
-
-
-    // // Unblur the true last card only if the last page is reached
-    // if (lastPageReached) {
-    //     const lastCard = cards[cards.length - 1];
-    //     if (lastCard) {
-    //         lastCard.classList.add('last-card'); // Unblur the last card
-    //     }
-    // }
-
-    
-    // Unblur the true last card only if the last page is reached or there is no pagination
-    if (lastPageReached || cards.length <= 10) {
-        const lastCard = cards[cards.length - 1];
-        if (lastCard) {
-            lastCard.classList.add('last-card'); // Unblur the last card
-        }
-    }
-
-}
-
-
-// Function to detect when the last page is loaded
-function checkLastPage() {
-    // Check if the last page indicator is present (you can modify this based on your template)
-    const lastPageIndicator = document.querySelector('#last-page-indicator');
-    if (lastPageIndicator) {
-        lastPageReached = true;
-        setActiveCard(); // Re-run the card blur/unblur logic
-    }
-}
-
-// Initialize on page load and scroll events
-window.addEventListener('load', setActiveCard);
-window.addEventListener('scroll', setActiveCard);
-
-// Reapply blur/unblur logic after HTMX loads new content
-document.body.addEventListener('htmx:afterSettle', function(evt) {
-    setActiveCard();
-    checkLastPage(); // Check if the last page is loaded
-});
-
-
-// Remove 'no-js' class when JS is enabled
-document.addEventListener('load', function () {
-  document.getElementById("results").classList.remove('no-js');
-});
-
-
-</script>
- -->
-
-
-
-<!-- 
-<script>
-    document.addEventListener('htmx:afterOnLoad', (event) => {
-        const resultsCount = document.getElementById("search_count").innerText;
-        const searchInput = document.getElementById("search-quotes");
-        const searchTerm = searchInput.value;
-
-        if (searchTerm) {
-            searchInput.placeholder = `${resultsCount} results for '${searchTerm}'`;
-        }
-    });
-</script>
--->
-
-
+    <script src="{% static 'base/after_on_load.js' %}"></script> 
   </body>
 </html>
