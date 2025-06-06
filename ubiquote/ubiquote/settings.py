@@ -183,22 +183,28 @@ USE_TZ = True
 
 # DATETIME_INPUT_FORMATS = ['%Y-%m-%d']
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = '/static/'
 
 # For debug tool
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-# Absolute filesystem path to the directory that will hold collectstatic files.
-STATIC_ROOT = BASE_DIR / "static"
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_URL = '/static/'
+
+# Absolute filesystem path to the directory that will hold collectstatic files. / for production
+# STATIC_ROOT = BASE_DIR / "static"
+
+
 
 STATICFILES_DIRS = [
     # BASE_DIR / "static/custom/",
-    BASE_DIR / "static/img_generator/",    
+    # BASE_DIR / "static/img_generator/",
+    # BASE_DIR / "static/base/",    
+    BASE_DIR / "static",      
     ]
 
 
@@ -271,8 +277,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Set a duration for access tokens
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=3),  # days=1 / Set a duration for refresh tokens
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Set a duration for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # days=1 / Set a duration for refresh tokens
     'ROTATE_REFRESH_TOKENS': True,  # Optional: rotate refresh tokens on usage
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklist old tokens after rotation
 }
