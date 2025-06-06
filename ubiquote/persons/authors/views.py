@@ -109,6 +109,14 @@ class GetAuthorView(DataFetchingMixin, ListView):
         page_number = request.GET.get('page', 1)
         author_slug = self.kwargs.get('slug')
         search_query = request.GET.get('q', '')
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0             
 
         if not author_slug:
             messages.error(request, "Author not found.")
@@ -142,6 +150,7 @@ class GetAuthorView(DataFetchingMixin, ListView):
                 'author': author_data,
                 'quotes': quotes,
                 'count': count,
+                'start_index': start_index,                   
                 'page_number': page_number,
                 'next_page_url': next_page_url,
                 'previous_page_url': previous_page_url,

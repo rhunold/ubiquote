@@ -88,7 +88,15 @@ class GetCategoryView(DataFetchingMixin, ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         category_slug = self.kwargs['slug']
-        search_query = request.GET.get('q', '')         
+        search_query = request.GET.get('q', '') 
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0                     
 
         # Fetch quotes of the author
         quotes_data = self.get_api_data(page_number, endpoint=f'category/{category_slug}/quotes/')
@@ -113,6 +121,7 @@ class GetCategoryView(DataFetchingMixin, ListView):
             'category': category_data,
             'quotes': quotes,
             'count': count,
+            'start_index': start_index,             
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
@@ -135,6 +144,14 @@ class HomeView(DataFetchingMixin, ListView):
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
         user = request.user
+        
+        # Default to computed start_index if not passed from HTMX
+        incoming_start_index = request.GET.get('start_index')
+        if incoming_start_index is not None:
+            start_index = int(incoming_start_index)
+        else:
+            # Only for first page or full render
+            start_index = 0           
         
         # # Fetch data for the home view (e.g., recommendations) and disable cache if randomization is required
         # session = request.session
@@ -211,6 +228,7 @@ class HomeView(DataFetchingMixin, ListView):
         context = {
             'quotes': results,  # Keep this as 'quotes' if your template expects it
             'count': count,
+            'start_index': start_index,
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
