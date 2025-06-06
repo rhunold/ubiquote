@@ -33,6 +33,8 @@ from texts.quotes.utils import create_quote_raw_from_row
 from django.utils.timezone import make_aware
 from django.forms.models import BaseInlineFormSet
 
+from django.contrib import messages
+
 start_date = make_aware(datetime(2020, 1, 1))
 end_date = make_aware(datetime(2025, 1, 1))
 
@@ -66,10 +68,10 @@ class QuoteAdmin(admin.ModelAdmin):
     # )
  
     
-    list_display = ('text', 'author', )  # 'contributor', 'get_categories', 'slug'
+    list_display = ('text', 'author', 'status' )  # 'contributor', 'get_categories', 'slug'
     ordering = ('-date_updated',)
     inlines = [QuotesCategoriesInline]      
-    list_filter = ('categories', )
+    list_filter = ('categories', 'status' )
     search_fields = ['text', 'author__fullname__icontains',]
     
     # def has_add_permission(self, request):
@@ -85,7 +87,7 @@ class QuoteAdmin(admin.ModelAdmin):
         try:
             obj.save()
         except QuoteDuplicateException as e:
-            from django.contrib import messages
+            
             self.message_user(request, f"Duplicate Quote: {str(e)}", level=messages.ERROR)    
     
     
