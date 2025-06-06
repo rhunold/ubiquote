@@ -9,9 +9,9 @@
 {% block content %}
     <h1>Categories</h1>
     <p>{{ count }} categories available in the database</p>
-    <ul>
+    <ul class="list-group col-md">
     {% for category in categories %}
-    <li>
+    <li class="list-group-item">
       <a href="{% url 'texts:get-category' category.title|slugify  %}" class="link-offset-2 link-underline link-underline-opacity-10">
         {{ category|get_translated_title|slice:":200"|safe }} - ({{ category.quotes_count|default:"0" }} quotes)</a>
 

@@ -12,35 +12,27 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content shadow">
       <div class="modal-header">
-        <h5 class="modal-title">Log in to QuotesApp</h5>
+        <h5 class="modal-title">Login</h5>
         <button type="button" class="btn-close" onclick="document.getElementById('modal-container').innerHTML = ''"></button>
       </div>
       <div class="modal-body">
 
         <!-- Social Login -->
-        <div class="mb-3">
+        <!-- <div class="mb-3">
           <button class="btn btn-outline-secondary w-100 mb-2 d-flex align-items-center justify-content-center">
             <img src="{% static 'icons/google.svg' %}" class="me-2" style="height: 18px;"> Continue with Google
           </button>
           <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center">
             <img src="{% static 'icons/apple.svg' %}" class="me-2" style="height: 18px;"> Continue with Apple
           </button>
-        </div>
+        </div> -->
 
-        <div class="text-center mb-3">
+        <!-- <div class="text-center mb-3">
           <span class="text-muted">or log in with email</span>
-        </div>
+        </div> -->
 
         <!-- Classical Login -->
-
-        {% comment %}
-        <form method="post" action="{% url 'users:login' %}"
-        hx-post="{% url 'users:login'?next=next %}"
-        hx-swap="none"
-        hx-trigger="submit"
-        hx-target="body"
-        hx-on="htmx:afterOnLoad: window.location.href = event.detail.xhr.response.redirect_url">
-        {% endcomment %}        
+     
 
         <form method="post" id="login" action="{% url 'users:login' %}?next={{ request.get_full_path}}">
 
@@ -59,6 +51,11 @@
 
           <button type="submit" class="btn btn-primary w-100">Log in</button>
         </form>
+
+        <!-- Divider -->
+        <div class="text-center my-4">
+            <span class="text-muted">or <a href="{% url 'users:register' %}" class="btn-link">register</a></span>
+        </div>        
 
       </div>
     </div>
