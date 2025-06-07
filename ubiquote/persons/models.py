@@ -2,6 +2,8 @@ from django.db import models
 
 # from django.core.exceptions import ValidationError
 # import os
+from django.core.exceptions import ValidationError
+from datetime import datetime
 
 
 
@@ -68,30 +70,82 @@ class Person(models.Model):
     biography = models.TextField(_('biography'), max_length=500, blank=True)    
 
     twitter_url = models.URLField(max_length=200, null=True, blank=True, default='http://www.twitter.com/')
+        
+        
+            
+    def clean(self):
+            # Validate and set birth date
+            if self.date_birth:
+                if self.date_birth.startswith('-'):
+                    self.date_birth_datefield = None
+                else:
+                    try:
+                        self.date_birth_datefield = datetime.strptime(self.date_birth, '%Y-%m-%d').date()
+                    except ValueError:
+                        self.date_birth_datefield = None
+            else:
+                self.date_birth_datefield = None
+
+            # Validate and set death date
+            if self.date_death:
+                if self.date_death.startswith('-'):
+                    self.date_death_datefield = None
+                else:
+                    try:
+                        self.date_death_datefield = datetime.strptime(self.date_death, '%Y-%m-%d').date()
+                    except ValueError:
+                        self.date_death_datefield = None
+            else:
+                self.date_death_datefield = None
     
-    def update_date_field(self, field_value, datefield):
-        if field_value:
-            try:
-                parsed_date = parse(field_value)
-                date_as_datetime = parsed_date.as_datetime()
-                setattr(self, datefield, date_as_datetime)
-            except Exception as e:
-                print(f"Error parsing date: {e}")
-                setattr(self, datefield, None)
-        else:
-            setattr(self, datefield, None)
+    # def save(self, *args, **kwargs):
+    #     self.date_birth_datefield, self.date_birth = self._normalize_dates(self.date_birth)
+    #     self.date_death_datefield, self.date_death = self._normalize_dates(self.date_death)    
+    #     super().save(*args, **kwargs)
 
-    def update_date_birth_datefield(self):
-        self.update_date_field(self.date_birth, 'date_birth_datefield')
+    # def _normalize_dates(self, raw_date):
+    #     """
+    #     Returns a tuple: (datefield_value, charfield_value)
+    #     Only one will be non-None:
+    #       - AD valid → (datetime.date, None)
+    #       - BCE or invalid → (None, original string)
+    #     """
+    #     if raw_date:
+    #         try:
+    #             sign = -1 if raw_date.startswith('-') else 1
+    #             parts = raw_date.lstrip('-').split('-')
+    #             year, month, day = map(int, parts)
+    #             if sign == 1 and year >= 1:
+    #                 return datetime.date(year, month, day), None
+    #         except Exception:
+    #             pass
+    #         return None, raw_date
+    #     return None, None    
+    
+    # def update_date_field(self, field_value, datefield):
+    #     if field_value:
+    #         try:
+    #             parsed_date = parse(field_value)
+    #             date_as_datetime = parsed_date.as_datetime()
+    #             setattr(self, datefield, date_as_datetime)
+    #         except Exception as e:
+    #             print(f"Error parsing date: {e}")
+    #             setattr(self, datefield, None)
+    #     else:
+    #         setattr(self, datefield, None)
 
-    def update_date_death_datefield(self):
-        self.update_date_field(self.date_death, 'date_death_datefield')
+    # def update_date_birth_datefield(self):
+    #     self.update_date_field(self.date_birth, 'date_birth_datefield')
+
+    # def update_date_death_datefield(self):
+    #     self.update_date_field(self.date_death, 'date_death_datefield')
 
 
-    def save(self, *args, **kwargs):
-        self.update_date_birth_datefield()
-        self.update_date_death_datefield()
-        super().save(*args, **kwargs)    
+    # def save(self, *args, **kwargs):
+    #     print(f"save from Text {type(self.date_birth_datefield)}")
+    #     self.update_date_birth_datefield()
+    #     self.update_date_death_datefield()
+    #     super().save(*args, **kwargs)    
 
     class Meta:
         abstract = True
