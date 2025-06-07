@@ -1,0 +1,1 @@
+DATE_FORMAT = 'd F Y'  # e.g., 6 juin 2025

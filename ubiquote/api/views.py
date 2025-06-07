@@ -39,6 +39,33 @@ import base64, os, time, threading
 from uuid import uuid4
 from django.conf import settings
 
+# from django.http import JsonResponse
+# from rest_framework_simplejwt.views import TokenRefreshView
+
+# class RefreshTokenView(TokenRefreshView):
+#     """
+#     A view to refresh access tokens using the refresh token stored in session.
+#     """
+#     def post(self, request, *args, **kwargs):
+#         refresh = request.session.get('refresh_token')
+#         if not refresh:
+#             return JsonResponse({'detail': 'No refresh token found in session'}, status=401)
+
+#         request.data._mutable = True  # Only needed for QueryDict
+#         request.data['refresh'] = refresh
+#         request.data._mutable = False
+
+#         response = super().post(request, *args, **kwargs)
+
+#         # Optional: update session tokens here
+#         if response.status_code == 200:
+#             data = response.data
+#             request.session['access_token'] = data.get('access')
+#             if 'refresh' in data:
+#                 request.session['refresh_token'] = data.get('refresh')
+
+#         return response
+
 # import . from serializers
 
 class CustomPagination(PageNumberPagination):
@@ -70,7 +97,7 @@ class QuotesAPIView(generics.ListAPIView):
     
     
     def get_queryset(self):
-        queryset = QuoteModel.Quote.objects.all()
+        queryset = QuoteModel.Quote.published.all()
         
         # Get the search query from the request
         search_query = self.request.query_params.get('q', None)
@@ -108,7 +135,12 @@ class AuthorAPIView(generics.RetrieveAPIView):
     queryset = AuthorModel.Author.objects.all()
     serializer_class = AuthorSerializer
     lookup_field = "slug"    
-    permission_classes = [AllowAny]        
+    permission_classes = [AllowAny]  
+    
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context["request"] = self.request  # 👈 essentiel pour que le serializer connaisse la langue
+    #     return context          
 
 
 class AuthorsAPIView(generics.ListAPIView):
@@ -222,7 +254,7 @@ class UserQuotesContributorAPIView(generics.ListAPIView):
             raise serializers.ValidationError({"detail": "User slug is required."})
 
         # Return the filtered queryset based on the user's slug
-        return QuoteModel.Quote.objects.filter(contributor__slug=user_slug)
+        return QuoteModel.Quote.published.filter(contributor__slug=user_slug)
     
     
 
@@ -344,7 +376,7 @@ class UserQuotesLikesAPIView(generics.ListAPIView):
 
 class QuoteAPIView(generics.RetrieveAPIView):
     # queryset = QuoteModel.Quote.objects.all()
-    queryset = QuoteModel.Quote.objects.all()
+    queryset = QuoteModel.Quote.published.all()
     serializer_class = QuoteSerializer
     lookup_field = "id"    
     permission_classes = [AllowAny]     
@@ -441,7 +473,7 @@ class CategoryQuotesAPIView(generics.ListAPIView):
         # Get all the quote IDs that belong to this category
         category_quotes = QuoteModel.QuotesCategories.objects.filter(category=category).values_list('quote', flat=True)
         
-        queryset = QuoteModel.Quote.objects.filter(id__in=category_quotes)
+        queryset = QuoteModel.Quote.published.filter(id__in=category_quotes)
         
         # print(type(queryset))
 
@@ -486,11 +518,11 @@ class HomeQuotesAPIView(generics.ListAPIView):
 
             # Get all the quote IDs recommanded to the user except if not like any quote yet
             if not QuoteModel.UserQuoteRecommendation.objects.filter(user=user).exists():
-                recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+                recommended_quotes = QuoteModel.Quote.published.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
             else:
                 recommanded_quotes_ids = QuoteModel.UserQuoteRecommendation.objects.filter(user=user).values_list('quote', flat=True)
                 liked_quotes = QuoteModel.QuotesLikes.objects.filter(user=user).values_list('quote__id', flat=True)                
-                recommended_quotes = QuoteModel.Quote.objects.filter(id__in=recommanded_quotes_ids).exclude(id__in=liked_quotes)
+                recommended_quotes = QuoteModel.Quote.published.filter(id__in=recommanded_quotes_ids).exclude(id__in=liked_quotes)
                 
                         
                 # Shuffle the queryset for each session
@@ -503,12 +535,12 @@ class HomeQuotesAPIView(generics.ListAPIView):
 
                 # Get the shuffled quote IDs from session and maintain order
                 shuffled_ids = self.request.session[session_key]
-                recommended_quotes = QuoteModel.Quote.objects.filter(id__in=shuffled_ids).order_by(Case(*[When(id=id, then=pos) for pos, id in enumerate(shuffled_ids)]))                
+                recommended_quotes = QuoteModel.Quote.published.filter(id__in=shuffled_ids).order_by(Case(*[When(id=id, then=pos) for pos, id in enumerate(shuffled_ids)]))                
                             
 
         else:
         # Handle anonymous user case by showing popular quotes
-            recommended_quotes = QuoteModel.Quote.objects.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
+            recommended_quotes = QuoteModel.Quote.published.annotate(num_likes=Count('quoteslikes')).order_by('-num_likes')[:100]
 
         return recommended_quotes
     

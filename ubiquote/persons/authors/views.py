@@ -24,7 +24,7 @@ from texts.quotes.models import Quote, QuotesLikes
 from texts.quotes.forms import QuoteForm
 # from texts.quotes.views import LanguageFilterMixin
 
-from api.mixins import DataFetchingMixin, TokenRefreshMixin # DatasFetchingMixin
+from api.mixins import QuotesFetchingMixin, TokenRefreshMixin #AuthorQuoteMixin  
 
 # from texts.quotes.views import get_user_quotes_likes
 
@@ -44,11 +44,14 @@ from django.template.loader import render_to_string
 from django.contrib import messages
 import logging
 
+from django.utils import translation
+
 logger = logging.getLogger(__name__)
 
-class GetAuthorsView(DataFetchingMixin, ListView):
+
+class GetAuthorsView(QuotesFetchingMixin, ListView):
     template_name = 'get_authors.html'
-    api_url = settings.API_URL
+    # api_url = settings.API_URL
     
 
     def get(self, request, *args, **kwargs):
@@ -101,9 +104,11 @@ class GetAuthorsView(DataFetchingMixin, ListView):
 
 
 
-class GetAuthorView(DataFetchingMixin, ListView):
+class GetAuthorView(QuotesFetchingMixin, ListView):
     template_name = 'get_author.html'
-    api_url = settings.API_URL
+    # api_url = settings.ROOT_URL
+    
+    print(translation.get_language() )
     
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
@@ -125,10 +130,14 @@ class GetAuthorView(DataFetchingMixin, ListView):
         try:
             # First try to get author data
             author_data = self.get_api_data(page_number=0, endpoint=f'author/{author_slug}/')
+            # print(author_data.keys())
             
             if not author_data or isinstance(author_data, dict) and 'detail' in author_data:
                 messages.error(request, "Author not found.")
                 return redirect('authors:get-authors')
+            
+            
+
 
             # Only fetch quotes if we have valid author data
             quotes_data = self.get_api_data(page_number, endpoint=f'author/quotes/{author_slug}/')
@@ -164,8 +173,50 @@ class GetAuthorView(DataFetchingMixin, ListView):
             messages.error(request, "An error occurred while fetching author data.")
             return redirect('authors:get-authors')
 
+# class GetAuthorView(AuthorQuoteMixin, ListView):
+#     template_name = 'quotes/author_quotes.html'
 
-        
+#     def get(self, request, *args, **kwargs):
+#         page_number = request.GET.get('page', 1)
+#         author_slug = self.kwargs.get('slug')
+#         search_query = request.GET.get('q', '')
+#         incoming_start_index = request.GET.get('start_index')
+
+#         start_index = int(incoming_start_index) if incoming_start_index else 0
+
+#         if not author_slug:
+#             messages.error(request, "Author not found.")
+#             return redirect('authors:get-authors')
+
+#         try:
+#             author_data = self.fetch_author_data(author_slug)
+#             if not author_data:
+#                 messages.error(request, "Author not found.")
+#                 return redirect('authors:get-authors')
+
+#             quotes_data = self.fetch_author_quotes(author_slug, page_number)
+#             quotes = quotes_data.get('results', [])
+#             count = quotes_data.get('count', 0)
+
+#             next_page_url, previous_page_url = self.build_pagination_urls(request, quotes_data, author_slug)
+
+#             context = {
+#                 'author': author_data,
+#                 'quotes': quotes,
+#                 'count': count,
+#                 'start_index': start_index,
+#                 'page_number': page_number,
+#                 'next_page_url': next_page_url,
+#                 'previous_page_url': previous_page_url,
+#                 'search_query': search_query,
+#             }
+
+#             return self.render_htmx_or_full_quotes(request, context)
+
+#         except Exception as e:
+#             logger.error(f"Error fetching author data: {str(e)}")
+#             messages.error(request, "An error occurred while fetching author data.")
+#             return redirect('authors:get-authors')
   
  
 class AddAuthorView(CreateView):

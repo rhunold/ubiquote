@@ -51,6 +51,7 @@ class AuthorAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         news_urls = [path('upload-authors-csv/', self.upload_authors_csv)]
         return  news_urls + urls
+        
     
     def upload_authors_csv(self, request):
             

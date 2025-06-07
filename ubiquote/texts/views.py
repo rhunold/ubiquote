@@ -18,7 +18,7 @@ from .models import Category
 from texts.quotes.models import Quote, QuotesLikes, UserQuoteRecommendation
 
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
-from api.mixins import DataFetchingMixin, TokenRefreshMixin 
+from api.mixins import QuotesFetchingMixin, TokenRefreshMixin 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -36,11 +36,11 @@ from django.db.models import F
 # from texts.quotes.services import RecommendationService
 
 
-class GetCategoriesView(ListView):
+class GetCategoriesView(QuotesFetchingMixin, ListView):
     template_name = 'get_categories.html'
     context_object_name = 'categories'  
     paginate_by = settings.DEFAULT_PAGINATION 
-    api_url = 'http://127.0.0.1:8000/api/categories/'
+    # api_url = 'http://127.0.0.1:8000/api/'
     
 
     # def get_context_data(self, **kwargs):
@@ -51,9 +51,11 @@ class GetCategoriesView(ListView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         search_query = request.GET.get('q', '')
+        
+        
         lang = get_language()
         
-        api_url = f'{self.api_url}?page={page_number}&q={search_query}&lang={lang}'
+        api_url = f'{self.api_url}categories/?page={page_number}&q={search_query}&lang={lang}'
         response = requests.get(api_url)
 
         if response.status_code == 200:
@@ -80,9 +82,9 @@ class GetCategoriesView(ListView):
 
 
 
-class GetCategoryView(DataFetchingMixin, ListView):
+class GetCategoryView(QuotesFetchingMixin, ListView):
     template_name = 'get_category.html'
-    api_url = settings.API_URL
+    # api_url = settings.API_URL
 
 
     def get(self, request, *args, **kwargs):
@@ -132,9 +134,9 @@ class GetCategoryView(DataFetchingMixin, ListView):
 
 
 
-class HomeView(DataFetchingMixin, ListView):
+class HomeView(QuotesFetchingMixin, ListView):
     template_name = 'home.html'
-    api_url = settings.API_URL
+    # api_url = settings.API_URL
     
 
     def get(self, request, *args, **kwargs):

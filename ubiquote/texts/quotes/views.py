@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from api.mixins import DataFetchingMixin, TokenRefreshMixin
+from api.mixins import QuotesFetchingMixin, TokenRefreshMixin #, ApiServiceMixin, PaginatedApiMixin, HtmxRenderMixin
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -103,9 +103,9 @@ def like_quote(request, id):
 
 
 
-class GetQuotesView(DataFetchingMixin, ListView):
+class GetQuotesView(QuotesFetchingMixin, ListView):
     template_name = 'get_quotes.html'
-    api_url = settings.API_URL
+    # api_url = 'http://127.0.0.1:8000/api/'
     
 
     def get(self, request, *args, **kwargs):
@@ -150,13 +150,46 @@ class GetQuotesView(DataFetchingMixin, ListView):
         }
         return self.render_htmx_or_full_quotes(request, context)
 
+
+# class GetQuotesView(ApiServiceMixin, PaginatedApiMixin, HtmxRenderMixin, ListView):
+#     template_name = 'quotes/get_quotes.html'
+
+#     def get(self, request, *args, **kwargs):
+#         page_number = request.GET.get('page', 1)
+#         search_query = request.GET.get('q', '')
+#         incoming_start_index = request.GET.get('start_index')
+#         start_index = int(incoming_start_index) if incoming_start_index else 0
+
+#         try:
+#             params = {'page': page_number, 'q': search_query} if search_query else {'page': page_number}
+#             quotes_data = self.get_api_data('quotes/', request, params=params)
+#             quotes = quotes_data.get('results', [])
+#             count = quotes_data.get('count', 0)
+
+#             next_page_url, previous_page_url = self.process_pagination_urls(quotes_data, request)
+
+#             context = {
+#                 'quotes': quotes,
+#                 'count': count,
+#                 'start_index': start_index,
+#                 'page_number': page_number,
+#                 'next_page_url': next_page_url,
+#                 'previous_page_url': previous_page_url,
+#                 'search_query': search_query,
+#             }
+#             return self.render_htmx_or_full_quotes(request, context)
+
+#         except Exception as e:
+#             logger.error(f"Error fetching quotes: {str(e)}")
+#             messages.error(request, "An error occurred while fetching quotes.")
+#             return redirect('quotes:get-quotes')
         
 
 class GetQuoteView(DetailView):
     model = Quote
     template_name = 'get_quote.html'
     context_object_name = 'quote'
-    api_url = settings.API_URL
+    api_url = 'http://127.0.0.1:8000/api/'
     
     def get_object(self, queryset=None):
         slug = self.kwargs.get('slug')
@@ -219,11 +252,11 @@ class GetQuoteView(DetailView):
   
   
 
-class AddQuoteView(LoginRequiredMixin, DataFetchingMixin, CreateView):
+class AddQuoteView(LoginRequiredMixin, QuotesFetchingMixin, CreateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'add_quote.html'
-    api_url = settings.API_URL
+    api_url = 'http://127.0.0.1:8000/api/'
   
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -307,11 +340,11 @@ class AddQuoteView(LoginRequiredMixin, DataFetchingMixin, CreateView):
     #     return self.form_invalid(form)
  
 # @login_required   
-class UpdateQuoteView(LoginRequiredMixin, DataFetchingMixin, UpdateView):
+class UpdateQuoteView(LoginRequiredMixin, QuotesFetchingMixin, UpdateView):
     model = Quote
     form_class = QuoteForm
     template_name = 'update_quote.html'
-    api_url = settings.API_URL
+    api_url = 'http://127.0.0.1:8000/api/'
     
     def get_success_url(self):
         return reverse_lazy('quotes:get-quote', kwargs={'slug': self.object.slug})
@@ -341,11 +374,11 @@ class UpdateQuoteView(LoginRequiredMixin, DataFetchingMixin, UpdateView):
         messages.error(self.request, "Failed to update quote. Please try again.")
         return self.form_invalid(form)
 
-class DeleteQuoteView(LoginRequiredMixin, DataFetchingMixin, DeleteView):
+class DeleteQuoteView(LoginRequiredMixin, QuotesFetchingMixin, DeleteView):
     model = Quote
     template_name = 'delete_quote.html'
     success_url = reverse_lazy('quotes:get-quotes')
-    api_url = settings.API_URL
+    api_url = 'http://127.0.0.1:8000/api/'
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
