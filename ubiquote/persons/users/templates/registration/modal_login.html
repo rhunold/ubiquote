@@ -1,0 +1,24 @@
+
+
+
+<div class="modal fade show d-block" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header">
+        <h5 class="modal-title">Login</h5>
+        <button type="button" class="btn-close" onclick="document.getElementById('modal-container').innerHTML = ''"></button>
+      </div>
+      <div class="modal-body">
+      
+        {% include "registration/form_login.html" %}    
+
+        <!-- Divider -->
+        <div class="text-center my-4">
+            <span class="text-muted">or <a href="{% url 'users:register' %}" class="btn-link">register</a></span>
+        </div>                
+
+      </div>
+    </div>
+  </div>
+</div>
+

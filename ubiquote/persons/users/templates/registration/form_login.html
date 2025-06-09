@@ -1,0 +1,39 @@
+{% load static %}
+
+        <!-- Social Login -->
+        <!-- <div class="mb-3">
+          <button class="btn btn-outline-secondary w-100 mb-2 d-flex align-items-center justify-content-center">
+            <img src="{% static 'icons/google.svg' %}" class="me-2" style="height: 18px;"> Continue with Google
+          </button>
+          <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center">
+            <img src="{% static 'icons/apple.svg' %}" class="me-2" style="height: 18px;"> Continue with Apple
+          </button>
+        </div> -->
+
+        <!-- <div class="text-center mb-3">
+          <span class="text-muted">or log in with email</span>
+        </div> -->
+
+        <!-- Classical Login -->
+     
+
+        <form method="post" id="login" action="{% url 'users:login' %}?next={{ request.get_full_path}}">
+
+
+
+          {% csrf_token %}
+          <div class="mb-3">
+            <input type="username" name="username" class="form-control" placeholder="Email" required>
+          </div>
+          <div class="mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" required>
+          </div>
+        
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+
+          <button type="submit" class="btn btn-primary w-100">Log in</button>
+        </form>
+
+
+
