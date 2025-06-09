@@ -27,8 +27,20 @@ from persons.authors.models import Author
 from texts.models import Category
 from django.utils.text import slugify
 from django.db import connection
+from django.test import override_settings
 
 User = get_user_model()
+
+
+
+
+@override_settings(
+    REST_FRAMEWORK={
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
+        ],
+    }
+)
 
 class QuoteAPITestCase(TransactionTestCase):
     """Use TransactionTestCase instead of TestCase to ensure proper database handling"""
@@ -89,13 +101,21 @@ class QuoteAPITestCase(TransactionTestCase):
 
     def test_create_quote_unauthenticated(self):
         """Test creating quote without authentication."""
+        client = APIClient()
+        client.credentials()  # Clear any existing credentials
+        
         url = reverse('api:quote-create')
         data = {
             'text': 'New test quote',
             'author_id': self.author.id,
             'lang': 'en'
         }
-        response = self.client.post(url, data, format='json')
+        response = client.post(url, data, format='json')
+
+        # Debug print if needed
+        print("Response status code:", response.status_code)
+        print("Response data:", response.data)
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_quote_authenticated(self):
