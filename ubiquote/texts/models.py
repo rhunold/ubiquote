@@ -57,51 +57,24 @@ class Text(models.Model):
             return super().get_queryset() .filter(status='published')
         
     status_options = (
-        ('draft', _('draft')),
+        ('unpublished', _('unpublished')),
         ('published', _('published'))
     )
     
     # Define the default manager
-    objects = models.Manager()    
+    objects = models.Manager()   
     
     
-    # text_input = models.TextField(_('Text'), max_length=1000)
-    # text_cleaned = models.TextField(_('Text cleaned'), max_length=1000)    # vide au debut=> ajouter methode pour le generer (detetection de lang puis formatage...)
-    
+    status = models.CharField(_('status'),max_length=20, choices=status_options, default='published')
+    # objects = models.Manager() # Defaut Manager
+    published = PublishedManager() # to make query preformated : Post.published.all() vs Post.objects.all()     
+
     text = models.TextField(_('Text'), max_length=1000) # max_length=500, default="Default value",  verbose_name="Text Content :"
     lang = models.CharField(_('Langs'), max_length=2, choices=settings.LANGUAGES, default="en")
-    
     
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
         
-        
-    # snippet = models.CharField(max_length=100, editable=False)
-    
-    # slug = models.SlugField(unique=True, blank=True, null=True, default=None)
-
-    # def generate_unique_slug(self):
-    #     # Use text content to create base slug
-    #     base_slug = slugify(self.text[:100]) or "quote"
-    #     slug = f"{base_slug}-{self.id}" if self.id else base_slug
-
-    #     # Ensure uniqueness
-    #     counter = 1
-    #     while Text.objects.filter(slug=slug).exclude(id=self.id).exists():
-    #         slug = f"{base_slug}-{self.id}-{counter}"
-    #         counter += 1
-    #     return slug
-
-    # def save(self, *args, **kwargs):
-    #     is_new = self.pk is None
-    #     super().save(*args, **kwargs)  # Save once to get the ID
-
-    #     if not self.slug or self.slug in ("", "none", "None", "None-None", f"{self.id}"):
-    #         self.slug = self.generate_unique_slug()
-    #         # Avoid infinite recursion: only save again if needed
-    #         super().save(update_fields=["slug"])    
-    
-    
     slug = models.SlugField(unique=True, blank=True, null=True, max_length=200)  # Remove AutoSlugField
 
     def generate_slug(self):
@@ -117,66 +90,8 @@ class Text(models.Model):
         if not self.slug or self.slug.endswith('-none'):
             self.slug = self.generate_slug()
             super().save(update_fields=["slug"])   
-             
-                        
-    
-    
-    # slug = AutoSlugField(populate_from='generate_slug', unique=True, null=True, default=None)
-    
-    
 
-    # # @property
-    # # def slug_with_id(self):
-    # #     return f"{self.slug}-{self.id}"
     
-
-    # def save(self, *args, **kwargs):
-    #     is_new = self.pk is None
-    #     super().save(*args, **kwargs)  # Save once to get the ID    
-        
-    #     if not self.slug or self.slug in ("", "none", "None", "None-None", f"{self.id}"):
-    #         self.slug = self.generate_slug()
-    #         print(self.slug)
-    #         # Avoid infinite recursion: only save again if needed
-    #         super().save(update_fields=["slug"])                
-
-
-    # def generate_slug(self):
-    #     base_slug = slugify(self.text[:100])  # Normalisation de base
-    #     slug = f"{base_slug}-{self.id}" 
-    #     print(slug)
-    #     # i = 1
-    #     # while self.__class__.objects.filter(slug=slug).exists():
-    #     #     slug = f"{base_slug}-{i}"
-    #     #     i += 1
-    #     # return slug
-    #     return slug
-    
-
-
-
-
-    # def get_absolute_url(self):
-    #     return f"/quote/{self.author.slug}/{self.slug}/"    
-    
-    # def generate_slug(self):
-    #     # For quotes, include author name and ID for uniqueness
-    #     if hasattr(self, 'author') and self.author:
-    #         # Get the first 100 chars of the text, remove common words, and make it URL-friendly
-    #         text_slug = self.text[:100].lower()
-    #         # Remove common words and special characters
-    #         text_slug = ' '.join(word for word in text_slug.split() if len(word) > 3)
-    #         text_slug = ''.join(c for c in text_slug if c.isalnum() or c.isspace())
-    #         text_slug = '-'.join(text_slug.split())
-            
-    #         # Combine with author name and ID
-    #         author_slug = self.author.slug if hasattr(self.author, 'slug') else self.author.nickname.lower()
-    #         return f"{author_slug}/{text_slug}-{self.id}"
-    #     return self.text[:100]
-    
-    status = models.CharField(_('status'),max_length=10, choices=status_options, default='published')
-    # objects = models.Manager() # Defaut Manager
-    published = PublishedManager() # to make query preformated : Post.published.all() vs Post.objects.all()
 
     contributor = models.ForeignKey(
         User,
@@ -193,22 +108,6 @@ class Text(models.Model):
 
     
     
-
-    # def save(self, *args, **kwargs):
-    #     super().save(*args, **kwargs)  # First save to get `id`
-    #     if not self.slug or not self.slug.endswith(str(self.id)):
-    #         base_slug = slugify(self.text[:100])
-    #         self.slug = f"{base_slug}-{self.id}"
-    #         super().save(update_fields=['slug'])    
-    
-    # def get_absolute_url(self):
-    #     return reverse('%(app_label)s:get-%(class)s', args=[self.slug])
-    
-    
-    # def save(self, *args, **kwargs):
-    #     # Calculate the value for the 'snippet' field by taking a slice of 'original_field'
-    #     self.snippet = Substr(self.text, 1, 100)
-    #     super().save(*args, **kwargs)
 
     class Meta:
         abstract = True
@@ -234,10 +133,7 @@ class Category(models.Model):
     # def get_translated_title(self, lang_code):
     #     translation = self.translations.filter(lang=lang_code).first()
     #     return translation.title if translation else self.title
-
-    # def get_translated_text(self, lang_code):
-    #     translation = self.translations.filter(lang=lang_code).first()
-    #     return translation.text if translation else self.text         
+     
     
 
     def save(self, *args, **kwargs):
@@ -256,14 +152,3 @@ class Category(models.Model):
 #     obj.save()
 
 
-# class CategoryTranslation(models.Model):
-#     category = models.ForeignKey(Category, related_name="translations", on_delete=models.CASCADE)
-#     lang = models.CharField(max_length=10, choices=settings.LANGUAGES, default="en")
-#     title = models.CharField(max_length=100)
-#     text = models.TextField(verbose_name=" Text :")
-
-#     class Meta:
-#         unique_together = ("category", "lang")
-
-#     def __str__(self):
-#         return f"{self.lang.upper()} – {self.title}"

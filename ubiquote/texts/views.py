@@ -1,5 +1,6 @@
 import random
 from django.shortcuts import render
+from django.contrib.auth import logout
 
 from django.utils.translation import gettext as _
 from django.utils.translation import get_language, activate
@@ -18,7 +19,7 @@ from .models import Category
 from texts.quotes.models import Quote, QuotesLikes, UserQuoteRecommendation
 
 from django.views.generic import ListView, DetailView  # CreateView, UpdateView, DeleteView
-from api.mixins import QuotesFetchingMixin, TokenRefreshMixin 
+from api.mixins import QuotesFetchingMixin #, TokenRefreshMixin 
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -40,7 +41,7 @@ class GetCategoriesView(QuotesFetchingMixin, ListView):
     template_name = 'get_categories.html'
     context_object_name = 'categories'  
     paginate_by = settings.DEFAULT_PAGINATION 
-    # api_url = 'http://127.0.0.1:8000/api/'
+    api_url = 'http://127.0.0.1:8000/api/'
     
 
     # def get_context_data(self, **kwargs):
@@ -140,103 +141,58 @@ class HomeView(QuotesFetchingMixin, ListView):
     
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return self.render_landing_page(request)        
         
-        page_number = request.GET.get('page', 1)
-        search_query = request.GET.get('q', '')
-        user = request.user
-        
-        # Default to computed start_index if not passed from HTMX
-        incoming_start_index = request.GET.get('start_index')
-        if incoming_start_index is not None:
-            start_index = int(incoming_start_index)
-        else:
-            # Only for first page or full render
-            start_index = 0           
-        
-        # # Fetch data for the home view (e.g., recommendations) and disable cache if randomization is required
-        # session = request.session
-        # disable_cache = False
+        if request.user.is_authenticated:
 
-        # if not session.get('randomized_homepage', False):
-        #     disable_cache = True        
-        
-        # disable_cache = not request.session.get('randomized_homepage', False)        
+            
+            page_number = request.GET.get('page', 1)
+            search_query = request.GET.get('q', '')
+            user = request.user
 
-        # Fetch data for the home view (e.g., recommendations)
-        data = self.get_api_data(page_number, endpoint='', disable_cache=True)  # Custom endpoint for HomeView
+            # request.session.flush()
+            
+            # Default to computed start_index if not passed from HTMX
+            incoming_start_index = request.GET.get('start_index')
+            if incoming_start_index is not None:
+                start_index = int(incoming_start_index)
+            else:
+                # Only for first page or full render
+                start_index = 0           
+            
+     
 
-        # Handle pagination and results
-        results = data.get('results', [])
-        next_page_url, previous_page_url = self.process_pagination(data, request)
-        count = data.get('count', 0)
-        
-        
-        # # Fetch recommendations for the user
-        # recommendations = UserQuoteRecommendation.objects.filter(user=user)
+            # Fetch data for the home view (e.g., recommendations)
+            data = self.get_api_data(page_number, endpoint='')  # Custom endpoint for HomeView
+            
+            # print(data)
+            
 
-        # # Update show_count for each recommendation
-        # recommendations.update(show_count=F('show_count') + 1)
+            # Handle pagination and results
+            results = data.get('results', [])
+            next_page_url, previous_page_url = self.process_pagination(data, request)
+            count = data.get('count', 0)
+            
+            
 
-        # # Remove any recommendations that have been shown more than 3 times
-        # UserQuoteRecommendation.objects.filter(user=user, show_count__gt=3).delete()
-
-        # # Get the remaining recommendations to display
-        # results = [rec.quote for rec in recommendations]   
-        
-        
-        # Randomize if new session
-        # if not request.session.get('randomized_homepage', False):
-        #     # results = list(results)
-        #     random.shuffle(results)
-        #     request.session['randomized_homepage'] = True
-        #     request.session.save()
-             
-        
-
-        # # Randomize the results for each new session
-        # session = request.session
-        # if not session.get('randomized_homepage', False):
-        #     random.shuffle(results)  # Randomize quotes
-        #     session['randomized_homepage'] = True  # Mark session as randomized
-        
-
-        
-        # # Randomize the results for each new session
-        # if disable_cache:
-        #     random.shuffle(results)
-        #     session['randomized_homepage'] = True  # Mark session as randomized
-        
-        
-        # print(results.first())     
-                 
-        
-        # # Randomize for new session
-        # if not request.session.get('randomized_homepage', False):
-        #     # Shuffle the results list
-        #     results = list(results) 
-        #     results = random.shuffle(results)
-        #     # print(type(results))
-        #     request.session['randomized_homepage'] = True  # Mark session as randomized
-        #     request.session.save()  # Ensure session is saved
-        #     print("randomized_homepage")
-        
-        # # print(results[:10])
-        
-        # print(type(results))
-        # # print(results[0])    
-
-        context = {
-            'quotes': results,  # Keep this as 'quotes' if your template expects it
-            'count': count,
-            'start_index': start_index,
-            'page_number': page_number,
-            'next_page_url': next_page_url,
-            'previous_page_url': previous_page_url,
-            'search_query' : search_query,
-        }
-        return self.render_htmx_or_full_quotes(request, context)
+            context = {
+                'quotes': results,  # Keep this as 'quotes' if your template expects it
+                'count': count,
+                'start_index': start_index,
+                'page_number': page_number,
+                'next_page_url': next_page_url,
+                'previous_page_url': previous_page_url,
+                'search_query' : search_query,
+            }
+            
+            # redirect to landing page if count ==0 (means the session is over)
+            if count==0:
+                logout(self.request)
+                return self.render_landing_page(request) 
+            
+            return self.render_htmx_or_full_quotes(request, context)
+        else:              
+            return self.render_landing_page(request) 
+  
     
     def render_landing_page(self, request):
         """Renders a public landing page for non-authenticated users."""

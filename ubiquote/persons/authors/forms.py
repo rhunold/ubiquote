@@ -24,8 +24,6 @@ class AuthorForm(forms.ModelForm):
         fields = '__all__'
         exclude = ('date_birth_datefield','date_death_datefield')        
         
-   
-     
         # date_birth = forms.DateInput(
         #      input_formats=['%Y-%m-%d'], attrs={'class': 'form-control'})     
         
@@ -53,6 +51,7 @@ class AuthorForm(forms.ModelForm):
                 label='Slug',
                 widget=forms.TextInput(attrs={'class': 'form-control'})
             )           
+                        
 
 
 class AuthorAutoCompleteForm(forms.ModelForm):

@@ -7,6 +7,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
+
     <title>{% block title %} Ubiquote{% endblock %}</title>
     <meta name="description" content="{% block meta_decription %}The best quote listing{% endblock %}">
 
@@ -45,6 +47,22 @@
 
     <script src="{% static 'base/base.js' %}"></script> 
 
+<!-- <script>
+  const token = localStorage.getItem('access');
+
+fetch("/fr/api/", {
+  headers: {
+    "Authorization": "Bearer " + token,
+    "Accept": "application/json"
+  }
+})
+  .then(res => res.json())
+  .then(data => {
+    console.log("Quotes:", data);
+    // Inject quotes into the page...
+  });
+  </script> -->
+
     {% block custom_static %}
 
     {% endblock %}
@@ -54,7 +72,6 @@
   </head>
   <body>
 
-    
 
     {% include "nav.html" %}
 
@@ -69,8 +86,45 @@
     <!-- HTMX will inject the modal here -->
     <div id="modal-container"></div>
 
+    <script src="{% static 'base/after_on_load.js' %}"></script>     
 
 
-    <script src="{% static 'base/after_on_load.js' %}"></script> 
+    {% comment %}    {% endcomment %}
+
+
+<!-- 
+    <script>
+      document.body.addEventListener('htmx:configRequest', (e) => {
+        e.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        })
+
+      function refreshToken() {
+          const refreshToken = localStorage.getItem('refresh_token');
+          
+          fetch('http://127.0.0.1:8000/api/token/refresh/', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refresh: refreshToken }),
+              
+          })
+
+          console.log("Fetched")
+          
+          .then(response => response.json())
+          .then(data => {
+              if (data.access) {
+                  // Store the new access token
+                  localStorage.setItem('access_token', data.access);
+                  console.error("New access token stored");
+              } else {
+                  console.error("Token refresh failed");
+              }
+          });
+      }
+    </script>     -->
+
+
   </body>
 </html>
