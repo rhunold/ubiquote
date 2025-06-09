@@ -1,6 +1,7 @@
 {% if user.is_authenticated %}
     <form id="quote-{{ quote.id }}">
         {{ quote.likes_count|default:""}}
+        {% csrf_token %}
         <button 
             hx-post="{% url 'quotes:like_quote' quote.id %}" 
             hx-swap="outerHTML" 
@@ -32,8 +33,10 @@
 
     <form method="post" id="quote-{{ quote.id }}">
         {{ quote.likes_count}}
+        {% csrf_token %}
         <button class="like-button bg-transparent border-0"
             hx-get="{% url 'users:login' %}?next={{ request.get_full_path}}"
+            
             hx-target="#modal-container"
             hx-swap="innerHTML"
         >
