@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+from django.http import HttpResponse, HttpResponseRedirect
 
 import requests
 import logging
@@ -139,156 +141,242 @@ logger = logging.getLogger(__name__)
 
 # --------------------------------------
 
-class RefreshTokenView(TokenRefreshView):
-    """
-    A view to refresh access tokens using the refresh token stored in session.
-    """
-    def post(self, request, *args, **kwargs):
-        refresh = request.session.get('refresh_token')
-        if not refresh:
-            return JsonResponse({'detail': 'No refresh token found in session'}, status=401)
-
-        request.data._mutable = True  # Only needed for QueryDict
-        request.data['refresh'] = refresh
-        request.data._mutable = False
-
-        response = super().post(request, *args, **kwargs)
-
-        # Optional: update session tokens here
-        if response.status_code == 200:
-            data = response.data
-            request.session['access_token'] = data.get('access')
-            if 'refresh' in data:
-                request.session['refresh_token'] = data.get('refresh')
-
-        return response
-
-class TokenRefreshMixin:
-    """Mixin to handle access token refresh and user logout on token expiry."""
-
-
-    def refresh_access_token(self):
-        refresh_token = self.request.session.get("refresh")
-        if not refresh_token:
-            self.logout_user()
-            current_url = self.request.get_full_path()
-            return redirect(f'/login/?next={current_url}')
-            # return None
-
-        data = {"refresh": refresh_token}
-
-        try:
-            response = requests.post(
-                f'{settings.API_URL}/token/refresh-session/',
-                data=data
-            )
-            if response.status_code == 200:
-                new_tokens = response.json()
-                self.request.session["access"] = new_tokens.get("access")
-                self.request.session["refresh"] = new_tokens.get("refresh")
-                return new_tokens.get("access")
-            else:
-                print("Token refresh failed:", response.json())
-                self.logout_user()  # Invalidate session
-                return None
-        except requests.RequestException as e:
-            print("Error refreshing token:", e)
-            self.logout_user()
-            return None
-
-    def logout_user(self):
-        self.request.session.flush()  # Clears all session data
-
-        refresh_token = self.request.session.get("refresh")
-        if not refresh_token:
-            return None  # Or handle the case where there's no token
-
-        data = {"refresh": refresh_token}
-
-        try:
-            response = requests.post(
-                f'{settings.API_URL}/token/refresh-session/',
-                data=data
-            )
-            if response.status_code == 200:
-                new_tokens = response.json()
-                # Update session with new tokens
-                self.request.session["access"] = new_tokens.get("access")
-                self.request.session["refresh"] = new_tokens.get("refresh")
-                return new_tokens.get("access")
-        except requests.RequestException as e:
-            print("Error refreshing token:", e)
-
-        return None
-
-    def handle_token_expiry(self):
-        """Handle token expiry by logging out the user and redirecting."""
-        # Clear the session tokens
-        self.request.session.pop('access_token', None)
-        self.request.session.pop('refresh_token', None)
-
-        # Log out the user and redirect to the login page
-        logout(self.request)
-
-        # Get the current page URL for redirection after login
-        current_url = self.request.build_absolute_uri()
-
-        # Redirect to the login page with 'next' parameter for redirection after login
-        return redirect(f'/login/?next={current_url}')
+# class RefreshTokenView(TokenRefreshView):
+#     """
+#     A view to refresh access tokens using the refresh token stored in session.
+#     """
     
+#     print("RefreshTokenView class")
     
-class QuotesFetchingMixin(TokenRefreshMixin):
-    # api_url = None  # Set in the child class
-    
+#     def post(self, request, *args, **kwargs):
+#         refresh = request.session.get('refresh_token')
+#         print(f"post refresh :{refresh}")
+#         if not refresh:
+#             return JsonResponse({'detail': 'No refresh token found in session'}, status=401)
+
+#         request.data._mutable = True  # Only needed for QueryDict
+#         request.data['refresh'] = refresh
+#         request.data._mutable = False
+
+#         response = super().post(request, *args, **kwargs)
+
+#         # Optional: update session tokens here
+#         if response.status_code == 200:
+#             data = response.data
+#             print(f"response.data : {response.data}")
+#             request.session['access_token'] = data.get('access')
+#             if 'refresh' in data:
+#                 request.session['refresh_token'] = data.get('refresh')
+
         
-    def get_api_data(self, page_number, endpoint='quotes/', search_query='', disable_cache=False): 
-        """Fetch quotes from the API with error handling and caching."""
-        # if not self.api_url:
-        #     logger.error("API URL not set in the view")
-        #     return {'results': [], 'count': 0, 'detail': 'Configuration error'}
-        lang = self.request.LANGUAGE_CODE 
+#         return response
+
+# class TokenRefreshMixin:
+#     """Mixin to handle access token refresh and user logout on token expiry."""
+
+#     print("TokenRefreshMixin class")
+
+    
+#     def refresh_access_token(self):    
+#         refresh_token = self.request.session.get("refresh")
+#         print(f"refresh_token : {refresh_token}")
+#         if not refresh_token:
+#             self.logout_user()
+#             current_url = self.request.get_full_path()
+#             return redirect(f'/login/?next={current_url}')
+#             # return None
+
+#         data = {"refresh": refresh_token}
+
+#         try:
+#             response = requests.post(
+#                 f'{settings.ROOT_URL}{lang}/api/token/refresh-session/',
+#                 data=data
+#             )
+#             print(f"try response {response}")
+
+#             if response.status_code == 200:
+#                 new_tokens = response.json()
+#                 self.request.session["access"] = new_tokens.get("access")
+#                 self.request.session["refresh"] = new_tokens.get("refresh")
+#                 return new_tokens.get("access")
+#             else:
+#                 print("Token refresh failed:", response.json())
+#                 self.logout_user()  # Invalidate session
+#                 return None
+#         except requests.RequestException as e:
+#             print("Error refreshing token:", e)
+#             self.logout_user()
+#             return None
+
+#     def logout_user(self):
+#         self.request.session.flush()  # Clears all session data
+
+#         refresh_token = self.request.session.get("refresh")
+#         if not refresh_token:
+#             return None  # Or handle the case where there's no token
+
+#         data = {"refresh": refresh_token}
+
+#         try:
+#             response = requests.post(
+#                 f'{settings.ROOT_URL}{lang}/api/token/refresh-session/',
+#                 data=data
+#             )
+#             if response.status_code == 200:
+#                 new_tokens = response.json()
+#                 # Update session with new tokens
+#                 self.request.session["access"] = new_tokens.get("access")
+#                 self.request.session["refresh"] = new_tokens.get("refresh")
+#                 return new_tokens.get("access")
+#         except requests.RequestException as e:
+#             print("Error refreshing token:", e)
+
+#         return None
+
+#     def handle_token_expiry(self):
+#         """Handle token expiry by logging out the user and redirecting."""
+#         # Clear the session tokens
+#         self.request.session.pop('access_token', None)
+#         self.request.session.pop('refresh_token', None)
+
+#         # Log out the user and redirect to the login page
+#         logout(self.request)
+
+#         # Get the current page URL for redirection after login
+#         current_url = self.request.build_absolute_uri()
+
+#         # Redirect to the login page with 'next' parameter for redirection after login
+#         return redirect(f'/login/?next={current_url}')
+
+
+class QuotesFetchingMixin:
+    def get_api_data(self, page_number, endpoint='quotes/', search_query=''):
+        lang = self.request.LANGUAGE_CODE
         root_api_url = f'{settings.ROOT_URL}{lang}/api/'
-
-
         api_url = f'{root_api_url}{endpoint}?page={page_number}&q={search_query}'
-        print(api_url)
-        headers = {}
 
-        # Add authorization header only if the user is authenticated (token exists)
+        headers = {}
         access_token = self.request.session.get("access_token")
         if access_token:
             headers['Authorization'] = f'Bearer {access_token}'
 
-        try:
-            response = requests.get(api_url, headers=headers, timeout=10)  # Add timeout
-            
-            # Handle token refresh if authenticated and the token is expired
-            if response.status_code == 401 and access_token:
-                new_access_token = self.refresh_access_token()
-                if new_access_token:
-                    headers['Authorization'] = f'Bearer {new_access_token}'
-                    response = requests.get(api_url, headers=headers, timeout=10)
+        response = self.refresh_token_if_needed(headers, api_url)
+        
 
-            # Log non-200 responses
-            if response.status_code != 200:
-                logger.error(f"API error: {response.status_code} - URL: {api_url}")
-                if response.content:
-                    logger.error(f"API response: {response.content.decode()}")
-                return {'results': [], 'count': 0, 'detail': f'API error: {response.status_code}'}
+        # if response.status_code == 403:     
+        #     return logout(self.request)   
+
+        if response.status_code != 200:
+            # 🔻 Refresh token failed — Force logout
             
-            try:
-                data = response.json()
-                return data
-            except ValueError as e:
-                logger.error(f"JSON decode error: {str(e)} - Content: {response.content.decode()}")
-                return {'results': [], 'count': 0, 'detail': 'Invalid JSON response'}
+            self.request.session.flush()     
+            response =  requests.get(api_url, timeout=10)  
+            return response.json()  
+        
+
+   
+
+        try:
+            return response.json()
+        except ValueError as e:
+            logger.error(f"JSON decode error: {str(e)} - Content: {response.content.decode()}")
+            return {'results': [], 'count': 0, 'detail': 'Invalid JSON response'}
+
+    def refresh_token_if_needed(self, headers, api_url):
+        response = requests.get(api_url, headers=headers, timeout=10)
+
+        if response.status_code == 401:
+            # Access token probably expired so refresh
+            new_access_token = self.refresh_access_token()
+            if new_access_token:
+                headers['Authorization'] = f'Bearer {new_access_token}'
+                # Try again
+                return requests.get(api_url, headers=headers, timeout=10)
             
-        except requests.exceptions.Timeout:
-            logger.error(f"API timeout: {api_url}")
-            return {'results': [], 'count': 0, 'detail': 'API request timed out'}
-        except requests.exceptions.RequestException as e:
-            logger.error(f"API request error: {str(e)} - URL: {api_url}")
-            return {'results': [], 'count': 0, 'detail': 'API request failed'}
+            # else:
+            #     # 🔻 Refresh token failed — Force logout
+            #     logout(self.request)
+            #     self.request.session.flush()                
+            #     return requests.get(api_url, timeout=10)                
+                
+            # return HttpResponseRedirect(reverse("texts:home"))
+            
+            # return render(self.request, 'landing_page.html', {})
+
+            
+            # logout(self.request)
+            
+            
+      
+
+            logger.warning("JWT refresh failed — clearing session tokens")
+            # Important: don't log out the Django session — let the view fallback gracefully
+
+        return response
+
+
+
+# class QuotesFetchingMixin(TokenRefreshMixin):
+#     # api_url = None  # Set in the child class
+    
+#     print("QuotesFetchingMixin")
+        
+#     def get_api_data(self, page_number, endpoint='quotes/', search_query='', disable_cache=False): 
+#         """Fetch quotes from the API with error handling and caching."""
+#         # if not self.api_url:
+#         #     logger.error("API URL not set in the view")
+#         #     return {'results': [], 'count': 0, 'detail': 'Configuration error'}
+#         lang = self.request.LANGUAGE_CODE 
+#         root_api_url = f'{settings.ROOT_URL}{lang}/api/'
+        
+#         print(f"request.user : {self.request.user}")
+
+
+#         api_url = f'{root_api_url}{endpoint}?page={page_number}&q={search_query}'
+#         print(api_url)
+#         headers = {}
+
+#         # Add authorization header only if the user is authenticated (token exists)
+#         access_token = self.request.session.get("access_token")
+#         print(f"Acces_token:{access_token}")
+#         if access_token:
+#             headers['Authorization'] = f'Bearer {access_token}'
+
+#         try:
+#             response = requests.get(api_url, headers=headers, timeout=10)  # Add timeout
+#             print(f"header : {headers}")
+            
+            
+#             # Handle token refresh if authenticated and the token is expired
+#             if response.status_code == 401 and access_token:
+#                 new_access_token = self.refresh_access_token()
+#                 print(f"new_access_token : {new_access_token}")
+#                 if new_access_token:
+#                     headers['Authorization'] = f'Bearer {new_access_token}'
+#                     response = requests.get(api_url, headers=headers, timeout=10)
+
+
+#             # Log non-200 responses
+#             if response.status_code != 200:
+#                 logger.error(f"API error: {response.status_code} - URL: {api_url}")
+#                 if response.content:
+#                     logger.error(f"API response: {response.content.decode()}")
+#                 return {'results': [], 'count': 0, 'detail': f'API error: {response.status_code}'}
+            
+#             try:
+#                 data = response.json()
+#                 return data
+#             except ValueError as e:
+#                 logger.error(f"JSON decode error: {str(e)} - Content: {response.content.decode()}")
+#                 return {'results': [], 'count': 0, 'detail': 'Invalid JSON response'}
+            
+#         except requests.exceptions.Timeout:
+#             logger.error(f"API timeout: {api_url}")
+#             return {'results': [], 'count': 0, 'detail': 'API request timed out'}
+#         except requests.exceptions.RequestException as e:
+#             logger.error(f"API request error: {str(e)} - URL: {api_url}")
+#             return {'results': [], 'count': 0, 'detail': 'API request failed'}
 
 
     # def create_api_data(self, endpoint, data):
