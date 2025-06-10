@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth import login
@@ -21,7 +22,7 @@ from .forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from texts.quotes.models import Quote, QuotesLikes
-from api.mixins import QuotesFetchingMixin, TokenRefreshMixin 
+from api.mixins import QuotesFetchingMixin #, TokenRefreshMixin 
 
 
 from .models import User
@@ -37,29 +38,31 @@ import re
 import requests
 
 from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import urlsplit
 
 
-
-# @login_required
-class GetUserLikesView(LoginRequiredMixin, ListView):
-    model = Quote
-    context_object_name = 'quotes'  
+class GetUserLikesView(QuotesFetchingMixin,LoginRequiredMixin, ListView):
     template_name = 'get_user_likes.html'
-    paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
+    # api_url = settings.API_URL
+    api_url = 'http://127.0.0.1:8000/api' 
     
-    # API URL for quotes list
-    api_url = 'http://127.0.0.1:8000/api'        
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        return context
-
+        return context    
+    
 
     def get(self, request, *args, **kwargs):
-        page_number = request.GET.get('page', 1)
+         
+
+    # if request.user.is_authenticated:
+    
         profil_slug = self.kwargs['slug']
-        search_query = request.GET.get('q', '')           
+        
+        page_number = request.GET.get('page', 1)
+        search_query = request.GET.get('q', '')
         user = request.user
+
+        # request.session.flush()
         
         # Default to computed start_index if not passed from HTMX
         incoming_start_index = request.GET.get('start_index')
@@ -67,37 +70,24 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
             start_index = int(incoming_start_index)
         else:
             # Only for first page or full render
-            start_index = 0          
-                
-
-        # Adjust API URL to pass pagination and search query
-        likes_api_url = f'{self.api_url}/likes/{profil_slug}/?page={page_number}'
-        # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
+            start_index = 0           
         
-        # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
-        response = requests.get(likes_api_url)
+    
 
-        if response.status_code == 200:
-            data = response.json()
-            # print(data)
-            quotes = data.get('results', [])
-            count = data.get('count', 0)             
-            next_page_url = data.get('next')
-            previous_page_url = data.get('previous')            
-        else:
-            quotes = []
-            next_page_url = None
-            previous_page_url = None            
+        # Fetch data for the home view (e.g., recommendations)
+        data = self.get_api_data(page_number, endpoint=f'likes/{profil_slug}/')  # Custom endpoint for Likes of user
+        
+        # 👇 If a JsonResponse or redirect, return early
+        if isinstance(data, HttpResponse):
+            return data
 
-        lang = request.LANGUAGE_CODE
-        # Replace /api/likes/ with the correct frontend path
-        if next_page_url:
-            next_page_url = next_page_url.replace('/api/', f'/{lang}/')
 
-        # print(previous_page_url)
-        if previous_page_url:
-            previous_page_url = previous_page_url.replace('/api/', f'/{lang}/')
-        # print(previous_page_url)            
+        # Handle pagination and results
+        results = data.get('results', [])
+        next_page_url, previous_page_url = self.process_pagination(data, request)
+        count = data.get('count', 0)
+        
+        
 
         profil_api_url = f'{self.api_url}/user/{profil_slug}/'
         profil_response = requests.get(profil_api_url)
@@ -106,26 +96,121 @@ class GetUserLikesView(LoginRequiredMixin, ListView):
             profil = profil_response.json()
 
         else:
-            profil = []
-
+            profil = []            
+        
 
         context = {
-            'profil': profil, 
-            'quotes': quotes,
+            'quotes': results,  # Keep this as 'quotes' if your template expects it
+            'profil': profil,
             'count': count,
-            'start_index': start_index,            
+            'start_index': start_index,
             'page_number': page_number,
             'next_page_url': next_page_url,
             'previous_page_url': previous_page_url,
-            'search_query': search_query,      
-        }    
+            'search_query' : search_query,
+        }
         
-        # If it's an HTMX request, return only the quotes part
-        if request.htmx:
+        # # redirect to landing page if count ==0 (means the session is over)
+        # if count==0:
+        #     logout(self.request)
+        #     return self.render_landing_page(request) 
+        
+        return self.render_htmx_or_full_quotes(request, context)
+    # else:              
+    #     return self.render_landing_page(request) 
 
-            return render(request, 'partials/quotes_cards.html', context)        
 
-        return render(request, self.template_name, context)    
+# def render_landing_page(self, request):
+#     """Renders a public landing page for non-authenticated users."""
+#     return render(request, 'landing_page.html', {})  # Create `landing.html` 
+
+
+# class GetUserLikesView(LoginRequiredMixin, ListView):
+#     model = Quote
+#     context_object_name = 'quotes'  
+#     template_name = 'get_user_likes.html'
+#     paginate_by = settings.DEFAULT_PAGINATION  # Number of items per page  
+    
+#     # API URL for quotes list
+#     api_url = 'http://127.0.0.1:8000/api'        
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         return context
+
+
+#     def get(self, request, *args, **kwargs):
+#         page_number = request.GET.get('page', 1)
+#         profil_slug = self.kwargs['slug']
+#         search_query = request.GET.get('q', '')       
+            
+#         user = request.user
+        
+#         # Default to computed start_index if not passed from HTMX
+#         incoming_start_index = request.GET.get('start_index')
+#         if incoming_start_index is not None:
+#             start_index = int(incoming_start_index)
+#         else:
+#             # Only for first page or full render
+#             start_index = 0          
+                
+
+#         # Adjust API URL to pass pagination and search query
+#         likes_api_url = f'{self.api_url}/likes/{profil_slug}/?page={page_number}'
+#         # quote_response = requests.get(api_url, headers={'Authorization': f'Token {request.user.auth_token}'})
+        
+#         # quote_api_url = f'http://127.0.0.1:8000/api/user/{profil.slug}/quotes/?page={page_number}'
+#         response = requests.get(likes_api_url)
+
+#         if response.status_code == 200:
+#             data = response.json()
+#             # print(data)
+#             quotes = data.get('results', [])
+#             count = data.get('count', 0)             
+#             next_page_url = data.get('next')
+#             previous_page_url = data.get('previous')            
+#         else:
+#             quotes = []
+#             next_page_url = None
+#             previous_page_url = None            
+
+#         lang = request.LANGUAGE_CODE
+#         # Replace /api/likes/ with the correct frontend path
+#         if next_page_url:
+#             next_page_url = next_page_url.replace('/api/', f'/{lang}/')
+
+#         # print(previous_page_url)
+#         if previous_page_url:
+#             previous_page_url = previous_page_url.replace('/api/', f'/{lang}/')
+#         # print(previous_page_url)            
+
+#         profil_api_url = f'{self.api_url}/user/{profil_slug}/'
+#         profil_response = requests.get(profil_api_url)
+
+#         if profil_response.status_code == 200:
+#             profil = profil_response.json()
+
+#         else:
+#             profil = []
+
+
+#         context = {
+#             'profil': profil, 
+#             'quotes': quotes,
+#             'count': count,
+#             'start_index': start_index,            
+#             'page_number': page_number,
+#             'next_page_url': next_page_url,
+#             'previous_page_url': previous_page_url,
+#             'search_query': search_query,      
+#         }    
+        
+#         # If it's an HTMX request, return only the quotes part
+#         if request.htmx:
+
+#             return render(request, 'partials/quotes_cards.html', context)        
+
+#         return render(request, self.template_name, context)    
 
 
 
@@ -143,11 +228,12 @@ class UserRegisterView(generic.CreateView):
         return redirect(self.success_url) # Redirects to the home page    
     
 
+
 class LoginView(auth_views.LoginView):
     form_class = AuthenticationForm
     template_name = 'registration/login.html'
-    success_url = reverse_lazy('texts:get-home')  # Fallback
-    EXCEPTION_PATHS =  [
+    success_url = reverse_lazy('texts:get-home')
+    EXCEPTION_PATHS = [
         r'^(/..)?/register/?$',  # optional 2-letter lang prefix
     ]
 
@@ -156,57 +242,47 @@ class LoginView(auth_views.LoginView):
         user = form.get_user()
         login(request, user)
 
-        # JWT tokens
+        # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
-        refresh_token = str(refresh)
+        request.session["access_token"] = str(refresh.access_token)
+        request.session["refresh_token"] = str(refresh)
 
-        # Extract "next" from POST or GET
-        next_url = request.POST.get('next') or request.GET.get('next')
-        
-         # Validate and sanitize next_url
-        if not next_url:
-            next_url = None
+
+        next_url = request.POST.get("next") or request.GET.get("next")
+        if not next_url or any(re.match(p, next_url) for p in self.EXCEPTION_PATHS):
+            next_url = str(self.success_url)
         else:
-            for pattern in self.EXCEPTION_PATHS:
-                if re.match(pattern, next_url):
-                    next_url = str(self.success_url)
-                    break
+            # Only keep the path (removes ?page=..., etc.)
+            next_url = urlsplit(next_url).path
 
-        # HTMX support: use HX-Redirect
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            response = JsonResponse({
-                'access_token': access_token,
-                'refresh_token': refresh_token,
-            })
-            response['HX-Redirect'] = next_url or str(self.success_url)
-            return response
 
-        # Classic POST fallback
-        return redirect(next_url or self.success_url)
+        # # Handle HTMX/AJAX login
+        # if request.headers.get('HX-Request') or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        #     response = JsonResponse({'success': True})
+        #     response['HX-Redirect'] = next_url
+        #     return response
+
+        return redirect(next_url)
+
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return ['registration/modal_login.html']
+        return [self.template_name]
     
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['next_like'] = self.request.GET.get('next_like')
-    #     return context      
+    
 
-    # def form_valid(self, form):
-    #     # Call the parent form_valid method
-    #     response = super().form_valid(form)
+# class ModalLoginView(auth_views.LoginView):
+#     def form_valid(self, form):
+#         super().form_valid(form)
+#         if self.request.headers.get("HX-Request"):
+#             return JsonResponse({"success": True}, headers={"HX-Trigger": "loginSuccess"})
+#         return super().form_valid(form)
 
-    #     # Retrieve the quote ID from the session
-    #     quote_id = self.request.GET.get('quote_id')
-        
-    #     # If the quote ID exists, like the quote and redirect the user
-    #     if quote_id:
-    #         # Like the quote (add your logic here)
-    #         like_quote(self.request, quote_id)
-            
-    #         # Redirect the user back to the initial page
-    #         return redirect(reverse('users:get-user-likes', kwargs={'slug': self.request.user.slug}))
-        
-
-    #     return response  # Return the original response if no quote ID is found    
+#     def form_invalid(self, form):
+#         if self.request.headers.get("HX-Request"):
+#             return JsonResponse({"success": False, "errors": form.errors}, status=400)
+#         return super().form_invalid(form)    
+    
     
 class LogoutView(auth_views.LogoutView):
     form_class = AuthenticationForm

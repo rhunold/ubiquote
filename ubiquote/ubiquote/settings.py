@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'debug_toolbar'
 ]
 
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',    
     'django.middleware.security.SecurityMiddleware', 
@@ -95,14 +96,20 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     
 
     
     'debug_toolbar.middleware.DebugToolbarMiddleware',    
-    'django_htmx.middleware.HtmxMiddleware'
+    'django_htmx.middleware.HtmxMiddleware',
+    'ubiquote.middleware.HTMXSessionExpiryMiddleware',      
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',      
 ]
+
+# MIDDLEWARE.insert(0, 'ubiquote.middleware.HTMXRequireLoginMiddleware')
+
 
 ROOT_URLCONF = 'ubiquote.urls'
 
@@ -240,7 +247,7 @@ LOCALE_PATHS = (
 
 AUTH_USER_MODEL = 'users.User'
 
-LOGIN_URL = "/login/"
+LOGIN_URL = "users:login"
 LOGIN_REDIRECT_URL = 'texts:get-home'
 LOGOUT_REDIRECT_URL = 'texts:get-home'
 
@@ -266,10 +273,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,  # Adjust this to your desired number of items per page
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',          
         'rest_framework_simplejwt.authentication.JWTAuthentication',       
         # 'rest_framework.authentication.TokenAuthentication',  
         # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',        
+      
     ),    
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # Or AllowAny
@@ -277,8 +285,10 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Set a duration for access tokens
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # days=1 / Set a duration for refresh tokens
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),    
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Set a duration for access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=3),  # days=1 / Set a duration for refresh tokens
     'ROTATE_REFRESH_TOKENS': True,  # Optional: rotate refresh tokens on usage
     'BLACKLIST_AFTER_ROTATION': True,  # Optional: blacklist old tokens after rotation
 }

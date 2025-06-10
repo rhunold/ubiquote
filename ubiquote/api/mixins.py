@@ -264,18 +264,32 @@ class QuotesFetchingMixin:
         response = self.refresh_token_if_needed(headers, api_url)
         
 
-        # if response.status_code == 403:     
-        #     return logout(self.request)   
 
+        # if response.status_code != 200:
+        #     # 🔻 Refresh token failed — Force logout
+        #     self.request.session.flush()     
+        #     response =  requests.get(api_url, timeout=10)  
+        #     return response.json()  
+                
+        if response.status_code == 401 or response.status_code == 403:
+            if self.request.headers.get("HX-Request"):
+                # Let HTMX frontend catch this and show login modal
+                login_form = render(self.request, "registration/modal_login.html").content.decode()
+                return JsonResponse(
+                    {"modal": login_form},
+                    status=401,
+                    headers={"HX-Trigger": "showLoginModal"}
+                )
+            else:
+                # Fallback for non-HTMX: flush session and redirect
+                self.request.session.flush()
+                return redirect("landing")  # Or use render_landing_page()
+
+        # Catch-all for other error statuses
         if response.status_code != 200:
-            # 🔻 Refresh token failed — Force logout
-            
-            self.request.session.flush()     
-            response =  requests.get(api_url, timeout=10)  
-            return response.json()  
+            logger.warning(f"Unexpected API status: {response.status_code}")
+            return {'results': [], 'count': 0}
         
-
-   
 
         try:
             return response.json()
@@ -293,22 +307,6 @@ class QuotesFetchingMixin:
                 headers['Authorization'] = f'Bearer {new_access_token}'
                 # Try again
                 return requests.get(api_url, headers=headers, timeout=10)
-            
-            # else:
-            #     # 🔻 Refresh token failed — Force logout
-            #     logout(self.request)
-            #     self.request.session.flush()                
-            #     return requests.get(api_url, timeout=10)                
-                
-            # return HttpResponseRedirect(reverse("texts:home"))
-            
-            # return render(self.request, 'landing_page.html', {})
-
-            
-            # logout(self.request)
-            
-            
-      
 
             logger.warning("JWT refresh failed — clearing session tokens")
             # Important: don't log out the Django session — let the view fallback gracefully
@@ -316,6 +314,40 @@ class QuotesFetchingMixin:
         return response
 
 
+    def process_pagination(self, data, request):
+        """Helper method to handle pagination and URL manipulation."""
+        next_page_url = data.get('next')
+        previous_page_url = data.get('previous')
+        
+        lang = request.LANGUAGE_CODE
+        if next_page_url:
+            next_page_url = next_page_url.replace(f'/api/', f'/{lang}/')
+        if previous_page_url:
+            previous_page_url = previous_page_url.replace(f'/api/', f'/{lang}/')
+        return next_page_url, previous_page_url
+
+    def render_htmx_or_full_quotes(self, request, context):
+        """Render partial or full template based on the request type (HTMX or not)."""
+        try:
+            if request.htmx:
+                return render(request, 'partials/quotes_cards.html', context)
+            return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Template rendering error: {str(e)}")
+            messages.error(request, "An error occurred while rendering the page.")
+            return redirect('quotes:get-quotes')
+
+    def render_htmx_or_full_authors(self, request, context):
+        """Render partial or full template based on the request type (HTMX or not)."""
+        try:
+            if request.htmx:
+                return render(request, 'partials/authors_cards.html', context)
+            return render(request, self.template_name, context)
+        except Exception as e:
+            logger.error(f"Template rendering error: {str(e)}")
+            messages.error(request, "An error occurred while rendering the page.")
+            return redirect('authors:get-authors')
+    
 
 # class QuotesFetchingMixin(TokenRefreshMixin):
 #     # api_url = None  # Set in the child class
@@ -474,39 +506,5 @@ class QuotesFetchingMixin:
     #         logger.error(f"Error deleting data through API: {e}")
     #         return False
 
-    def process_pagination(self, data, request):
-        """Helper method to handle pagination and URL manipulation."""
-        next_page_url = data.get('next')
-        previous_page_url = data.get('previous')
-        
-        lang = request.LANGUAGE_CODE
-        if next_page_url:
-            next_page_url = next_page_url.replace(f'/api/', f'/{lang}/')
-        if previous_page_url:
-            previous_page_url = previous_page_url.replace(f'/api/', f'/{lang}/')
-        return next_page_url, previous_page_url
-
-    def render_htmx_or_full_quotes(self, request, context):
-        """Render partial or full template based on the request type (HTMX or not)."""
-        try:
-            if request.htmx:
-                return render(request, 'partials/quotes_cards.html', context)
-            return render(request, self.template_name, context)
-        except Exception as e:
-            logger.error(f"Template rendering error: {str(e)}")
-            messages.error(request, "An error occurred while rendering the page.")
-            return redirect('quotes:get-quotes')
-
-    def render_htmx_or_full_authors(self, request, context):
-        """Render partial or full template based on the request type (HTMX or not)."""
-        try:
-            if request.htmx:
-                return render(request, 'partials/authors_cards.html', context)
-            return render(request, self.template_name, context)
-        except Exception as e:
-            logger.error(f"Template rendering error: {str(e)}")
-            messages.error(request, "An error occurred while rendering the page.")
-            return redirect('authors:get-authors')
-    
 
     

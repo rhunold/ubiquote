@@ -1,7 +1,7 @@
 
 
 
-<div class="modal fade show d-block" tabindex="-1">
+<div class="modal fade show d-block" tabindex="-1" id="login-modal">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content shadow">
       <div class="modal-header">
@@ -11,6 +11,9 @@
       <div class="modal-body">
       
         {% include "registration/form_login.html" %}    
+
+
+        
 
         <!-- Divider -->
         <div class="text-center my-4">
@@ -22,3 +25,18 @@
   </div>
 </div>
 
+
+{% comment %}
+<div id="login-modal" class="modal">
+  <form 
+    method="POST"
+    hx-post="{% url 'users:login' %}"
+    hx-target="#login-modal"
+    hx-swap="outerHTML"
+  >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+</div>        
+{% endcomment %}

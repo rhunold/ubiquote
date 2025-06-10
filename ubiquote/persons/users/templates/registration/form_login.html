@@ -17,9 +17,7 @@
         <!-- Classical Login -->
      
 
-        <form method="post" id="login" action="{% url 'users:login' %}?next={{ request.get_full_path}}">
-
-
+        <form method="post" id="login" action="{% url 'users:login' %}">
 
           {% csrf_token %}
           <div class="mb-3">
@@ -36,4 +34,19 @@
         </form>
 
 
+{% comment %}
+<div id="login-modal" class="modal">
+  <form 
+    method="POST"
+    hx-post="{% url 'users:login' %}"
+    hx-target="#login-modal"
+    hx-swap="outerHTML"
+  >
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+</div>        
+
+{% endcomment %}
 
