@@ -8,13 +8,17 @@
 
 
 
+
 {% block content %}
 
-{% include "partials/search_quotes.html" %}    
-{% include 'partials/quotes_cards.html' %}
 
+{% include "partials/search_quotes.html" %}    
+<div id="content">
+    {% include 'partials/quotes_cards.html' %}
+</div>
 
 
 
 {% endblock %}  
+</div>
 

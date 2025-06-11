@@ -3,6 +3,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 
+from django.contrib.auth import logout
+
 import requests
 import logging
 from django.core.cache import cache
@@ -251,10 +253,26 @@ logger = logging.getLogger(__name__)
 
 
 class QuotesFetchingMixin:
-    def get_api_data(self, page_number, endpoint='quotes/', search_query=''):
+    def get_api_data(self, page_number, endpoint='quotes/', search_query='', extra_params=None):
         lang = self.request.LANGUAGE_CODE
         root_api_url = f'{settings.ROOT_URL}{lang}/api/'
-        api_url = f'{root_api_url}{endpoint}?page={page_number}&q={search_query}'
+        
+        
+        # api_url = f'{root_api_url}{endpoint}?page={page_number}&q={search_query}'
+        
+
+        params = {
+            'page': page_number,
+            'q': search_query,
+        }
+
+        if extra_params:
+            params.update(extra_params)
+
+        query_string = '&'.join([f"{key}={value}" for key, value in params.items()])
+        api_url = f"{root_api_url}{endpoint}?{query_string}"
+        
+        
 
         headers = {}
         access_token = self.request.session.get("access_token")
@@ -264,13 +282,6 @@ class QuotesFetchingMixin:
         response = self.refresh_token_if_needed(headers, api_url)
         
 
-
-        # if response.status_code != 200:
-        #     # 🔻 Refresh token failed — Force logout
-        #     self.request.session.flush()     
-        #     response =  requests.get(api_url, timeout=10)  
-        #     return response.json()  
-                
         if response.status_code == 401 or response.status_code == 403:
             if self.request.headers.get("HX-Request"):
                 # Let HTMX frontend catch this and show login modal
@@ -283,7 +294,9 @@ class QuotesFetchingMixin:
             else:
                 # Fallback for non-HTMX: flush session and redirect
                 self.request.session.flush()
-                return redirect("landing")  # Or use render_landing_page()
+                logout(self.request)
+                return redirect("quotes:get-quotes")
+             
 
         # Catch-all for other error statuses
         if response.status_code != 200:

@@ -4,21 +4,22 @@
 
     <form class="search_bar form-inline row g-3" >
 
-        <div class="col">
+        <div class="col" >
 
             <!-- HTMX target for the list -->
             <input 
-       
+            
             class="form-control me-2"               
  
             placeholder="{% blocktrans %}Search {{ count }} quotes{% endblocktrans %} "
-            value="{{ search_query }}"
+            value="{{ request.GET.q }}"
             type="text" 
             name="q"
             hx-get="{% url 'quotes:get-quotes' %}"
             hx-trigger="keyup changed delay:500ms"
             hx-target="#results" 
-            hx-swap="innerHTML"  
+            hx-swap="innerHTML" 
+
             autofocus>
         </div>   
         
@@ -36,8 +37,46 @@
 {% endcomment %}        
 
         <div class="col-auto">
-            <button class="btn btn-primary w-100" type="submit">{% translate "Search" %}</button>
-        </div>  
+            <button class="btn btn-primary w-60" type="submit">{% translate "Search" %}</button>
+            <button class="btn btn-outline-secondary w-40" type="button" onclick="toggleFilterPanel()">
+                <i class="bi bi-funnel"></i> Filter
+        </button>
+                    
+        </div>
+
+
+
+        <!-- Filter Panel -->
+        <div id="filter-panel" class="mb-3" style="display: none;">
+            Langues : 
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="lang" value="en" id="langEn"
+                hx-get="{% url 'quotes:get-quotes' %}"
+                hx-target="#content"
+                hx-trigger="change"
+                hx-include="[name='q'], [name='lang']">
+            <label class="form-check-label" for="langEn">English</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" name="lang" value="fr" id="langFr"
+                hx-get="{% url 'quotes:get-quotes' %}"
+                hx-target="#content"
+                hx-trigger="change"
+                hx-include="[name='q'], [name='lang']">
+            <label class="form-check-label" for="langFr">French</label>
+        </div>
+
+
+       
+        </div>
+
+        <script>
+        function toggleFilterPanel() {
+        const panel = document.getElementById('filter-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        </script>
+
     </form>
 
     
